@@ -1,0 +1,7 @@
+[
+  { "find": "VERSION 0.1", "repl": "VERSION 0.2" },
+  { "find": "Agency e-Budgeting Management System", "repl": "Agency Budget and Government ERP Platform" },
+  { "find": "ระบบบริหารจัดการงบประมาณอิเล็กทรอนิกส์สำหรับหน่วยรับงบประมาณ (AEBMS)", "repl": "ระบบบริหารงบประมาณและงานสนับสนุนสำหรับหน่วยงานรัฐ (AEBMS และ ERP-Gov)" },
+  { "find": "One Budget Platform: From Strategic Planning to Budget Performance", "repl": "One platform: from strategic planning to payment, assets and people" },
+  { "find": "ตุลาคม 2569", "repl": "พฤศจิกายน 2569" }
+]

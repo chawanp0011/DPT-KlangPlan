@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fisko-KlangFinance tests R1-R9</title>
+<style>
+:root { --bg: #F7F8FA; --surface: #FFFFFF; --line: #E5E7EB; --ink: #111827; --muted: #6B7280; --ok: #15803D; --bad: #B91C1C; --accent: #34498C; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0E1015; --surface: #15181F; --line: #262B36; --ink: #E8EAEE; --muted: #8F96A3; --ok: #4ADE80; --bad: #F08A8A; --accent: #9DB0E3; color-scheme: dark; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, "Segoe UI", Tahoma, sans-serif; }
+main { max-width: 980px; margin: 0 auto; padding: 24px max(16px, env(safe-area-inset-left, 0px)) 40px; display: flex; flex-direction: column; gap: 16px; }
+h1 { font-size: 22px; font-weight: 600; margin: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button { font: inherit; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button:disabled { opacity: .5; cursor: default; }
+label { display: inline-flex; gap: 6px; align-items: center; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; } .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.sub { color: var(--muted); font-size: 13px; }
+.ok { color: var(--ok); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+pre { white-space: pre-wrap; font: 12.5px/1.5 ui-monospace, Consolas, monospace; margin: 0; max-height: 360px; overflow: auto; }
+iframe { width: 100%; height: 420px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fisko-KlangFinance tests (rounds R1 to R9)</h1>
+  <p class="sub">Serve the project folder (for example <code>python -m http.server 8791 --bind 127.0.0.1</code>) and open <code>http://127.0.0.1:8791/tests/klang.html</code>. Rebuild first with <code>bash src/build.sh</code>. It checks the rules of the new features and opens every new page for every role; it does not replace <code>tests/run.html</code>. It reseeds data in memory and clears the saved demo state at the end.</p>
+  <div class="card">
+    <div class="row"><button class="primary" type="button" id="go">Run the R1 to R9 tests</button></div>
+    <div class="bar"><i id="bar"></i></div>
+    <div id="status" class="sub">Loading the prototype…</div>
+  </div>
+  <div class="card"><b>Result</b><pre id="out">–</pre></div>
+  <iframe id="app" src="../Fisko_Prototype.html" title="Fisko prototype under test"></iframe>
+</main>
+<script>
+(function () {
+  const app = document.getElementById("app"), st = document.getElementById("status"), out = document.getElementById("out"), btn = document.getElementById("go");
+  let ready = false;
+  let started = false;
+  const init = () => {
+    if (started) return; started = true;
+    const d = app.contentDocument, s = d.createElement("script");
+    s.src = new URL("klang.js", location.href).href + "?v=" + Date.now();
+    s.onload = () => { ready = true; st.textContent = "Ready."; btn.disabled = false; };
+    s.onerror = () => { st.textContent = "Couldn't load tests/klang.js. Open this page through a local web server, not as a file."; };
+    d.body.appendChild(s);
+  };
+  btn.disabled = true;
+  app.addEventListener("load", init);
+  try { if (app.contentDocument && app.contentDocument.readyState === "complete" && app.contentDocument.getElementById("view") !== undefined && app.contentDocument.body && app.contentDocument.body.children.length) init(); } catch (e) {}
+  btn.onclick = async () => {
+    if (!ready) return; btn.disabled = true; out.textContent = "Running…";
+    try {
+      const r = await app.contentWindow.KLANG_TEST.run({ onProgress: p => { st.textContent = `${p.what} · ${p.n} checks · ${p.errors} errors`; } });
+      st.innerHTML = r.ok ? `<span class="ok">Passed</span> · ${r.checks} checks in ${r.seconds} s` : `<span class="bad">${r.errors.length} failed</span> · ${r.checks} checks in ${r.seconds} s`;
+      out.textContent = r.ok ? "All checks passed." : r.errors.join(String.fromCharCode(10));
+    } catch (e) { st.innerHTML = `<span class="bad">The run stopped</span>`; out.textContent = String(e && e.stack || e); }
+    btn.disabled = false;
+  };
+})();
+</script>
+</body>
+</html>
