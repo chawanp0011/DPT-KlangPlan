@@ -67,3 +67,19 @@ MON_PANELS.procure = () => { const fy = BI.fy, rows = prDtRows(fy, false), book 
 MON_BIND.procure = () => {};
 document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return; const a = t.closest("[data-tfpst]"); if (a) { TF_PST = a.dataset.tfpst; route(); return; }
   const c = t.closest("[data-tfcase]"); if (c) jump("case:" + c.dataset.tfcase); });
+
+// ---------- P90 (24 Nov 2569): the province and the quantities come from the unit's details of the budget item ----------
+// The unit fills จังหวัด/อำเภอ/ตำบล and the quantities (เมตร, ไร่, ครัวเรือน, แห่ง) in ขอซื้อขอจ้าง (จัดทำรายละเอียด); the follow-up form
+// takes them into columns 11 and 51-54 (a quantity the Treasury entered on the contract stays first).
+const tfReqOf = p => { if (!p) return null; const c = caseByPlan(p.id); return (c && caseReq(c)) || S.reqn.find(q => q.plan === p.id && q.status !== "superseded") || null; };
+{ const base = prTrackBook; prTrackBook = function (fy) { const book = base(fy), rows = prDtRows(fy, false);
+    book[0].rows.slice(5).forEach((row, i) => { const r = rows[i]; if (!r) return; const bi = ((S.bi && S.bi.rows) || []).find(y => y.id === r.id), p = r.p || (bi && bi.sent ? S.pplan.find(q => q.id === bi.sent.pp) : r.k ? famPlan(r.k.plan) : null), rq = tfReqOf(p), d = rq && rq.detail; if (!d) return;
+      if (!row[10] && d.prov) row[10] = d.prov; [[50, "qLen"], [51, "qRai"], [52, "qHouse"], [53, "qPlace"]].forEach(([c, k]) => { const x = d[k]; if (x === "" || x == null) return; if (!row[c] || (c === 53 && row[c] === 1)) row[c] = Number(x); }); });
+    return book; }; flSpendBook = () => prTrackBook(BI.fy); }
+// the sample: the requisitions get a province and, where it fits the work, a quantity (fictional)
+const TF_QTY = [[/ระบายน้ำ|ถนน|ทางเดิน|ท่อ/, { qLen: 850 }], [/ภูมิทัศน์|สวน/, { qRai: 3 }], [/ประปา|บ่อ|แหล่งน้ำ/, { qHouse: 120 }], [/ก่อสร้าง|อาคาร|ศาลา/, { qPlace: 1 }]];
+function tfSeedReq(s) { const provs = [...new Set((s.geo || []).filter(g => !g.retired).map(g => g.prov).filter(Boolean))]; if (!provs.length) return;
+  (s.reqn || []).forEach((rq, i) => { const d = (rq.detail = rq.detail || {}); if (!d.prov) { const pv = provs[i % provs.length], g = (s.geo || []).find(x => x.prov === pv && x.dist && x.sub); d.prov = pv; if (g) { d.amp = g.dist; d.tam = g.sub; } }
+    const p = (s.pplan || []).find(x => x.id === rq.plan), n = p ? tx(p.name) : ""; if (["qLen", "qRai", "qHouse", "qPlace"].every(k => d[k] === "" || d[k] == null)) { const hit = TF_QTY.find(([re]) => re.test(n)); if (hit) Object.assign(d, hit[1]); } }); }
+Object.keys(SEEDS).forEach(n => { const prev = SEEDS[n].seed; SEEDS[n].seed = () => { const s = prev(); try { tfSeedReq(s); } catch (e) {} return s; }; });
+{ const base = route; route = function () { try { if (typeof S !== "undefined" && S && S.reqn && !S.tfReqSeed) { S.tfReqSeed = 1; tfSeedReq(S); } } catch (e) {} return base.apply(this, arguments); }; }

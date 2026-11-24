@@ -22599,7 +22599,7 @@ document.addEventListener("change", e => { const t = e.target; if (!t || !t.matc
   if (t === P) { A.innerHTML = rqGeoOpts("dist", "", P.value, ""); T.innerHTML = rqGeoOpts("sub", "", P.value, ""); } else if (t === A) T.innerHTML = rqGeoOpts("sub", "", P.value, A.value); });
 function rqReadVals() {
   const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
-  return { amt: g("pr-amt"), why: g("pr-why"), obj: g("pr-obj"), scope: g("pr-scope"), qty: g("pr-qty"), unit: g("pr-unit"), days: g("pr-days"), place: g("pr-place"), deliv: g("pr-deliv"), basis: g("pr-basis"), ben: g("pr-ben"), contact: g("pr-contact"), phone: g("pr-phone"), prov: g("pr-prov"), amp: g("pr-amp"), tam: g("pr-tam"), refs: g("pr-refs"), split: g("pr-split"), files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: x.kind || 0 })) };
+  return { amt: g("pr-amt"), why: g("pr-why"), obj: g("pr-obj"), scope: g("pr-scope"), qty: g("pr-qty"), unit: g("pr-unit"), days: g("pr-days"), place: g("pr-place"), deliv: g("pr-deliv"), basis: g("pr-basis"), ben: g("pr-ben"), contact: g("pr-contact"), phone: g("pr-phone"), prov: g("pr-prov"), amp: g("pr-amp"), tam: g("pr-tam"), qLen: g("pr-qlen"), qRai: g("pr-qrai"), qHouse: g("pr-qhouse"), qPlace: g("pr-qplace"), refs: g("pr-refs"), split: g("pr-split"), files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: x.kind || 0 })) };
 }
 const rqReady = c => [{ ok: !!c.method, label: L("เลือกวิธีจัดหา (แผงวิธีจัดซื้อ)", "Choose the method (Method panel)") }, ...casePrepItems(c)];
 function rqFormHtml(c) {
@@ -22623,6 +22623,8 @@ function rqFormHtml(c) {
       ${fld("pr-prov", "จังหวัด", "Province", `<select id="pr-prov" data-rqgeo>${rqGeoOpts("prov", v("prov", ""), "", "")}</select>`, "1 1 180px")}
       ${fld("pr-amp", "อำเภอ", "District", `<select id="pr-amp" data-rqgeo>${rqGeoOpts("dist", v("amp", ""), v("prov", ""), "")}</select>`, "1 1 180px")}
       ${fld("pr-tam", "ตำบล", "Sub-district", `<select id="pr-tam" data-rqgeo>${rqGeoOpts("sub", v("tam", ""), v("prov", ""), v("amp", ""))}</select>`, "1 1 180px")}</div>
+      <div class="rq-qty-row" style="flex:1 1 100%;display:flex;gap:inherit;flex-wrap:wrap;align-items:flex-end"><div class="sub" style="flex:1 1 100%">ปริมาณงาน (ตามฟอร์มติดตาม พ.ร.บ. ใส่เฉพาะที่เกี่ยวข้อง)</div>
+      ${[["pr-qlen", "qLen", "ความยาว (เมตร)"], ["pr-qrai", "qRai", "ไร่"], ["pr-qhouse", "qHouse", "ครัวเรือน"], ["pr-qplace", "qPlace", "แห่ง (รายการ)"]].map(([id, k, t]) => fld(id, t, t, `<input type="number" id="${id}" min="0" step="any" value="${esc(v(k, ""))}">`, "1 1 140px")).join("")}</div>
       ${fld("pr-deliv", "ผลงานที่ต้องส่งมอบ *", "Deliverables *", `<input type="text" id="pr-deliv" value="${esc(v("deliv", ""))}" placeholder="${esc(L("เช่น ระบบพร้อมใช้งาน คู่มือ การฝึกอบรม", "e.g. working system, manual, training"))}">`)}
       ${fld("pr-basis", "ที่มาของวงเงิน", "Basis of the estimate", `<select id="pr-basis">${["ใบเสนอราคา", "ราคาท้องตลาด", "ราคาที่เคยซื้อ/จ้างย้อนหลัง", "ราคามาตรฐานครุภัณฑ์", "อื่น ๆ"].map(x => `<option ${v("basis", "") === x ? "selected" : ""}>${x}</option>`).join("")}</select>`, "1 1 220px")}
       ${fld("pr-ben", "ประโยชน์ที่คาดว่าจะได้รับ", "Expected benefit", `<textarea id="pr-ben" rows="3" placeholder="${esc(L("ผลที่หน่วยงานหรือประชาชนจะได้รับ ตัวชี้วัด หรือจำนวนผู้ได้ประโยชน์", "What the agency or the public will gain, indicators, how many benefit"))}">${esc(v("ben", ""))}</textarea>`)}
@@ -22673,7 +22675,7 @@ function rqSubmit(c) {
   if (!(amount > 0)) { T("ใส่วงเงินก่อน", "Enter an amount"); return; }
   if (!inPublishedPlan(p)) { T("รายการนี้ยังไม่ได้รับอนุมัติแผน ขออนุมัติแผนที่หน้าแผนจัดซื้อก่อน", "The plan for this item is not approved yet; ask for approval on the procurement plan page first"); return; }
   if (amount > famHeadroom(p.line)) { T(`เกินวงเงินคงเหลือของรายการจัดสรร (${mb(famHeadroom(p.line))} ลบ.)`, `More than the room left on the line (${mb(famHeadroom(p.line))} M)`); return; }
-  const detail = { obj: v.obj, scope: v.scope, qty: Number(v.qty) || 0, unit: v.unit, days: Number(v.days) || 0, place: v.place, deliv: v.deliv, basis: v.basis, ben: v.ben, contact: v.contact, phone: v.phone, prov: v.prov, amp: v.amp, tam: v.tam, refs: v.refs, files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: RQ_DOCS[x.kind || 0] })) };
+  const detail = { obj: v.obj, scope: v.scope, qty: Number(v.qty) || 0, unit: v.unit, days: Number(v.days) || 0, place: v.place, deliv: v.deliv, basis: v.basis, ben: v.ben, contact: v.contact, phone: v.phone, prov: v.prov, amp: v.amp, tam: v.tam, qLen: v.qLen === "" || v.qLen == null ? "" : Number(v.qLen), qRai: v.qRai === "" || v.qRai == null ? "" : Number(v.qRai), qHouse: v.qHouse === "" || v.qHouse == null ? "" : Number(v.qHouse), qPlace: v.qPlace === "" || v.qPlace == null ? "" : Number(v.qPlace), refs: v.refs, files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: RQ_DOCS[x.kind || 0] })) };
   const miss = [[detail.obj, "วัตถุประสงค์", "objective"], [detail.qty > 0, "จำนวน", "quantity"], [detail.days > 0, "ระยะเวลาส่งมอบ", "delivery days"], [detail.place, "สถานที่ส่งมอบ", "delivery site"], [detail.deliv, "ผลงานที่ต้องส่งมอบ", "deliverables"], [detail.contact, "ผู้ประสานงาน", "contact"], [detail.phone, "เบอร์ติดต่อ", "phone"]].filter(x => !x[0]).map(x => L(x[1], x[2]));
   if (miss.length) { T("กรอกรายละเอียดโครงการให้ครบ: " + miss.join(", "), "Complete the project details: " + miss.join(", ")); return; }
   const bad = rqReady(c).find(x => !x.ok); if (bad) { toast(`${L("ยังส่งไม่ได้", "Can't send yet")}: ${bad.label}`); return; }
@@ -30411,6 +30413,22 @@ MON_PANELS.procure = () => { const fy = BI.fy, rows = prDtRows(fy, false), book 
 MON_BIND.procure = () => {};
 document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return; const a = t.closest("[data-tfpst]"); if (a) { TF_PST = a.dataset.tfpst; route(); return; }
   const c = t.closest("[data-tfcase]"); if (c) jump("case:" + c.dataset.tfcase); });
+
+// ---------- P90 (24 Nov 2569): the province and the quantities come from the unit's details of the budget item ----------
+// The unit fills จังหวัด/อำเภอ/ตำบล and the quantities (เมตร, ไร่, ครัวเรือน, แห่ง) in ขอซื้อขอจ้าง (จัดทำรายละเอียด); the follow-up form
+// takes them into columns 11 and 51-54 (a quantity the Treasury entered on the contract stays first).
+const tfReqOf = p => { if (!p) return null; const c = caseByPlan(p.id); return (c && caseReq(c)) || S.reqn.find(q => q.plan === p.id && q.status !== "superseded") || null; };
+{ const base = prTrackBook; prTrackBook = function (fy) { const book = base(fy), rows = prDtRows(fy, false);
+    book[0].rows.slice(5).forEach((row, i) => { const r = rows[i]; if (!r) return; const bi = ((S.bi && S.bi.rows) || []).find(y => y.id === r.id), p = r.p || (bi && bi.sent ? S.pplan.find(q => q.id === bi.sent.pp) : r.k ? famPlan(r.k.plan) : null), rq = tfReqOf(p), d = rq && rq.detail; if (!d) return;
+      if (!row[10] && d.prov) row[10] = d.prov; [[50, "qLen"], [51, "qRai"], [52, "qHouse"], [53, "qPlace"]].forEach(([c, k]) => { const x = d[k]; if (x === "" || x == null) return; if (!row[c] || (c === 53 && row[c] === 1)) row[c] = Number(x); }); });
+    return book; }; flSpendBook = () => prTrackBook(BI.fy); }
+// the sample: the requisitions get a province and, where it fits the work, a quantity (fictional)
+const TF_QTY = [[/ระบายน้ำ|ถนน|ทางเดิน|ท่อ/, { qLen: 850 }], [/ภูมิทัศน์|สวน/, { qRai: 3 }], [/ประปา|บ่อ|แหล่งน้ำ/, { qHouse: 120 }], [/ก่อสร้าง|อาคาร|ศาลา/, { qPlace: 1 }]];
+function tfSeedReq(s) { const provs = [...new Set((s.geo || []).filter(g => !g.retired).map(g => g.prov).filter(Boolean))]; if (!provs.length) return;
+  (s.reqn || []).forEach((rq, i) => { const d = (rq.detail = rq.detail || {}); if (!d.prov) { const pv = provs[i % provs.length], g = (s.geo || []).find(x => x.prov === pv && x.dist && x.sub); d.prov = pv; if (g) { d.amp = g.dist; d.tam = g.sub; } }
+    const p = (s.pplan || []).find(x => x.id === rq.plan), n = p ? tx(p.name) : ""; if (["qLen", "qRai", "qHouse", "qPlace"].every(k => d[k] === "" || d[k] == null)) { const hit = TF_QTY.find(([re]) => re.test(n)); if (hit) Object.assign(d, hit[1]); } }); }
+Object.keys(SEEDS).forEach(n => { const prev = SEEDS[n].seed; SEEDS[n].seed = () => { const s = prev(); try { tfSeedReq(s); } catch (e) {} return s; }; });
+{ const base = route; route = function () { try { if (typeof S !== "undefined" && S && S.reqn && !S.tfReqSeed) { S.tfReqSeed = 1; tfSeedReq(S); } } catch (e) {} return base.apply(this, arguments); }; }
 
 /* ---- 98zzzzo-klang-montabs.js ---- */
 // Fisko-KlangFinance, round P87 (24 Nov 2569): every tab of ติดตามการใช้จ่าย (#dashboard) reads the same data.
