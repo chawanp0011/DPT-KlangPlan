@@ -1,10 +1,10 @@
 // Fisko-KlangFinance, round P67 (23 Nov 2569): the page of a รายการจัดซื้อ (the request a unit raised).
-// The parts ทำสัญญา, บริหารสัญญาและเบิกจ่าย and ปิดการจัดซื้อและส่งมอบ are not shown here any more (they live in สัญญางบประมาณ).
+// P89 (24 Nov 2569): the parts 4-7 are shown again (asked for: "เอากลับมาก่อน"); window.CASE_HIDE47 = true hides them as in P67.
 // The part ส่ง e-GP has two tabs: "สถานะ e-GP" (the steps, as before) and "รายละเอียดขอซื้อขอจ้าง": everything the unit entered in
 // ขอซื้อขอจ้าง, with its documents, read-only. The hidden parts stay in the page (hidden) so that nothing that reads them breaks.
 let CASE_EGP_TAB = "st";
 { const base = caseRegroup; caseRegroup = function (c) { base(c); const main = document.querySelector(".case-main"); if (!main || main.dataset.p67) return; main.dataset.p67 = "1";
-    [4, 5, 6, 7].forEach(n => { const b = document.querySelector(`.cphase[data-cphase="${n}"]`), m = document.querySelector(`.cmain[data-cmain="${n}"]`); if (b) b.style.display = "none"; if (m) { m.hidden = true; m.dataset.p67hide = "1"; } });
+    if (window.CASE_HIDE47) [4, 5, 6, 7].forEach(n => { const b = document.querySelector(`.cphase[data-cphase="${n}"]`), m = document.querySelector(`.cmain[data-cmain="${n}"]`); if (b) b.style.display = "none"; if (m) { m.hidden = true; m.dataset.p67hide = "1"; } });
     const m2 = document.querySelector('.cmain[data-cmain="2"]'), m3 = document.querySelector('.cmain[data-cmain="3"]'), b3 = document.querySelector('.cphase[data-cphase="3"]');
     if (m3 && m2) {
       const st = document.createElement("div"), rq = document.createElement("div"); st.className = "c3-st"; rq.className = "c3-rq";
@@ -22,7 +22,7 @@ let CASE_EGP_TAB = "st";
       m3.appendChild(bar); m3.appendChild(st); m3.appendChild(rq); draw();
     }
     // a case past e-GP opens on its e-GP part
-    const sel = CASE_MAIN[c.id] || casePhases(c).cur || 1; if (sel >= 4 && b3) { document.querySelectorAll(".cmain").forEach(m => (m.hidden = m.dataset.cmain !== "3")); document.querySelectorAll(".cphase").forEach(x => { const on = x === b3; x.setAttribute("aria-selected", String(on)); x.style.border = on ? "2px solid var(--accent)" : ""; }); }
+    const sel = CASE_MAIN[c.id] || casePhases(c).cur || 1; if (window.CASE_HIDE47 && sel >= 4 && b3) { document.querySelectorAll(".cmain").forEach(m => (m.hidden = m.dataset.cmain !== "3")); document.querySelectorAll(".cphase").forEach(x => { const on = x === b3; x.setAttribute("aria-selected", String(on)); x.style.border = on ? "2px solid var(--accent)" : ""; }); }
   }; }
 
 // ---------- P69 (23 Nov 2569): ขอซื้อขอจ้าง has no approval step any more ----------
@@ -65,3 +65,9 @@ document.addEventListener("change", e => { const t = e.target; if (!t || !t.matc
   const [cid, ns] = f.dataset.e7.split("|"), c = caseOf(cid), n = Number(ns); if (!c || !egpUpCan(c)) return; const s = egp7Of(c)["s" + n];
   f.querySelectorAll("input,select,textarea").forEach(el => { if (!el.name || el === t || el.type === "file" || el.type === "radio" || el.type === "checkbox" || el.disabled) return; s[el.name] = el.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value; });
   E7_KEEP = { cid, n, y: window.scrollY }; }, true);
+
+// ---------- P88 (24 Nov 2569): from part 3 (ส่ง e-GP) on, the panel "รายละเอียดโครงการที่ขอซื้อขอจ้าง" above the parts is hidden ----------
+// (asked for: it repeats the tab "รายละเอียดขอซื้อขอจ้าง" of part 3). It shows again on parts 1 and 2.
+const caseStep2Sync = c => { const el = document.getElementById("case-step-2"); if (!el || !c) return; const sel = CASE_MAIN[c.id] || casePhases(c).cur || 1; el.style.display = sel >= 3 ? "none" : ""; };
+{ const base = caseRegroup; caseRegroup = function (c) { const r = base.apply(this, arguments); caseStep2Sync(c); return r; }; }
+document.addEventListener("click", e => { const b = e.target && e.target.closest && e.target.closest(".cphase"); if (!b || !CASE_OPEN) return; setTimeout(() => caseStep2Sync(caseOf(CASE_OPEN)), 0); });
