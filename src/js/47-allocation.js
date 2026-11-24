@@ -26,7 +26,7 @@ const transferLevel = t => { const a = lineOf(t.from), b = lineOf(t.to);
 
 const ALLOC = {};
 ALLOC.appropriation = () => {
-  const A = AL(), closed = S.submission.status === "closed";
+  const A = AL(), closed = S.submission.status === "closed" || actInForce(); // 16 Nov 2569: the Bureau batch screens are out of B6 for now, so the results are "ready" also when an act amount is recorded there
   return `
   <section class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
     <div class="kpi hl"><span class="l">${L("วงเงินตามพระราชบัญญัติ", "Appropriated")}</span><span class="v">${mb(A.total)}<small>${L("ลบ.", "M")}</small></span><span class="d" style="color:var(--rail-ink)">${A.draft ? L("ร่าง · รอพระราชบัญญัติ", "Draft · awaiting the act") : fdate(A.date)}</span></div>

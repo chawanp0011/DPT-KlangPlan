@@ -1,5 +1,5 @@
 // M04 tabs (round 3): review queue, committee meetings with resolutions, side-by-side versions.
-let REV_TAB = "queue", CMP_REQ = null;
+let REV_TAB = "rounds", CMP_REQ = null;
 const REV_PANELS = {}, REV_BIND = {};
 const RES = {
   approve: [["เห็นชอบตามเสนอ", "Approved as proposed"], "p-ok"], reduce: [["เห็นชอบโดยปรับลดวงเงิน", "Approved, amount reduced"], "p-info"],

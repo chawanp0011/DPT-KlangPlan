@@ -2,7 +2,8 @@
 // whole request, then send it back or forward. Requesters see the comments and mark them resolved.
 let CMT_OPEN = null; // index of the line whose comment box is open
 const lineKey = it => it.type + "|" + nameKey(it.name);
-const canReview = r => (r.status === "unit" && ROLE === "divhead" && r.unit === me().unit) || (r.status === "plan" && acting("plan", "review")) || ((r.status === "committee" || r.status === "exec") && acting("exec", "committee"));
+const canReview = r => { const v = typeof rvCan === "function" ? rvCan(r) : null; return v !== null ? v : canReviewLegacy(r); };
+const canReviewLegacy = r => (r.status === "unit" && ROLE === "divhead" && r.unit === me().unit) || (r.status === "plan" && acting("plan", "review")) || ((r.status === "committee" || r.status === "exec") && acting("exec", "committee"));
 const reviewBy = r => (r.status === "unit" ? "" : r.status === "plan" ? onBehalf("plan", "review") : onBehalf("exec", "committee"));
 const openComments = r => (r.comments || []).filter(c => !c.resolved);
 
@@ -73,7 +74,7 @@ function bindReviewMode(r) {
   const pass = $("#rv-pass");
   if (pass) pass.onclick = () => {
     // B1 (FR-B-12, FR-B-20): division director → Planning → committee (only when w3 applies) or executive → approved
-    const from = r.status, by = reviewBy(r), next = from === "unit" ? "plan" : from === "plan" ? (needsCommittee(r) ? "committee" : "exec") : "approved";
+    const from = r.status, by = reviewBy(r), next = (typeof rvNext === "function" ? rvNext(r) : null) || (from === "unit" ? "plan" : from === "plan" ? (needsCommittee(r) ? "committee" : "exec") : "approved");
     r.status = next; r.updated = TODAY;
     if (from === "unit") snapshot(r, ["ผู้อำนวยการกองเห็นชอบ", "Division director approved"], true);
     const A = { plan: [["ผู้อำนวยการกองเห็นชอบและส่งกองแผนงาน", "Division director approved and sent to Planning"], ["plan"], [`คำขอ ${r.id} รอกองแผนกลั่นกรอง`, `Request ${r.id} is waiting for Planning review`], L("ส่งกองแผนงานแล้ว", "Sent to Planning")],

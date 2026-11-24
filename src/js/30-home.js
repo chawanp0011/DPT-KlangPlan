@@ -59,7 +59,7 @@ function myTasks() {
   if (ROLE === "exec") (S.planRevs || []).filter(v => v.status === "pending").forEach(v => R(`${L("อนุมัติการทบทวนค่าเป้าหมาย", "Approve a target revision")} ${v.id}`, `${v.kpi} ${PLAN_YEARS[v.y]}: ${v.from} → ${v.to}`, TODAY, "strat-revise", "p-warn"));
   if (ROLE === "div") {
     const u = me().unit;
-    if (resp[u] && resp[u].st === "pending") R(L("ตอบรับกรอบวงเงินของหน่วยงาน", "Reply to your unit ceiling"), `${fmt(S.cons.unitCeil[u], 1)} ${L("ล้านบาท", "M baht")}`, cal("c2").date, "requests", "p-warn");
+    if (false && resp[u] && resp[u].st === "pending") R(L("ตอบรับกรอบวงเงินของหน่วยงาน", "Reply to your unit ceiling"), `${fmt(S.cons.unitCeil[u], 1)} ${L("ล้านบาท", "M baht")}`, cal("c2").date, "requests", "p-warn");
     ideas.filter(i => i.unit === u && i.status === "accepted").forEach(i => R(`${L("จัดทำคำขอจากแนวคิดที่รับเข้าแผน", "Prepare a request from an accepted idea")} ${i.id}`, tx(i.name), cal("c2").date, "strat-bank", "p-info"));
   }
   // Round 9: hearings, parliament appeals, releases and carry-over.

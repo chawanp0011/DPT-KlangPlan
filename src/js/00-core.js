@@ -1,6 +1,6 @@
 // Core runtime: i18n, formatting, per-organization state, roles, router, audit, notifications.
 // TODAY is the demo date. Round C4 lets the demo move it ("as of month"); REAL_TODAY keeps the starting date.
-let TODAY = "2026-10-16";
+let TODAY = "2026-11-17"; // the sample story is dated against this day (file 98zzzm)
 const REAL_TODAY = TODAY;
 // Thai fiscal year (B.E.) of a date: October starts the next year. CUR_FY is the year being spent.
 const fyOf = iso => { const [y, m] = String(iso).split("-").map(Number); return y + 543 + (m >= 10 ? 1 : 0); };
@@ -35,7 +35,7 @@ const fyLabel = fy => L(`ปีงบประมาณ พ.ศ. ${fy}`, `FY${fy
 
 // ---------- organizations and state ----------
 const SEEDS = {}; // id -> { name: [th, en], seed: () => state }, registered by data files
-const DATA_V = 66; // bump when the seed shape changes so saved demo state is reseeded
+const DATA_V = 104; // bump when the seed shape changes so saved demo state is reseeded
 let ORG = "sample";
 let S = null;
 const key = () => "fisko-v1-" + ORG;
@@ -113,13 +113,16 @@ const APP_IDS = ["budget", "procurement", "finance"];
 let APP = APP_IDS.includes(store.get("fisko-app")) ? store.get("fisko-app") : "budget";
 function allowed(id) { const n = NAV.find(x => x.id === id); return !n || n.roles.includes(ROLE); }
 function go(v) { if (location.hash === "#" + v) route(); else location.hash = v; }
+const NAV_ALIAS = { request: "requests" }; // a page without a menu line of its own opens under this line
+let ROUTE_KEY = ""; // the page drawn last: view id and, on the request page, which request and tab
 function route() {
   // window.FISKO_ROUTE lets tests/sweep.js route without touching browser history, which browsers throttle
   let v = (window.FISKO_ROUTE || location.hash || "#home").slice(1);
   if (v.startsWith("admin-")) { ADMIN_TAB = v.slice(6); v = "admin"; }
   if (!VIEWS[v] && !NAV.find(n => n.id === v)) v = "home";
   CUR = v;
-  const n = NAV.find(x => x.id === v) || (v === "request" ? NAV.find(x => x.id === "requests") : null);
+  const rkey = `${v}|${typeof CUR_REQ !== "undefined" ? CUR_REQ : ""}|${typeof REQ_TAB !== "undefined" ? REQ_TAB : ""}`, keep = rkey === ROUTE_KEY ? { y: window.scrollY, id: document.activeElement && document.activeElement.id } : null; ROUTE_KEY = rkey;
+  const n = NAV.find(x => x.id === v) || (NAV_ALIAS[v] ? NAV.find(x => x.id === NAV_ALIAS[v]) : null);
   appSync(n);
   const extra = { demo: ["คู่มือการสาธิต", "Demo guide"], delegation: ["การมอบอำนาจ", "Delegation of authority"], cashcount: ["ตรวจนับเงินประจำวัน", "Daily cash count"] };
   const tabL = n && n.tabs ? (n.tabs.find(t => t[0] === n.tabGet()) || [])[1] : null;
@@ -137,5 +140,8 @@ function route() {
     if (typeof bindLinks === "function") bindLinks(view);
     if (typeof uiDecorate === "function") uiDecorate(view);
   }
-  window.scrollTo(0, 0);
+  // drawing the same page again (a drop-down changed, a tab inside the page) keeps the scroll position and the focused control;
+  // going to another page, or another request, starts at the top
+  if (keep) { window.scrollTo(0, keep.y); if (keep.id) { const el = document.getElementById(keep.id); if (el && el.focus) { try { el.focus({ preventScroll: true }); } catch (e) { /* not focusable */ } } } }
+  else window.scrollTo(0, 0);
 }

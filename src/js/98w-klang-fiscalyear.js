@@ -19,7 +19,8 @@ function fyRouteId() {
 // The year a page shows, or null when it does not depend on one. "allocation" and "requests" can show several (see fyPageHas).
 // The selector belongs to the budget pages only (asked for on 4 Nov 2569): it is shown, and applied, on a page of the Budget app
 // that depends on a year. Procurement, finance, contracts, assets, HR and the other apps ignore it and do not show it.
-const fyApplies = id => !FY_FREE.includes(id) && !id.startsWith("admin") && appOfLink(id) === "budget";
+const FY_OWN = ["bq-cfg"]; // pages that filter by year inside their own list: no top-bar selector
+const fyApplies = id => !FY_FREE.includes(id) && !id.startsWith("admin") && !FY_OWN.includes(id) && appOfLink(id) === "budget";
 function fyOfPage(id) { return FY_FREE.includes(id) || id.startsWith("admin") ? null : FY_FORM.includes(id) || id.startsWith("rg-") ? FORM_FY : id === "allocation" ? CUR_FY : CUR_FY; }
 function fyPageHas(id, y) {
   if (id === "requests") return fyYears().includes(y); // request list: the year being prepared, or any year's allocated lines (read only)

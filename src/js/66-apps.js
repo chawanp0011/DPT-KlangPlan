@@ -38,7 +38,7 @@ function tabBadge(nid, tab) {
 function navForHash() {
   let v = (location.hash || "#home").slice(1);
   if (v.startsWith("admin-")) v = "admin";
-  if (v === "request") v = "requests";
+  v = NAV_ALIAS[v] || v;
   return NAV.find(n => n.id === v) || null;
 }
 function markNav(n) {

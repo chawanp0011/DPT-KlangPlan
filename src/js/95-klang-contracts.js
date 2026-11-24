@@ -65,7 +65,7 @@ Object.keys(SEEDS).forEach(k => {
     s.cdocs = [];
     const D = (con, kind, title, pages, scan, kept, phase) => s.cdocs.push({ id: "CD-" + String(s.cdocs.length + 1).padStart(4, "0"), contract: con.id, kind, phase: phase || null, title, pages, scan, kept, by: pr, t: "2026-10-10T10:00" });
     if (c[0]) { c[0].guarantee = { type: "bank", bank: "ธนาคารตัวอย่าง จำกัด (มหาชน)", no: "BG-2569-0458", amount: Math.round(c[0].amount * 0.05), expires: "2027-12-31", status: "held", t: "2026-10-02T09:00", by: pr, verify: { result: "ok", date: "2026-10-05", by: pr, note: "โทรยืนยันกับสาขา", ref: "บันทึกข้อความ 123/2569" } };
-      D(c[0], "contract", "สัญญาจ้างพัฒนาระบบ", 186, "ocr", "ตู้เอกสาร 3 ชั้น 2"); D(c[0], "attach", "TOR และแบบรูปรายการ", 42, "scanned", "ตู้เอกสาร 3 ชั้น 2"); D(c[0], "committee", "คำสั่งที่ 52/2569", 3, "ocr", "แฟ้มจัดซื้อ"); D(c[0], "guarantee", "หนังสือค้ำประกัน BG-2569-0458", 2, "ocr", "แฟ้มหลักประกัน"); D(c[0], "accept", "ใบตรวจรับงวดที่ 1", 4, "ocr", "แฟ้มจัดซื้อ", 1); }
+      D(c[0], "contract", "สัญญาจ้างพัฒนาระบบ", 186, "ocr", "ตู้เอกสาร 3 ชั้น 2"); D(c[0], "attach", "TOR และแบบรูปรายการ", 42, "scanned", "ตู้เอกสาร 3 ชั้น 2"); D(c[0], "committee", "คำสั่งที่ 52/2569", 3, "ocr", "รายการจัดซื้อ"); D(c[0], "guarantee", "หนังสือค้ำประกัน BG-2569-0458", 2, "ocr", "แฟ้มหลักประกัน"); D(c[0], "accept", "ใบตรวจรับงวดที่ 1", 4, "ocr", "รายการจัดซื้อ", 1); }
     if (c[1]) { c[1].guarantee = { type: "bank", bank: "ธนาคารตัวอย่าง จำกัด (มหาชน)", no: "BG-2570-0012", amount: Math.round(c[1].amount * 0.05), expires: "2026-11-05", status: "held", t: "2026-10-03T09:00", by: pr };
       D(c[1], "contract", "สัญญาจ้างก่อสร้าง", 412, "scanned", "ตู้เอกสาร 4 ชั้น 1"); }
     return s;

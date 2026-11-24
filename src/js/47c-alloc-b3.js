@@ -17,7 +17,7 @@ function planFromQ(r, amount) {
   const bv = ALLOC.appropriation;
   ALLOC.appropriation = () => {
     let html = bv();
-    const P = S.parl, done = P && P.stage >= PARL_STEPS.length;
+    const P = S.parl, done = actInForce(); // the act is in force when its amount is recorded in B6 (or the old parliament steps are done)
     if (ALLOC_FY === CUR_FY && !S.allocs[FORM_FY]) if (done) html = html.replace(L(`สร้างร่างการจัดสรรปี ${FORM_FY} จากผลพิจารณา`, `Create the FY${FORM_FY} draft from the results`), L(`สร้างบรรทัดจัดสรรปี ${FORM_FY} ตาม พ.ร.บ.`, `Create FY${FORM_FY} lines from the appropriation act`));
     if (ALLOC_FY === FORM_FY && S.allocs[FORM_FY]) {
       const A = S.allocs[FORM_FY], linked = A.lines.filter(l => l.req).length;
@@ -31,7 +31,7 @@ function planFromQ(r, amount) {
     bb();
     const mk = $(`#mk-${FORM_FY}`);
     if (mk) mk.onclick = () => {
-      const rs = S.requests.filter(r => actAmount(r) != null), done = S.parl && S.parl.stage >= PARL_STEPS.length;
+      const done = actInForce(), rs = S.requests.filter(r => (done ? actSource(r) === "act" : actAmount(r) != null));
       if (!rs.length) { toast(L("ยังไม่มีผลพิจารณา", "No results yet")); return; }
       const lines = rs.map((r, i) => {
         const by = {}; r.items.forEach(it => (by[it.type] = (by[it.type] || 0) + itemTotal(it)));

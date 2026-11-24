@@ -91,7 +91,7 @@ SUB.status = () => {
   const batch = sb.batches[sb.batches.length - 1], inBatch = batch ? S.requests.filter(r => r.sub === batch.id) : [];
   let action = "";
   if (ed && sb.status === "preparing") action = `<button class="btn primary" type="button" id="sub-send" ${P.length && !blocked ? "" : "disabled"}>${L("ส่งชุดข้อมูลถึงสำนักงบประมาณ", "Send the package to the Budget Bureau")}</button>
-    ${!P.length ? `<span class="sub">${L("ยังไม่มีคำขอในชุดส่ง", "The package is empty")}</span>` : blocked ? `<span class="sub" style="color:var(--bad)">${L("แก้รายการที่ไม่ผ่านในแท็บตรวจก่อนส่งก่อน", "Fix the failing checks first")}</span>` : ""}`;
+    ${!P.length ? `<span class="sub">${L("ยังไม่มีคำขอในชุดส่ง", "The package is empty")}</span>` : blocked ? `<span class="sub" style="color:var(--bad)">${L("แก้รายการที่ไม่ผ่านในแท็บปรับปรุงสถานะ สงป. ก่อน", "Fix the failing checks first")}</span>` : ""}`;
   if (ed && sb.status === "submitted") action = `<button class="btn" type="button" id="sub-sim1">${L("จำลอง: สำนักงบประมาณรับเรื่องและเริ่มพิจารณา", "Demo: the Budget Bureau starts its review")}</button>`;
   if (ed && sb.status === "reviewing") action = `<button class="btn" type="button" id="sub-sim2">${L("จำลอง: ได้รับผลพิจารณาจากสำนักงบประมาณ", "Demo: results arrive from the Budget Bureau")}</button>`;
   if (ed && sb.status === "result") action = `<button class="btn primary" type="button" id="sub-close" ${sb.revisions.some(v => !v.closed) ? "disabled" : ""}>${L("รับผลและส่งต่อการจัดสรร (M06)", "Accept results and hand to allocation (M06)")}</button>

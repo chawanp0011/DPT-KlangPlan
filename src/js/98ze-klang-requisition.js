@@ -33,9 +33,18 @@ function rqDecide(id, ok) {
 }
 
 // ---------- the form ----------
+// จังหวัด / อำเภอ / ตำบล come from the area register (ทะเบียนพื้นที่, S.geo), one drop-down feeding the next (23 Nov 2569)
+function rqGeoOpts(lvl, cur, prov, dist) {
+  const G = (S.geo || []).filter(g => !g.retired && (lvl === "prov" || g.prov === prov) && (lvl !== "sub" || g.dist === dist));
+  const list = [...new Set(G.map(g => g[lvl]).filter(Boolean))].sort((a, b) => a.localeCompare(b, "th"));
+  const head = lvl === "prov" ? L("— เลือกจังหวัด —", "— Province —") : lvl === "dist" ? (prov ? L("— เลือกอำเภอ —", "— District —") : L("— เลือกจังหวัดก่อน —", "— Pick the province first —")) : (dist ? L("— เลือกตำบล —", "— Sub-district —") : L("— เลือกอำเภอก่อน —", "— Pick the district first —"));
+  return `<option value="">${head}</option>` + list.map(x => `<option ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("");
+}
+document.addEventListener("change", e => { const t = e.target; if (!t || !t.matches || !t.matches("[data-rqgeo]")) return; const P = document.getElementById("pr-prov"), A = document.getElementById("pr-amp"), T = document.getElementById("pr-tam"); if (!P || !A || !T) return;
+  if (t === P) { A.innerHTML = rqGeoOpts("dist", "", P.value, ""); T.innerHTML = rqGeoOpts("sub", "", P.value, ""); } else if (t === A) T.innerHTML = rqGeoOpts("sub", "", P.value, A.value); });
 function rqReadVals() {
   const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
-  return { amt: g("pr-amt"), why: g("pr-why"), obj: g("pr-obj"), scope: g("pr-scope"), qty: g("pr-qty"), unit: g("pr-unit"), days: g("pr-days"), place: g("pr-place"), deliv: g("pr-deliv"), basis: g("pr-basis"), ben: g("pr-ben"), contact: g("pr-contact"), refs: g("pr-refs"), split: g("pr-split"), files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: x.kind || 0 })) };
+  return { amt: g("pr-amt"), why: g("pr-why"), obj: g("pr-obj"), scope: g("pr-scope"), qty: g("pr-qty"), unit: g("pr-unit"), days: g("pr-days"), place: g("pr-place"), deliv: g("pr-deliv"), basis: g("pr-basis"), ben: g("pr-ben"), contact: g("pr-contact"), phone: g("pr-phone"), prov: g("pr-prov"), amp: g("pr-amp"), tam: g("pr-tam"), refs: g("pr-refs"), split: g("pr-split"), files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: x.kind || 0 })) };
 }
 const rqReady = c => [{ ok: !!c.method, label: L("เลือกวิธีจัดหา (แผงวิธีจัดซื้อ)", "Choose the method (Method panel)") }, ...casePrepItems(c)];
 function rqFormHtml(c) {
@@ -50,33 +59,40 @@ function rqFormHtml(c) {
       <div class="f" id="pr-splitbox" style="flex:1 1 100%;display:none"><label for="pr-split">${L("คำชี้แจงการแตกซื้อ (R-02) *", "Split-purchase explanation (R-02) *")}</label><input type="text" id="pr-split" value="${esc(v("split", ""))}" placeholder="${esc(L("ระบบพบรายการประเภทเดียวกันในหน่วยเดียวกันรวมกันเกินเพดานวิธีเฉพาะเจาะจง ระบุเหตุผลที่ต้องแยกซื้อ", "Similar requests in the same unit pass the specific-method ceiling. Say why they are bought separately"))}"></div></div></section>
     <section><h3>2 · ${L("รายละเอียดโครงการ", "Project details")}</h3><div class="row">
       ${fld("pr-obj", "วัตถุประสงค์ / ความเป็นมา *", "Objective / background *", `<textarea id="pr-obj" rows="2" placeholder="${esc(L("ทำไมต้องซื้อหรือจ้าง เชื่อมกับโครงการ/กิจกรรมใด", "Why it is needed and which project it serves"))}">${esc(v("obj", ""))}</textarea>`)}
-      ${fld("pr-scope", "ขอบเขตงาน / คุณลักษณะเฉพาะ *", "Scope / specification *", `<textarea id="pr-scope" rows="3" placeholder="${esc(L("รายการ คุณสมบัติ ขนาด มาตรฐาน (ใช้จัดทำ TOR)", "Items, specs, standards (used for the TOR)"))}">${esc(v("scope", ""))}</textarea>`)}
+      ${fld("pr-scope", "ขอบเขตงาน / คุณลักษณะเฉพาะ", "Scope / specification", `<textarea id="pr-scope" rows="3" placeholder="${esc(L("รายการ คุณสมบัติ ขนาด มาตรฐาน (ใช้จัดทำ TOR)", "Items, specs, standards (used for the TOR)"))}">${esc(v("scope", ""))}</textarea>`)}
       ${fld("pr-qty", "จำนวน *", "Qty *", `<input type="number" id="pr-qty" min="1" step="1" value="${esc(v("qty", p.qty || 1))}">`, "0 1 110px")}
       ${fld("pr-unit", "หน่วยนับ", "Unit", `<input type="text" id="pr-unit" value="${esc(v("unit", p.unitName || "ชุด"))}">`, "0 1 120px")}
       ${fld("pr-days", "ระยะเวลาส่งมอบ (วัน) *", "Delivery (days) *", `<input type="number" id="pr-days" min="1" step="1" value="${esc(v("days", p.months ? p.months * 30 : 90))}">`, "0 1 170px")}
       ${fld("pr-place", "สถานที่ส่งมอบ / ดำเนินการ *", "Delivery site *", `<input type="text" id="pr-place" value="${esc(v("place", ""))}">`, "1 1 220px")}
+      <div class="rq-geo-row" style="flex:1 1 100%;display:flex;gap:inherit;flex-wrap:wrap">
+      ${fld("pr-prov", "จังหวัด", "Province", `<select id="pr-prov" data-rqgeo>${rqGeoOpts("prov", v("prov", ""), "", "")}</select>`, "1 1 180px")}
+      ${fld("pr-amp", "อำเภอ", "District", `<select id="pr-amp" data-rqgeo>${rqGeoOpts("dist", v("amp", ""), v("prov", ""), "")}</select>`, "1 1 180px")}
+      ${fld("pr-tam", "ตำบล", "Sub-district", `<select id="pr-tam" data-rqgeo>${rqGeoOpts("sub", v("tam", ""), v("prov", ""), v("amp", ""))}</select>`, "1 1 180px")}</div>
       ${fld("pr-deliv", "ผลงานที่ต้องส่งมอบ *", "Deliverables *", `<input type="text" id="pr-deliv" value="${esc(v("deliv", ""))}" placeholder="${esc(L("เช่น ระบบพร้อมใช้งาน คู่มือ การฝึกอบรม", "e.g. working system, manual, training"))}">`)}
       ${fld("pr-basis", "ที่มาของวงเงิน", "Basis of the estimate", `<select id="pr-basis">${["ใบเสนอราคา", "ราคาท้องตลาด", "ราคาที่เคยซื้อ/จ้างย้อนหลัง", "ราคามาตรฐานครุภัณฑ์", "อื่น ๆ"].map(x => `<option ${v("basis", "") === x ? "selected" : ""}>${x}</option>`).join("")}</select>`, "1 1 220px")}
-      ${fld("pr-ben", "ประโยชน์ที่คาดว่าจะได้รับ", "Expected benefit", `<input type="text" id="pr-ben" value="${esc(v("ben", ""))}">`, "1 1 220px")}
-      ${fld("pr-contact", "ผู้ประสานงาน / เบอร์ติดต่อ *", "Contact person *", `<input type="text" id="pr-contact" value="${esc(v("contact", userName(me().id)))}">`, "1 1 100%")}</div></section>
-    <section><h3>3 · ${L("เอกสารแนบ", "Attachments")}</h3>
+      ${fld("pr-ben", "ประโยชน์ที่คาดว่าจะได้รับ", "Expected benefit", `<textarea id="pr-ben" rows="3" placeholder="${esc(L("ผลที่หน่วยงานหรือประชาชนจะได้รับ ตัวชี้วัด หรือจำนวนผู้ได้ประโยชน์", "What the agency or the public will gain, indicators, how many benefit"))}">${esc(v("ben", ""))}</textarea>`)}
+      ${fld("pr-contact", "ผู้ประสานงาน *", "Contact person *", `<input type="text" id="pr-contact" value="${esc(v("contact", userName(me().id)))}">`, "1 1 260px")}
+      ${fld("pr-phone", "เบอร์ติดต่อ *", "Phone *", `<input type="text" inputmode="tel" id="pr-phone" value="${esc(v("phone", ""))}">`, "1 1 180px")}</div></section>
+</form>`;
+}
+// "เอกสารแนบอื่นๆ ประกอบ" (23 Nov 2569): its own panel at the bottom of the unit's part, just before "ready to send?"
+function rqAttachPanel(c) { if (!rqCanRaise(c)) return null; const d = c.rqDraft || {}, v = (k, def) => (d[k] !== undefined && d[k] !== "" ? d[k] : def), fld = (id, th, en, inner, flex) => `<div class="f" style="flex:${flex || "1 1 100%"}"><label for="${id}">${L(th, en)}</label>${inner}</div>`;
+  return { title: L("เอกสารแนบอื่นๆ ประกอบ", "Other supporting attachments"), body: `<div class="rq-attach" style="display:flex;flex-direction:column;gap:8px">
       <label class="rq-drop" id="rq-drop" for="rq-file"><b>${L("เลือกไฟล์ หรือลากมาวางที่นี่", "Choose files or drop them here")}</b><span class="sub">${L("เช่น TOR ร่าง ใบเสนอราคา แบบรูป · เก็บเฉพาะชื่อ ขนาด และประเภทไฟล์ (TOR ที่แนบเป็นเอกสารจริงทำที่แผง TOR)", "e.g. draft TOR, quotations, drawings · name, size and type only (the TOR as an attached document is on the TOR panel)")}</span></label>
       <input type="file" id="rq-file" multiple hidden>
       <div id="rq-files">${rqFilesHtml()}</div>
-      ${fld("pr-refs", "เลขที่เอกสารอ้างอิง (ถ้ามี)", "Document reference no.", `<input type="text" id="pr-refs" value="${esc(v("refs", ""))}">`)}</section>
-</form>`;
-}
+      ${fld("pr-refs", "เลขที่เอกสารอ้างอิง (ถ้ามี)", "Document reference no.", `<input type="text" id="pr-refs" value="${esc(v("refs", ""))}">`)}</div>` }; }
 // The panel for the requisition on the case page: the form before it is raised, then its status and the decision buttons.
 function rqCasePanel(c) {
   const rq = caseReq(c), n = caseState(c);
   if (rqCanRaise(c)) return { title: L("ขอจัดซื้อ", "Raise the requisition"), body: rqFormHtml(c) };
-  if (!rq) return n === 1 && !c.cancelled ? { title: L("ขอจัดซื้อ", "Raise the requisition"), body: `<span class="sub">${!inPublishedPlan(famPlan(c.plan)) ? L("รายการนี้ยังไม่อยู่ในแผนที่อนุมัติและประกาศแล้ว", "The item is not in the approved, published plan yet") : L("สำนัก/กองเจ้าของเรื่องหรือเจ้าหน้าที่พัสดุเป็นผู้ขอจัดซื้อ", "The owning division or procurement raises the requisition")}</span>` } : null;
+  if (!rq) return n === 1 && !c.cancelled ? { title: L("ขอจัดซื้อ", "Raise the requisition"), body: `<span class="sub">${!inPublishedPlan(famPlan(c.plan)) ? L("รายการนี้ยังไม่ได้รับอนุมัติแผน ขออนุมัติแผนที่หน้าแผนจัดซื้อก่อน", "The plan for this item is not approved yet; ask for approval on the procurement plan page first") : L("สำนัก/กองเจ้าของเรื่องหรือเจ้าหน้าที่พัสดุเป็นผู้ขอจัดซื้อ", "The owning division or procurement raises the requisition")}</span>` } : null;
   return { title: L("ใบขอซื้อขอจ้าง", "Requisition"), body: `<div><b class="mono">${esc(rq.id)}</b> · ${baht(rq.amount)} · ${stTag(REQ_ST, rq.status)}</div><div class="sub">${L("ผู้ขอ", "Requester")}: ${esc(userName(rq.by))} · ${fdate(rq.t, true)}${rq.decided ? ` · ${L("พิจารณาโดย", "Decided by")} ${esc(userName(rq.decided.by))} ${fdate(rq.decided.t, true)}` : ""}</div>
     ${rq.status === "pending" ? `<div class="sub">${L("รอผู้มีอำนาจของสำนัก/กองอนุมัติ พร้อมวิธีจัดหา", "Waiting for the division's authority, with the method")}</div>${rqCanDecide(rq) ? `<div class="row"><button class="btn primary" type="button" data-rqdec="${rq.id}|1">${L("อนุมัติ", "Approve")}</button><button class="btn danger" type="button" data-rqdec="${rq.id}|0">${L("ไม่อนุมัติ", "Reject")}</button></div>` : ""}` : ""}` };
 }
 // "Ready to send?": the status of each heading of Prepare the data, and the send button; kept at the bottom of the panel.
 const rqVals = c => (document.getElementById("rq-inline") ? rqReadVals() : (c.rqDraft || {}));
-function rqMissing(v) { return [[v.obj, "วัตถุประสงค์", "objective"], [v.scope, "ขอบเขตงาน", "scope"], [Number(v.qty) > 0, "จำนวน", "quantity"], [Number(v.days) > 0, "ระยะเวลาส่งมอบ", "delivery days"], [v.place, "สถานที่ส่งมอบ", "delivery site"], [v.deliv, "ผลงานที่ต้องส่งมอบ", "deliverables"], [v.contact, "ผู้ประสานงาน", "contact"], [Number(v.amt) > 0, "วงเงิน", "amount"]].filter(x => !x[0]).map(x => L(x[1], x[2])); }
+function rqMissing(v) { return [[v.obj, "วัตถุประสงค์", "objective"], [Number(v.qty) > 0, "จำนวน", "quantity"], [Number(v.days) > 0, "ระยะเวลาส่งมอบ", "delivery days"], [v.place, "สถานที่ส่งมอบ", "delivery site"], [v.deliv, "ผลงานที่ต้องส่งมอบ", "deliverables"], [v.contact, "ผู้ประสานงาน", "contact"], [v.phone, "เบอร์ติดต่อ", "phone"], [Number(v.amt) > 0, "วงเงิน", "amount"]].filter(x => !x[0]).map(x => L(x[1], x[2])); }
 function rqReadyRows(c) {
   const v = rqVals(c), miss = rqMissing(v), m = prepMethod(c), needTor = needsCompetition({ method: m }), needCm = ((ruleFor(m).committees) || []).includes("tor"), files = (c.tor && c.tor.files) || [];
   return [
@@ -100,10 +116,10 @@ function rqSubmit(c) {
   const p = famPlan(c.plan), v = rqReadVals(), amount = Math.round(Number(v.amt) * 1e6 / 1e3) * 1e3, T = (th, en) => toast(L(th, en));
   if (!rqCanRaise(c)) { T("ขอจัดซื้อไม่ได้ในตอนนี้", "Can't raise a requisition now"); return; }
   if (!(amount > 0)) { T("ใส่วงเงินก่อน", "Enter an amount"); return; }
-  if (!inPublishedPlan(p)) { T("รายการนี้ยังไม่อยู่ในแผนที่อนุมัติและประกาศแล้ว เสนอแผนฉบับใหม่ก่อน", "This item isn't in the approved, published plan yet; propose a new plan version first"); return; }
+  if (!inPublishedPlan(p)) { T("รายการนี้ยังไม่ได้รับอนุมัติแผน ขออนุมัติแผนที่หน้าแผนจัดซื้อก่อน", "The plan for this item is not approved yet; ask for approval on the procurement plan page first"); return; }
   if (amount > famHeadroom(p.line)) { T(`เกินวงเงินคงเหลือของรายการจัดสรร (${mb(famHeadroom(p.line))} ลบ.)`, `More than the room left on the line (${mb(famHeadroom(p.line))} M)`); return; }
-  const detail = { obj: v.obj, scope: v.scope, qty: Number(v.qty) || 0, unit: v.unit, days: Number(v.days) || 0, place: v.place, deliv: v.deliv, basis: v.basis, ben: v.ben, contact: v.contact, refs: v.refs, files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: RQ_DOCS[x.kind || 0] })) };
-  const miss = [[detail.obj, "วัตถุประสงค์", "objective"], [detail.scope, "ขอบเขตงาน", "scope"], [detail.qty > 0, "จำนวน", "quantity"], [detail.days > 0, "ระยะเวลาส่งมอบ", "delivery days"], [detail.place, "สถานที่ส่งมอบ", "delivery site"], [detail.deliv, "ผลงานที่ต้องส่งมอบ", "deliverables"], [detail.contact, "ผู้ประสานงาน", "contact"]].filter(x => !x[0]).map(x => L(x[1], x[2]));
+  const detail = { obj: v.obj, scope: v.scope, qty: Number(v.qty) || 0, unit: v.unit, days: Number(v.days) || 0, place: v.place, deliv: v.deliv, basis: v.basis, ben: v.ben, contact: v.contact, phone: v.phone, prov: v.prov, amp: v.amp, tam: v.tam, refs: v.refs, files: RQ_FILES.map(x => ({ name: x.name, size: x.size, type: x.type, kind: RQ_DOCS[x.kind || 0] })) };
+  const miss = [[detail.obj, "วัตถุประสงค์", "objective"], [detail.qty > 0, "จำนวน", "quantity"], [detail.days > 0, "ระยะเวลาส่งมอบ", "delivery days"], [detail.place, "สถานที่ส่งมอบ", "delivery site"], [detail.deliv, "ผลงานที่ต้องส่งมอบ", "deliverables"], [detail.contact, "ผู้ประสานงาน", "contact"], [detail.phone, "เบอร์ติดต่อ", "phone"]].filter(x => !x[0]).map(x => L(x[1], x[2]));
   if (miss.length) { T("กรอกรายละเอียดโครงการให้ครบ: " + miss.join(", "), "Complete the project details: " + miss.join(", ")); return; }
   const bad = rqReady(c).find(x => !x.ok); if (bad) { toast(`${L("ยังส่งไม่ได้", "Can't send yet")}: ${bad.label}`); return; }
   const sp = splitRisk(p, amount); if (sp.risk && v.split.length < 10) { const box = document.getElementById("pr-splitbox"); if (box) box.style.display = ""; T(`ระบบพบรายการประเภทเดียวกันในหน่วยเดียวกัน รวม ${fmt(sp.total)} บาท เกินเพดานวิธีเฉพาะเจาะจง ต้องชี้แจง`, `Similar requests in the same unit total ${fmt(sp.total)} baht, above the specific-method ceiling. An explanation is needed`); return; }

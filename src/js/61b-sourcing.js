@@ -24,8 +24,8 @@ function torPicker(c) {
 PROC.tor = () => {
   const head = ROLE === "prochead", pr = isProcRole(), T = S.torLib, open = T.find(t => t.id === TOR_OPEN);
   return `
-  <section class="panel"><header><h2>${L("คลัง TOR และแม่แบบ", "TOR library")}</h2><span class="sp"></span><span class="sub">${L("เจ้าหน้าที่พัสดุเสนอฉบับใหม่ หัวหน้าพัสดุอนุมัติ แฟ้มใช้ฉบับที่อนุมัติล่าสุด", "Officers propose a new version, the head approves it, and cases use the latest approved version")}</span></header>
-    <div class="tbl-wrap"><table><thead><tr><th>${L("รหัส", "ID")}</th><th>${L("แม่แบบ", "Template")}</th><th>${L("ชนิดงาน", "Kind")}</th><th>${L("ฉบับใช้งาน", "In use")}</th><th>${L("รออนุมัติ", "Pending")}</th><th>${L("ใช้ในแฟ้ม", "Used by")}</th><th></th></tr></thead>
+  <section class="panel"><header><h2>${L("คลัง TOR และแม่แบบ", "TOR library")}</h2><span class="sp"></span><span class="sub">${L("เจ้าหน้าที่พัสดุเสนอฉบับใหม่ หัวหน้าพัสดุอนุมัติ รายการจัดซื้อใช้ฉบับที่อนุมัติล่าสุด", "Officers propose a new version, the head approves it, and cases use the latest approved version")}</span></header>
+    <div class="tbl-wrap"><table><thead><tr><th>${L("รหัส", "ID")}</th><th>${L("แม่แบบ", "Template")}</th><th>${L("ชนิดงาน", "Kind")}</th><th>${L("ฉบับใช้งาน", "In use")}</th><th>${L("รออนุมัติ", "Pending")}</th><th>${L("ใช้ในรายการจัดซื้อ", "Used by")}</th><th></th></tr></thead>
       <tbody>${T.map(t => { const lv = torLatest(t), pend = t.versions.filter(v => v.status === "draft"), used = S.cases.filter(c => c.tor && c.tor.tpl === t.id).map(c => c.id);
         return `<tr><td class="mono">${t.id}</td><td>${esc(tx(t.name))}</td><td class="sub">${tx(KINDS[t.kind])}</td><td>${lv ? `v${lv.v} <span class="sub">${fdate(lv.appr.t)}</span>` : "—"}</td><td>${pend.length ? tag(`v${pend.map(v => v.v).join(", v")}`, "p-warn") : "—"}</td><td class="sub">${used.join(", ") || "—"}</td>
           <td><button class="btn" type="button" data-toropen="${t.id}">${TOR_OPEN === t.id ? L("ปิด", "Close") : L("เปิด", "Open")}</button></td></tr>`; }).join("")}</tbody></table></div></section>
@@ -43,7 +43,7 @@ function bindTor() {
     audit(["เสนอแม่แบบ TOR ฉบับใหม่", "Proposed a new TOR template version"], `${t.id} v${v}`); notify(["prochead"], [`แม่แบบ ${t.id} ฉบับ v${v} รออนุมัติ`, `Template ${t.id} v${v} needs approval`], "prc-tor"); done(L("ส่งให้หัวหน้าพัสดุแล้ว", "Sent to the head")); };
   $$("[data-torok]").forEach(b => (b.onclick = () => { const [id, v] = b.dataset.torok.split("|"), t = S.torLib.find(x => x.id === id), ver = t.versions.find(x => x.v === Number(v));
     if (ver.by === me().id) { toast(L("ผู้เสนอฉบับนี้อนุมัติเองไม่ได้", "Whoever proposed it can't approve it")); return; }
-    ver.status = "approved"; ver.appr = { by: me().id, t: nowIso() }; audit(["อนุมัติแม่แบบ TOR", "Approved a TOR template"], `${id} v${v}`); done(L("อนุมัติแล้ว แฟ้มใหม่จะใช้ฉบับนี้", "Approved; new cases use this version")); }));
+    ver.status = "approved"; ver.appr = { by: me().id, t: nowIso() }; audit(["อนุมัติแม่แบบ TOR", "Approved a TOR template"], `${id} v${v}`); done(L("อนุมัติแล้ว รายการจัดซื้อใหม่จะใช้ฉบับนี้", "Approved; new cases use this version")); }));
 }
 
 // ---------- conflict of interest (SD-07), criteria, bids and scores ----------
@@ -109,7 +109,7 @@ function egpMismatch(c) {
 const canEditCase = c => isProcRole() && !c.cancelled && caseState(c) >= 3 && caseState(c) <= 8;
 CASE_PANELS.push(c => {
   const m = egpMismatch(c);
-  return m ? `<div class="alert"><div class="ic" style="background:var(--warn-soft);color:var(--warn)">!</div><div><b>${L("สถานะใน e-GP ล้ำหน้าแฟ้ม", "e-GP is ahead of this case")}</b><p>${L("ไฟล์ e-GP ระบุ", "The e-GP file says")} “${tx(m.stage)}” ${L("แต่แฟ้มอยู่ขั้น", "but the case is at step")} ${m.n} · ${m.age} ${L("วัน", "days")}${m.late ? ` · ${L("เกินเวลาที่ตั้ง สร้างงานให้เจ้าหน้าที่พัสดุแล้ว (R-19)", "past the set time; a task was created for the officer (R-19)")}` : ""}</p></div></div>` : "";
+  return m ? `<div class="alert"><div class="ic" style="background:var(--warn-soft);color:var(--warn)">!</div><div><b>${L("สถานะใน e-GP ล้ำหน้ารายการจัดซื้อ", "e-GP is ahead of this case")}</b><p>${L("ไฟล์ e-GP ระบุ", "The e-GP file says")} “${tx(m.stage)}” ${L("แต่รายการจัดซื้ออยู่ขั้น", "but the case is at step")} ${m.n} · ${m.age} ${L("วัน", "days")}${m.late ? ` · ${L("เกินเวลาที่ตั้ง สร้างงานให้เจ้าหน้าที่พัสดุแล้ว (R-19)", "past the set time; a task was created for the officer (R-19)")}` : ""}</p></div></div>` : "";
 });
 CASE_PANELS.push(c => {
   const n = caseState(c), ed = canEditCase(c) && n >= 3 && n <= 4, M = c.market || [];
@@ -170,7 +170,7 @@ CASE_PANELS.push(c => {
 });
 function egpPack(c) {
   const p = famPlan(c.plan), rq = caseReq(c), line = famLine(c.line), cm = k => (c.committees[k] ? `${c.committees[k].order} · ${committeeMembers(c.committees[k]).map(userName).join(", ")}` : "-");
-  return [`โครงการ: ${tx(p.name)}`, `รหัสแฟ้ม Fisko: ${c.id} · แผน ${p.id}`, `วิธีจัดซื้อ: ${tx(PMETHOD[c.method])}`, `ประเภท: ${tx(KINDS[c.kind])}`,
+  return [`โครงการ: ${tx(p.name)}`, `รหัสรายการจัดซื้อ Fisko: ${c.id} · แผน ${p.id}`, `วิธีจัดซื้อ: ${tx(PMETHOD[c.method])}`, `ประเภท: ${tx(KINDS[c.kind])}`,
     `วงเงินงบประมาณ: ${fmt(rq ? rq.amount : p.est)} บาท · รายการจัดสรร ${line.id} ${tx(line.name)}`, `ราคากลาง: ${c.ref ? fmt(c.ref.amount) + " บาท · แหล่ง " + c.ref.basis.map(b => tx(BASIS[b])).join(", ") : "-"}`,
     `TOR: ${c.tor ? c.tor.doc : "-"}`, `คณะกรรมการ TOR และราคากลาง: ${cm("tor")}`, `เกณฑ์พิจารณา: ${(c.criteria || []).map(k => `${tx(k.name)} ${k.w}`).join(", ") || "-"}`,
     `ประกาศ: ${c.egp ? fdate(c.egp.announce) : "-"} · ยื่นข้อเสนอถึง: ${c.egp ? fdate(c.egp.close) : "-"}`].join("\n");
@@ -186,7 +186,7 @@ CASE_BINDS.push((c, done) => {
     if (conflict && w.length < 2) { toast(L("ระบุผู้ยื่นที่มีส่วนได้เสีย", "Name the bidder")); return; }
     c.coi = c.coi || {}; c.coi[k] = c.coi[k] || {}; c.coi[k][u] = { conflict, with: w, t: nowIso(), by: me().id, paper: u !== me().id };
     caseLog(c, "coi", `${userName(u)} · ${conflict ? "มีส่วนได้เสีย " + w : "ไม่มี"}`); audit(["บันทึกแบบแจ้งผลประโยชน์ทับซ้อน", "Recorded a conflict-of-interest declaration"], `${c.id} ${userName(u)}`);
-    if (conflict) notify(["prochead"], [`แฟ้ม ${c.id} มีกรรมการแจ้งส่วนได้เสีย ต้องแทนที่`, `Case ${c.id}: a member declared a conflict and must be replaced`], `case:${c.id}`);
+    if (conflict) notify(["prochead"], [`รายการจัดซื้อ ${c.id} มีกรรมการแจ้งส่วนได้เสีย ต้องแทนที่`, `Case ${c.id}: a member declared a conflict and must be replaced`], `case:${c.id}`);
     done(conflict ? L("บันทึกแล้ว ต้องแทนที่กรรมการรายนี้ก่อนบันทึกผล (SD-07)", "Recorded; replace this member before the result (SD-07)") : L("บันทึกแล้ว", "Recorded")); }));
   $$("[data-coiswap]").forEach(b => (b.onclick = () => { const [, k, u] = b.dataset.coiswap.split("|"), nu = $(`#coi-r-${k}-${u}`).value, cm = c.committees[k];
     if (cm.chair === u) cm.chair = nu; else cm.members = cm.members.map(x => (x === u ? nu : x));
@@ -232,7 +232,7 @@ CASE_BINDS.push((c, done) => {
       const n = caseState(c);
       ["tor", "eval", "buy"].forEach(k => { const cm = c.committees[k]; if (cm && n >= 4 && n <= 6 && committeeMembers(cm).includes(meId) && !coiOf(c, k, meId)) R(`${L("แจ้งผลประโยชน์ทับซ้อน", "Declare conflicts of interest")} ${c.id}`, tx(COMMITTEES[k]), TODAY, `case:${c.id}`, "p-warn"); });
       if (n === 6 && c.bids && nonPrice(c).length && c.committees[evalKey(c)] && evalMembers(c).includes(meId) && !scored(c, meId)) R(`${L("ให้คะแนนข้อเสนอ", "Score the bids")} ${c.id}`, caseName(c), TODAY, `case:${c.id}`, "p-info");
-      const m = egpMismatch(c); if (m && m.late && isProcRole()) R(`${L("ปรับแฟ้มให้ตรงสถานะ e-GP", "Bring the case in line with e-GP")} ${c.id}`, tx(m.stage), TODAY, `case:${c.id}`, "p-warn");
+      const m = egpMismatch(c); if (m && m.late && isProcRole()) R(`${L("ปรับรายการจัดซื้อให้ตรงสถานะ e-GP", "Bring the case in line with e-GP")} ${c.id}`, tx(m.stage), TODAY, `case:${c.id}`, "p-warn");
     });
     if (ROLE === "prochead") S.torLib.forEach(t => t.versions.filter(v => v.status === "draft").forEach(v => R(`${L("อนุมัติแม่แบบ TOR", "Approve a TOR template")} ${t.id} v${v.v}`, tx(t.name), TODAY, "prc-tor", "p-warn")));
   };

@@ -1,5 +1,6 @@
 // M03 consolidation tabs (round 2): priority scoring, per-unit ceilings, programme breakdown.
 let CONS_TAB = "overview";
+let CN_TAB = "overview"; // the tab of the consolidation page of file 98zs (declared here because the page table in 75 reads it at load)
 const OPEN_PROG = new Set();
 const CONS_PANELS = {}, CONS_BIND = {};
 function consTabsBar() {

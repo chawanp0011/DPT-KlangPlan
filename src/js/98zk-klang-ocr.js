@@ -65,7 +65,7 @@ function ocImport() {
 }
 
 // ---------- page ----------
-const ocCan = () => ROLE === "div" || ROLE === "plan";
+const ocCan = () => ROLE === "div"; // 13 Nov 2569: requests are made by the offices and divisions only (it was also Planning, for any unit)
 function ocDocHtml(d, i) {
   const u = ocUnit(d), iss = ocIssues(d, u), low = k => ocLow(d.f[k]);
   const cell = (f, id, w) => `<div class="row" style="flex-wrap:nowrap"><input type="text" id="${id}" value="${esc(f.v)}" style="min-width:${w || 120}px;${f.c < OC_MIN && f.v === f.orig ? "background:var(--warn-soft, #fff4d6)" : ""}"><span class="sub">${Math.round(f.c * 100)}%</span>${f.c < OC_MIN && f.v === f.orig ? `<label class="field-inline" title="${L("ยืนยันว่าค่านี้ถูกต้อง", "Confirm this value")}"><input type="checkbox" id="${id}-ok" ${f.ok ? "checked" : ""}> ${L("ถูกต้อง", "OK")}</label>` : f.v !== f.orig ? tag(L("แก้แล้ว", "Edited"), "p-info") : ""}</div>`;
@@ -83,7 +83,6 @@ ePageDef("budget", "bq-ocr", "BQ8", "form", KROLES, ["นำเข้าคำ�
       <div class="row" style="flex-wrap:wrap"><input type="file" id="oc-file" accept=".pdf,image/*" ${can ? "" : "disabled"}>${F ? `<span class="sub">${esc(F.name)} · ${fmt(F.size / 1024, 1)} KB · ${esc(F.type || "–")}</span>` : `<span class="sub">${L("ยังไม่ได้เลือกไฟล์ (ไม่เลือกก็ทดลองได้)", "No file chosen (you can try without)")}</span>`}</div>
       ${F && F.url && /^image\//.test(F.type) ? `<img src="${F.url}" alt="${esc(F.name)}" style="max-width:260px;max-height:180px;margin-top:8px;border:1px solid var(--line);border-radius:6px">` : ""}
       <div class="row" style="margin-top:8px;flex-wrap:wrap"><label for="oc-sample"><b style="font-weight:600">${L("ผลอ่านตัวอย่างที่ใช้จำลอง", "Simulated reading to use")}</b></label><select id="oc-sample" ${can ? "" : "disabled"}>${Object.keys(OC_SAMPLES).map(k => `<option value="${k}" ${OCR.sample === k ? "selected" : ""}>${k} · ${esc(tx(OC_SAMPLES[k]))}</option>`).join("")}</select>
-        ${ROLE === "plan" ? `<label for="oc-unit">${L("หน่วยงานเจ้าของคำขอ", "Owning unit")}</label><select id="oc-unit"><option value="">${L("— ตามที่อ่านได้ —", "— as read —")}</option>${(S.units || []).filter(u => u.parent).map(u => `<option value="${u.id}" ${OCR.unit === u.id ? "selected" : ""}>${esc(tx(u.name))}</option>`).join("")}</select>` : ""}
         <button class="btn primary" type="button" id="oc-read" ${can ? "" : "disabled"}>${L("อ่านเอกสาร (จำลอง)", "Read the document (simulated)")}</button></div></div></section>
     ${D ? `<section class="panel"><header><h2>${L("2 ตรวจและแก้ข้อมูลที่อ่านได้", "2 Check and correct what was read")}</h2><span class="sp"></span><span class="sub">${L("ช่องที่ความมั่นใจต่ำกว่า 80% ต้องแก้หรือยืนยัน", "A field below 80% must be corrected or confirmed")}</span></header></section>${D.map(ocDocHtml).join("")}
       <section class="panel"><header><h2>${L("3 สร้างร่างคำขอ", "3 Make the draft requests")}</h2></header><div class="body row"><button class="btn primary" type="button" id="oc-go" ${can && !issues ? "" : "disabled"}>${L("สร้างร่างคำขอ", "Make")} ${D.length} ${L("รายการ", "draft(s)")}</button>${issues ? `<span class="sub" style="color:var(--bad)">${issues} ${L("ข้อที่ยังต้องแก้", "issues to fix")}</span>` : ""}<button class="btn ghost" type="button" id="oc-clear">${L("ล้าง", "Clear")}</button></div></section>` : ""}
@@ -105,7 +104,7 @@ ePageDef("budget", "bq-ocr", "BQ8", "form", KROLES, ["นำเข้าคำ�
   document.querySelectorAll("[data-ocopen]").forEach(b => (b.onclick = () => openReq(b.dataset.ocopen)));
 });
 Object.assign(NAV_ICON, { "bq-ocr": "file" });
-{ // a way in from the request list for a division and for Planning
+{ // a way in from the request list, for a division
   const vb = VIEWS.requests;
   VIEWS.requests = () => { const html = vb(); if (typeof rqYear === "function" && rqYear() !== FORM_FY || !ocCan()) return html; return `<div class="row" style="margin:0 0 10px"><button class="btn" type="button" data-jump="bq-ocr">${L("นำเข้าคำขอจากเอกสาร (OCR จำลอง)", "Import a request from a document (simulated OCR)")}</button></div>` + html; };
   const bq = BIND.requests; BIND.requests = () => { bq(); document.querySelectorAll("#view [data-jump]").forEach(x => (x.onclick = () => jump(x.dataset.jump))); };

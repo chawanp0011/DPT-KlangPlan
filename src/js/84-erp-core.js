@@ -38,16 +38,54 @@ const TIER_DOC = {
   xfer: ["โอน / ย้ายครุภัณฑ์ข้ามหน่วย", "Asset transfer between units"], dispose: ["จำหน่ายครุภัณฑ์", "Asset disposal"],
   issue: ["เบิกวัสดุจากคลัง", "Stock issue"], adjust: ["ปรับยอดวัสดุจากการนับ", "Stock count adjustment"], agr: ["ข้อตกลง / สัญญานอกการจัดซื้อ", "Agreement outside procurement"],
 };
-// Asset categories: the code and useful life are sample values, to be confirmed against the Comptroller General's rules.
-const ASSET_CATS = [
-  { id: "7440", name: ["ครุภัณฑ์คอมพิวเตอร์", "Computer equipment"], life: 5 },
-  { id: "7110", name: ["ครุภัณฑ์สำนักงาน", "Office equipment"], life: 8 },
-  { id: "7520", name: ["ยานพาหนะ", "Vehicles"], life: 8 },
-  { id: "7310", name: ["ครุภัณฑ์ไฟฟ้าและวิทยุ", "Electrical and radio"], life: 5 },
-  { id: "7620", name: ["ครุภัณฑ์งานบ้านงานครัว", "Household equipment"], life: 8 },
-];
-const assetCat = id => ASSET_CATS.find(c => c.id === id) || ASSET_CATS[1];
-const ASSET_LOW = 5000; // below this an item is kept in the register but not depreciated (ERP: account_asset_low_value); a sample value
+// Asset types follow the Comptroller General's Department table of useful lives and depreciation rates for government
+// fixed assets (letter ที่ กค 0423.3/ว 238, 4 Sep 2557, table 1, in force for assets acquired from budget year 2558).
+// id = the number in the table; lifeMin/lifeMax in years and rateMin/rateMax in percent per year are copied from it.
+// `life` is the life this agency adopts (it must lie in the range). The `cgd` account code is a SAMPLE placeholder,
+// not a real code: the real code list has to be supplied and confirmed with the Comptroller General's Department.
+const ASSET_GROUP = { bldg: ["อาคารและสิ่งปลูกสร้าง", "Buildings"], dur: ["ครุภัณฑ์", "Equipment"], infra: ["โครงสร้างพื้นฐาน", "Infrastructure"], intang: ["สินทรัพย์ไม่มีตัวตน", "Intangible"] };
+const ASSET_TYPE_DEFS = (() => {
+  // [id, group, main (th, en), sub (th, en) or null, lifeMin, lifeMax, rateMin, rateMax, adopted life, example items (th)]
+  const T = [
+    ["01", "bldg", ["อาคารถาวร", "Permanent building"], null, 15, 40, 2.5, 6.5, 30, ["บ้านพักอาศัยชั้นเดียว", "บ้านพักอาศัยสองชั้น", "ห้องแถวไม้ทั่วไป", "ตึกแถวทั่วไป", "อาคารอื่น ๆ"]],
+    ["02", "bldg", ["อาคารชั่วคราว/โรงเรือน", "Temporary building / shed"], null, 8, 15, 6.5, 12.5, 10, ["โรงเก็บรถ", "อาคารเก็บของกลาง", "อาคารจอดรถยนต์", "ที่พักชั่วคราว", "เรือนเพาะชำ"]],
+    ["03.1", "bldg", ["สิ่งก่อสร้าง", "Structures"], ["ใช้คอนกรีตเสริมเหล็กหรือโครงเหล็กเป็นส่วนประกอบหลัก", "Reinforced concrete or steel frame"], 15, 25, 4, 6.5, 20, ["รั้วคอนกรีต - ผนังอิฐบล็อก", "สระว่ายน้ำ", "ลานคอนกรีต", "ถนน (ไม่ใช่สาธารณประโยชน์)"]],
+    ["03.2", "bldg", ["สิ่งก่อสร้าง", "Structures"], ["ใช้ไม้หรือวัสดุอื่น ๆ เป็นส่วนประกอบหลัก", "Timber or other materials"], 5, 15, 6.5, 20, 10, ["รั้วลวดหนาม", "รั้วสังกะสี", "รั้วตาข่าย", "รั้วไม้"]],
+    ["04", "dur", ["ครุภัณฑ์สำนักงาน", "Office equipment"], null, 3, 12, 8, 33, 8, ["เครื่องโทรสาร", "เครื่องถ่ายเอกสาร", "เครื่องปรับอากาศ", "โทรศัพท์", "โต๊ะทำงาน"]],
+    ["05", "dur", ["ครุภัณฑ์ยานพาหนะและขนส่ง", "Vehicles and transport"], null, 5, 30, 3, 20, 8, ["รถยนต์นั่ง", "รถบรรทุก", "รถโดยสาร", "รถจักรยานยนต์", "เรือ"]],
+    ["06", "dur", ["ครุภัณฑ์ไฟฟ้าและวิทยุ", "Electrical and radio"], null, 5, 10, 10, 20, 5, ["เครื่องรับส่งวิทยุ", "เครื่องกำเนิดไฟฟ้า (อายุ 15-20 ปี)", "ไมโครโฟน", "เครื่องเล่นวีซีดี/ดีวีดี", "เครื่องชาร์จแบตเตอรี่"]],
+    ["07", "dur", ["ครุภัณฑ์โฆษณาและเผยแพร่", "Advertising and broadcasting"], null, 5, 10, 10, 20, 5, ["โทรทัศน์", "จอภาพ", "เครื่องมัลติมีเดียโปรเจคเตอร์"]],
+    ["08.1", "dur", ["ครุภัณฑ์การเกษตร", "Agricultural equipment"], ["เครื่องมือและอุปกรณ์", "Tools and apparatus"], 2, 5, 20, 50, 4, ["เครื่องพ่นยา", "เครื่องสูบน้ำ", "เครื่องชั่ง", "ตู้เก็บเมล็ดพันธุ์"]],
+    ["08.2", "dur", ["ครุภัณฑ์การเกษตร", "Agricultural equipment"], ["เครื่องจักรกล", "Machinery"], 3, 10, 10, 33, 8, ["รถไถ", "รถแทรกเตอร์", "เครื่องสีข้าว", "เครื่องตัดหญ้า"]],
+    ["09.1", "dur", ["ครุภัณฑ์โรงงาน", "Factory equipment"], ["เครื่องมือและอุปกรณ์", "Tools and apparatus"], 2, 5, 20, 50, 4, []],
+    ["09.2", "dur", ["ครุภัณฑ์โรงงาน", "Factory equipment"], ["เครื่องจักรกล", "Machinery"], 3, 10, 10, 33, 8, []],
+    ["10.1", "dur", ["ครุภัณฑ์ก่อสร้าง", "Construction equipment"], ["เครื่องมือและอุปกรณ์", "Tools and apparatus"], 2, 5, 20, 50, 4, []],
+    ["10.2", "dur", ["ครุภัณฑ์ก่อสร้าง", "Construction equipment"], ["เครื่องจักรกล", "Machinery"], 3, 10, 10, 33, 10, ["เครื่องจักรกลและเครื่องมือหนัก เช่น รถผักตบ"]],
+    ["11", "dur", ["ครุภัณฑ์สำรวจ", "Survey equipment"], null, 5, 10, 10, 20, 8, []],
+    ["12", "dur", ["ครุภัณฑ์การแพทย์และวิทยาศาสตร์", "Medical and scientific equipment"], null, 5, 15, 6.5, 20, 8, []],
+    ["13", "dur", ["ครุภัณฑ์คอมพิวเตอร์", "Computer equipment"], null, 3, 5, 20, 33, 5, []],
+    ["14", "dur", ["ครุภัณฑ์การศึกษา", "Educational equipment"], null, 2, 5, 20, 50, 5, []],
+    ["15", "dur", ["ครุภัณฑ์งานบ้านงานครัว", "Household and kitchen equipment"], null, 2, 5, 20, 50, 5, []],
+    ["16", "dur", ["ครุภัณฑ์กีฬา/กายภาพ", "Sports and physical equipment"], null, 2, 5, 20, 50, 5, []],
+    ["17", "dur", ["ครุภัณฑ์ดนตรี/นาฏศิลป์", "Music and performing-arts equipment"], null, 2, 5, 20, 50, 5, []],
+    ["18", "dur", ["ครุภัณฑ์อาวุธ", "Weapons"], null, 5, 10, 10, 20, 10, []],
+    ["19", "dur", ["ครุภัณฑ์สนาม", "Field equipment"], null, 2, 5, 20, 50, 5, []],
+    ["20.1", "infra", ["สินทรัพย์โครงสร้างพื้นฐาน", "Infrastructure"], ["ถนนคอนกรีต", "Concrete road"], 10, 20, 5, 10, 20, []],
+    ["20.2", "infra", ["สินทรัพย์โครงสร้างพื้นฐาน", "Infrastructure"], ["ถนนลาดยาง", "Asphalt road"], 3, 10, 10, 33, 10, []],
+    ["20.3", "infra", ["สินทรัพย์โครงสร้างพื้นฐาน", "Infrastructure"], ["สะพานคอนกรีตเสริมเหล็ก", "Reinforced-concrete bridge"], 20, 50, 2, 5, 40, []],
+    ["20.4", "infra", ["สินทรัพย์โครงสร้างพื้นฐาน", "Infrastructure"], ["เขื่อนดิน", "Earth dam"], 20, 50, 2, 5, 40, []],
+    ["20.5", "infra", ["สินทรัพย์โครงสร้างพื้นฐาน", "Infrastructure"], ["เขื่อนปูน", "Concrete dam"], 50, 80, 1.25, 2, 60, []],
+    ["20.6", "infra", ["สินทรัพย์โครงสร้างพื้นฐาน", "Infrastructure"], ["อ่างเก็บน้ำ", "Reservoir"], 30, 80, 1.25, 3, 50, []],
+    ["21", "dur", ["ครุภัณฑ์อื่น", "Other equipment"], null, 2, 15, 6.5, 50, 5, []],
+    ["22", "intang", ["สินทรัพย์ไม่มีตัวตน", "Intangible assets"], null, 2, 20, 5, 50, 5, []],
+  ];
+  return T.map(([id, group, main, sub, lifeMin, lifeMax, rateMin, rateMax, life, ex]) => ({ id, group, main, sub, name: sub ? [`${main[0]} · ${sub[0]}`, `${main[1]} · ${sub[1]}`] : main, lifeMin, lifeMax, rateMin, rateMax, life, cgd: `ตย.${id}`, ex, on: true }));
+})();
+const ASSET_CATS = ASSET_TYPE_DEFS.map(t => ({ id: t.id, name: t.name, life: t.life }));
+// The live type register is S.atypes (editable at A8); the table above is the fallback while a seed is being built.
+const assetType = id => ((typeof S !== "undefined" && S && S.atypes) || ASSET_TYPE_DEFS).find(c => c.id === id) || ASSET_TYPE_DEFS.find(c => c.id === id) || ASSET_TYPE_DEFS[4];
+const assetCat = assetType;
+const ASSET_LOW = 5000; // CGD letter ที่ กค 0423.3/ว 238: below 5,000 baht per unit or set an item is expensed in the year bought, but still controlled in the register (ERP: account_asset_low_value)
 const STOCK_CATS = [["paper", ["กระดาษและเครื่องเขียน", "Paper and stationery"]], ["ict", ["วัสดุคอมพิวเตอร์", "Computer supplies"]], ["clean", ["วัสดุสำนักงานและทำความสะอาด", "Office and cleaning"]], ["other", ["วัสดุอื่น", "Other"]]];
 const baht = n => `${fmt(n)} ${L("บาท", "baht")}`;
 const tagN = (cls, th, en) => tag(L(th, en), cls);
@@ -73,7 +111,7 @@ function assetDep(a, asOf = TODAY) {
   const acc = Math.round(monthly * months);
   return { monthly, months, acc, nbv: Math.max(1, a.cost - acc), low, life };
 }
-const assetInService = a => ["active", "repair", "disp_req"].includes(a.status);
+const assetInService = a => ["active", "spare", "repair", "disp_req"].includes(a.status);
 function depForMonth(ym) {
   const idx = ymIdx(ym + "-01");
   return Math.round((S.assets || []).filter(a => assetInService(a) && a.cost >= ASSET_LOW && ymIdx(a.acq) <= idx && idx - ymIdx(a.acq) < assetCat(a.cat).life * 12)
@@ -113,23 +151,31 @@ function erpSeedInto(s) {
   // assets (a few come from the two sample contracts once their phases are accepted; the rest are older)
   const cust = i => usr("div", kids[i % kids.length].id) || usr("div", sec.id);
   const A = (n, th, en, cat, unitIdx, loc, acq, cost, src, status = "active", extra = {}) => ({ id: "AS-" + String(n).padStart(4, "0"), name: [th, en], cat, unit: kids[unitIdx % kids.length].id, cust: cust(unitIdx), loc, acq, cost, src, status, tag: status === "pending" ? "" : `${cat}-${String(n).padStart(4, "0")}`, ...extra });
+  const P = (ref, party, inv, warr) => ({ type: "purchase", ref, party, inv, warr });
   s.assets = [
-    A(1, "เครื่องคอมพิวเตอร์ตั้งโต๊ะ ชุดที่ 1", "Desktop computers, set 1", "7440", 0, "ห้อง 201", "2022-03-15", 420000, { type: "purchase" }),
-    A(2, "เครื่องพิมพ์เลเซอร์สี", "Colour laser printer", "7440", 1, "ห้อง 305", "2023-06-20", 38000, { type: "purchase" }),
-    A(3, "เซิร์ฟเวอร์ประมวลผล", "Compute server", "7440", 2, "ห้องศูนย์ข้อมูล", "2024-01-10", 1850000, { type: "purchase" }),
-    A(4, "โต๊ะประชุม 12 ที่นั่ง", "Meeting table, 12 seats", "7110", 0, "ห้องประชุมใหญ่", "2021-09-01", 96000, { type: "purchase" }),
-    A(5, "ตู้เหล็กเก็บเอกสาร", "Steel filing cabinet", "7110", 3, "ห้อง 108", "2020-05-12", 4200, { type: "purchase" }),
-    A(6, "รถยนต์ตรวจการ", "Inspection vehicle", "7520", 4, "ลานจอด", "2022-11-30", 1250000, { type: "purchase" }),
-    A(7, "เครื่องปรับอากาศ 24,000 BTU", "Air conditioner 24,000 BTU", "7310", 1, "ห้อง 305", "2023-02-14", 45000, { type: "purchase" }, "repair", { repairWhy: "คอมเพรสเซอร์ขัดข้อง" }),
-    A(8, "กล้องถ่ายภาพดิจิทัล", "Digital camera", "7310", 2, "ห้อง 410", "2025-04-18", 68000, { type: "donation" }),
-    A(9, "เครื่องคอมพิวเตอร์พกพา", "Laptop computers", "7440", 3, "ห้อง 108", "2025-10-05", 360000, { type: "purchase" }),
-    A(10, "เครื่องถ่ายเอกสารเก่า", "Old photocopier", "7110", 0, "ห้องพัสดุ", "2016-07-01", 120000, { type: "purchase" }, "disp_req", { dispReq: { why: "ชำรุดเกินซ่อม ค่าซ่อมสูงกว่ามูลค่า", by: "u12", t: "2026-10-12T10:00" } }),
-    A(11, "ชุดระบบจัดการคิว (จากสัญญา CT-2570-001 งวด 1)", "Queue system (contract CT-2570-001, phase 1)", "7440", 1, "", "2026-10-14", 560000, { type: "contract", id: "CT-2570-001", phase: 1 }, "pending"),
-    A(12, "พัดลมตั้งพื้น", "Floor fan", "7620", 3, "ห้อง 108", "2024-03-02", 1800, { type: "purchase" }),
+    A(1, "เครื่องคอมพิวเตอร์ตั้งโต๊ะ ชุดที่ 1", "Desktop computers, set 1", "13", 0, "ห้อง 201", "2022-03-15", 420000, P("PO-2565-014", "บริษัท ตัวอย่างคอมพิวเตอร์ จำกัด", "INV-65-0231", "2025-03-14"), "active", { brand: "ยี่ห้อตัวอย่าง", model: "รุ่น D-100", serial: "SN-D100-0001" }),
+    A(2, "เครื่องพิมพ์เลเซอร์สี", "Colour laser printer", "13", 1, "ห้อง 305", "2023-06-20", 38000, P("PO-2566-031", "บริษัท ตัวอย่างสำนักงาน จำกัด", "INV-66-0540", "2025-06-19")),
+    A(3, "เซิร์ฟเวอร์ประมวลผล", "Compute server", "13", 2, "ห้องศูนย์ข้อมูล", "2024-01-10", 1850000, P("CT-2566-009", "บริษัท ตัวอย่างระบบ จำกัด", "INV-67-0012", "2027-01-09"), "active", { serial: "SN-SRV-0003" }),
+    A(4, "โต๊ะประชุม 12 ที่นั่ง", "Meeting table, 12 seats", "04", 0, "ห้องประชุมใหญ่", "2021-09-01", 96000, P("PO-2564-077", "บริษัท ตัวอย่างเฟอร์นิเจอร์ จำกัด", "INV-64-1102", "")),
+    A(5, "ตู้เหล็กเก็บเอกสาร", "Steel filing cabinet", "04", 3, "ห้อง 108", "2020-05-12", 4200, P("PO-2563-022", "บริษัท ตัวอย่างเฟอร์นิเจอร์ จำกัด", "INV-63-0455", "")),
+    A(6, "รถยนต์ตรวจการ", "Inspection vehicle", "05", 4, "ลานจอด", "2022-11-30", 1250000, P("CT-2565-004", "บริษัท ตัวอย่างยานยนต์ จำกัด", "INV-65-0890", "2025-11-29")),
+    A(7, "เครื่องปรับอากาศ 24,000 BTU", "Air conditioner 24,000 BTU", "04", 1, "ห้อง 305", "2023-02-14", 45000, P("PO-2565-088", "บริษัท ตัวอย่างแอร์ จำกัด", "INV-66-0090", "2028-02-13"), "repair", { repairWhy: "คอมเพรสเซอร์ขัดข้อง" }),
+    A(8, "กล้องถ่ายภาพดิจิทัล", "Digital camera", "07", 2, "ห้อง 410", "2025-04-18", 68000, { type: "donation", party: "มูลนิธิตัวอย่าง", ref: "หนังสือบริจาค ที่ มต 12/2568", basis: "donor" }),
+    A(9, "เครื่องคอมพิวเตอร์พกพา", "Laptop computers", "13", 3, "ห้อง 108", "2025-10-05", 360000, P("PO-2568-120", "บริษัท ตัวอย่างคอมพิวเตอร์ จำกัด", "INV-68-0777", "2028-10-04")),
+    A(10, "เครื่องถ่ายเอกสารเก่า", "Old photocopier", "04", 0, "ห้องพัสดุ", "2016-07-01", 120000, P("PO-2559-010", "บริษัท ตัวอย่างสำนักงาน จำกัด", "INV-59-0301", ""), "disp_req", { dispReq: { method: "destroy", why: "ชำรุดเกินซ่อม ค่าซ่อมสูงกว่ามูลค่า", by: "u12", t: "2026-10-12T10:00" } }),
+    A(11, "ชุดระบบจัดการคิว (จากสัญญา CT-2570-001 งวด 1)", "Queue system (contract CT-2570-001, phase 1)", "13", 1, "", "2026-10-14", 560000, { type: "purchase", ref: "CT-2570-001 งวด 1", party: "บริษัท ตัวอย่างระบบ จำกัด", inv: "", warr: "" }, "pending"),
+    A(12, "พัดลมตั้งพื้น", "Floor fan", "15", 3, "ห้อง 108", "2024-03-02", 1800, P("PO-2567-005", "ร้านตัวอย่างเครื่องใช้ไฟฟ้า", "INV-67-0044", "")),
+    A(13, "โทรทัศน์ 55 นิ้ว", "55-inch television", "07", 1, "ห้องประชุมใหญ่", "2024-08-20", 24500, P("PO-2567-060", "บริษัท ตัวอย่างอิเล็กทรอนิกส์ จำกัด", "INV-67-0620", "2027-08-19")),
+    A(14, "เครื่องมัลติมีเดียโปรเจคเตอร์", "Multimedia projector", "07", 0, "ห้องพัสดุ", "2025-02-11", 32000, P("PO-2568-018", "บริษัท ตัวอย่างอิเล็กทรอนิกส์ จำกัด", "INV-68-0098", "2027-02-10"), "spare"),
+    A(15, "เครื่องคอมพิวเตอร์พกพา (สำรอง) เครื่องที่ 1", "Spare laptop 1", "13", 0, "ห้องพัสดุ", "2026-02-10", 29500, P("PO-2569-011", "บริษัท ตัวอย่างคอมพิวเตอร์ จำกัด", "INV-69-0150", "2029-02-09"), "spare"),
+    A(16, "เครื่องคอมพิวเตอร์พกพา (สำรอง) เครื่องที่ 2", "Spare laptop 2", "13", 0, "ห้องพัสดุ", "2026-02-10", 29500, P("PO-2569-011", "บริษัท ตัวอย่างคอมพิวเตอร์ จำกัด", "INV-69-0150", "2029-02-09"), "spare"),
+    A(17, "เก้าอี้สำนักงาน (สำรอง)", "Office chair (spare)", "04", 0, "ห้องพัสดุ", "2026-03-05", 6800, P("PO-2569-020", "บริษัท ตัวอย่างเฟอร์นิเจอร์ จำกัด", "INV-69-0233", ""), "spare"),
+    A(18, "ซอฟต์แวร์ระบบบัญชีหน่วยงาน (สิทธิการใช้)", "Accounting software licence", "22", 2, "ห้องศูนย์ข้อมูล", "2024-10-01", 480000, P("CT-2567-021", "บริษัท ตัวอย่างซอฟต์แวร์ จำกัด", "INV-67-0900", "")),
+    A(19, "รถกระบะตรวจพื้นที่ (รับโอน)", "Pickup truck (received by transfer)", "05", 4, "ลานจอด", "2025-12-01", 540000, { type: "transfer_in", party: "หน่วยงานตัวอย่าง ก", ref: "หนังสือส่งมอบ ที่ ตก 0123/456", book: 780000 }),
   ];
   s.axfers = [
-    { id: "XF-0001", asset: "AS-0004", from: s.assets[3].unit, to: kids[1 % kids.length].id, why: "ย้ายไปใช้ที่ห้องประชุมของหน่วยที่รับผิดชอบโครงการใหม่", value: 96000, status: "submitted", by: "u12", t: "2026-10-13T09:30" },
-    { id: "XF-0002", asset: "AS-0002", from: s.assets[1].unit, to: kids[0].id, why: "รวมเครื่องพิมพ์ไว้ที่หน่วยเดียว", value: 38000, status: "done", by: "u12", t: "2026-09-02T09:30", decided: { by: "u12", t: "2026-09-03T10:00" } },
+    { id: "XF-0001", assets: ["AS-0004"], from: s.assets[3].unit, to: kids[1 % kids.length].id, why: "ย้ายไปใช้ที่ห้องประชุมของหน่วยที่รับผิดชอบโครงการใหม่", value: 96000, status: "submitted", by: "u12", t: "2026-10-13T09:30" },
+    { id: "XF-0002", assets: ["AS-0002"], from: s.assets[1].unit, to: kids[0].id, why: "รวมเครื่องพิมพ์ไว้ที่หน่วยเดียว", value: 38000, status: "done", by: "u12", t: "2026-09-02T09:30", decided: { by: "u12", t: "2026-09-03T10:00" } },
   ];
   s.acount = [{ id: "CNT-" + CUR_FY, fy: CUR_FY, status: "open", start: "2026-10-01", results: { "AS-0001": "found", "AS-0002": "found", "AS-0003": "found", "AS-0004": "found" } }];
   s.depRuns = [];
@@ -194,12 +240,12 @@ Object.assign(NAV_ICON, { "org-tree": "building", "org-pos": "users", "org-tier"
     if (!S.assets) return;
     const open = (S.axfers || []).filter(x => x.status === "submitted"), low = S.sitems.filter(stockLow);
     if (ROLE === "asset") {
-      open.filter(x => tierRole("xfer", x.value) === "asset").forEach(x => R(`${L("พิจารณาการโอนครุภัณฑ์", "Decide an asset transfer")} ${x.id}`, `${x.asset} · ${baht(x.value)}`, TODAY, "as-xfer", "p-info"));
+      open.filter(x => tierRole("xfer", x.value) === "asset").forEach(x => R(`${L("พิจารณาการโอนครุภัณฑ์", "Decide an asset transfer")} ${x.id}`, `${(x.assets || []).join(", ")} · ${baht(x.value)}`, TODAY, "as-xfer", "p-info"));
       S.assets.filter(a => a.status === "pending").forEach(a => R(`${L("ยืนยันขึ้นทะเบียนครุภัณฑ์", "Confirm asset registration")} ${a.id}`, tx(a.name), TODAY, "as-reg", "p-warn"));
       const c = (S.acount || []).find(x => x.status === "open"); if (c) R(`${L("ตรวจนับครุภัณฑ์ประจำปี", "Annual asset count")} ${c.id}`, `${Object.keys(c.results).length}/${S.assets.filter(assetInService).length}`, "2026-12-31", "as-count", "p-info");
     }
     if (ROLE === "exec") {
-      open.filter(x => tierRole("xfer", x.value) === "exec").forEach(x => R(`${L("อนุมัติการโอนครุภัณฑ์", "Approve an asset transfer")} ${x.id}`, `${x.asset} · ${baht(x.value)}`, TODAY, "as-xfer", "p-info"));
+      open.filter(x => tierRole("xfer", x.value) === "exec").forEach(x => R(`${L("อนุมัติการโอนครุภัณฑ์", "Approve an asset transfer")} ${x.id}`, `${(x.assets || []).join(", ")} · ${baht(x.value)}`, TODAY, "as-xfer", "p-info"));
       S.assets.filter(a => a.status === "disp_req").forEach(a => R(`${L("อนุมัติจำหน่ายครุภัณฑ์", "Approve an asset disposal")} ${a.id}`, tx(a.name), TODAY, "as-reg", "p-warn"));
       S.sreqs.filter(r => r.status === "submitted" && tierRole("issue", reqValue(r)) === "exec").forEach(r => R(`${L("อนุมัติใบเบิกวัสดุ", "Approve a stock request")} ${r.id}`, baht(reqValue(r)), TODAY, "in-req", "p-info"));
       (S.scount || []).filter(c => c.status === "pending").forEach(c => R(`${L("อนุมัติปรับยอดวัสดุ", "Approve a stock adjustment")} ${c.id}`, baht(c.value), TODAY, "in-count", "p-warn"));

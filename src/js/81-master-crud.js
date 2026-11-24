@@ -77,7 +77,7 @@ CRUD.def("stKpi", {
     + (kpiUsed(k) && ROLE === "plan" && !k.retired ? `<p class="sub">${L("ลบไม่ได้เพราะมีการผูกกิจกรรม ผลตัวชี้วัด แนวคิดโครงการ หรือการทบทวนแผน ใช้ “เลิกใช้” แทน", "Can't be deleted: it has activities, results, ideas or revisions. Retire it instead.")}</p>` : ""),
 });
 {
-  const mp = STRAT.map;
+  const mp = STRAT.map; STRAT.mapBase = mp; // the strategy map without the list (menu round M2 shows the list under another name)
   STRAT.map = () => mp() + crudList("stNode", { head: `<h2>${L("ยุทธศาสตร์และเป้าประสงค์", "Strategies and goals")}</h2><span class="sp"></span><span class="sub">${L("กองแผนงานเพิ่ม แก้ไข และเลิกใช้", "Planning adds, edits and retires")}</span>` });
   STRAT.kpis = () => crudList("stKpi", { head: `<h2>${L("ตัวชี้วัดและค่าเป้าหมาย 5 ปี", "KPIs and 5-year targets")}</h2><span class="sp"></span>${tag(ROLE === "plan" ? L("แก้ไขได้", "Editable") : L("ดูอย่างเดียว", "View only"), ROLE === "plan" ? "p-ok" : "p-mute")}` });
 }
@@ -116,7 +116,7 @@ CRUD.def("stIdea", {
       out.push({ id: "acc", label: L("รับเข้าแผน", "Accept"), kind: "primary", run: () => { i.status = "accepted"; audit(["รับแนวคิดโครงการเข้าแผน", "Accepted a project idea"], i.id); notify(["div"], [`แนวคิดโครงการ ${i.id} ได้รับเข้าแผน จัดทำคำขอได้แล้ว`, `Project idea ${i.id} was accepted; you can now prepare a request`], "strat-bank"); return L("รับเข้าแผนแล้ว", "Accepted"); } });
       out.push({ id: "rej", label: L("ไม่รับ", "Decline"), kind: "danger", why: true, run: (_, why) => { i.status = "rejected"; i.note = [why, why]; audit(["ไม่รับแนวคิดโครงการ", "Declined a project idea"], `${i.id} · ${why}`); notify(["div"], [`แนวคิดโครงการ ${i.id} ไม่ได้รับเข้าแผน: ${why}`, `Project idea ${i.id} was not taken: ${why}`], "strat-bank"); return L("บันทึกแล้ว", "Saved"); } });
     }
-    if ((ideaMine(i) || pl) && i.status === "accepted") out.push({ id: "conv", label: L("สร้างร่างคำขอ (B3)", "Create a B3 draft"), kind: "primary", undo: false, run: () => { crClose(); STRAT_TAB = "bank"; route(); const real = $(`[data-iconv="${i.id}"]`); if (real) real.click(); return ""; } });
+    if (ideaMine(i) && i.status === "accepted") out.push({ id: "conv", label: L("สร้างร่างคำขอ (B3)", "Create a B3 draft"), kind: "primary", undo: false, run: () => { crClose(); STRAT_TAB = "bank"; route(); const real = $(`[data-iconv="${i.id}"]`); if (real) real.click(); return ""; } });
     if (ideaMine(i) && ["proposed", "screened"].includes(i.status)) out.push({ id: "wd", label: L("ถอนแนวคิด", "Withdraw the idea"), kind: "ghost", why: true, run: (_, why) => { i.status = "withdrawn"; i.note = [why, why]; audit(["ถอนแนวคิดโครงการ", "Withdrew a project idea"], `${i.id} · ${why}`); return L("ถอนแล้ว", "Withdrawn"); } });
     return out;
   },

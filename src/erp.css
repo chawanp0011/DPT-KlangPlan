@@ -19,3 +19,11 @@
 .rq-drop.on, .rq-drop:hover { border-color: var(--accent, #3b4a9a); background: var(--surface-2); }
 .rq-file { display: flex; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
 .rq-file .rq-fn { flex: 1; overflow-wrap: anywhere; }
+
+/* Fisko Assets R9: dashboard bars and work flows */
+.as-br { display: grid; grid-template-columns: minmax(110px, 230px) 1fr minmax(70px, 110px); gap: 10px; align-items: center; padding: 4px 0; }
+.as-bl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-bv { text-align: right; font-variant-numeric: tabular-nums; }
+.as-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; padding: 14px; }
+.as-step { display: flex; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--surface); }
+.as-n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 600; display: grid; place-items: center; font-size: 13px; }

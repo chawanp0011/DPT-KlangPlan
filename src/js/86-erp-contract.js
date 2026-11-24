@@ -60,7 +60,7 @@ ePageDef("contract", "ct-reg", "C1", "ctr", CT_ROLES, ["ทะเบียนส
 
 ePageDef("contract", "ct-agr", "C2", "ctr", CT_ROLES, ["ข้อตกลงนอกการจัดซื้อ", "Agreements outside procurement"], () => {
   const A = S.agr || [];
-  return `${eHead(CT_APP, "C2", ["ข้อตกลงและสัญญานอกการจัดซื้อ", "Agreements outside procurement"], ["เช่า บริการ ใช้สิทธิ และ MOU ที่ไม่ผ่านแฟ้มจัดซื้อ · ผู้อนุมัติตามขั้นวงเงินใน O3", "Leases, services, licences and MOUs that do not go through a procurement case · approver by the O3 tiers"])}
+  return `${eHead(CT_APP, "C2", ["ข้อตกลงและสัญญานอกการจัดซื้อ", "Agreements outside procurement"], ["เช่า บริการ ใช้สิทธิ และ MOU ที่ไม่ผ่านรายการจัดซื้อ · ผู้อนุมัติตามขั้นวงเงินใน O3", "Leases, services, licences and MOUs that do not go through a procurement case · approver by the O3 tiers"])}
     ${eKpis([[L("ข้อตกลงทั้งหมด", "Agreements"), A.length], [L("มีผล", "In force"), A.filter(a => agrStatus(a) === "active").length], [L("รออนุมัติ", "Awaiting approval"), A.filter(a => a.status === "review").length, "", A.some(a => a.status === "review")], [L("สิ้นสุดใน 60 วัน", "Ending in 60 days"), A.filter(a => agrStatus(a) === "active" && daysUntil(a.end) <= 60).length]])}
     ${crudList("agr", { head: `<h2>${L("ทะเบียนข้อตกลง", "Agreement register")}</h2>` })}`;
 });

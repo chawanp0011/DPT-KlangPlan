@@ -85,7 +85,7 @@ h1, h2, h3 { letter-spacing: -.015em; }
 .iconbtn .cnt { background: var(--bad); box-shadow: 0 0 0 2px var(--surface); }
 
 /* ---------- page ---------- */
-.view { gap: 20px; padding-block: 28px 56px; max-width: 1400px; }
+.view { gap: 20px; padding-block: 28px 56px; max-width: none; }
 .head { align-items: flex-end; gap: 14px; }
 .head h1 { font-size: 28px; font-weight: 700; letter-spacing: -.025em; line-height: 1.2; }
 .head p { color: var(--muted); font-size: 14.5px; }

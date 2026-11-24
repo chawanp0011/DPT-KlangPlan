@@ -25,9 +25,9 @@ const PROC_PAGES = [
   { id: "reqn", code: "P3", group: "plan", label: ["ใบขอซื้อขอจ้าง", "Requisitions"], roles: PR_WORK,
     sub: ["ขอซื้อขอจ้างตามแผน อนุมัติภายในวงเงินคงเหลือ และตรวจการแบ่งซื้อ", "Requisitions from the plan, approval within the room left, and the split-purchase check"],
     tabs: [{ id: "main", key: "reqn", secs: ["reqn"] }] },
-  { id: "cases", code: "P4", group: "run", label: ["แฟ้มจัดซื้อ", "Case files"], roles: PR_WORK,
-    sub: ["แฟ้มจัดซื้อ 12 ขั้นตั้งแต่ขอซื้อถึงปิดงาน และไทม์ไลน์ของทุกแฟ้ม", "The 12-step case file from requisition to close, and a timeline of every case"],
-    tabs: [{ id: "cases", key: "cases", label: ["แฟ้ม", "Cases"], secs: ["cases"] },
+  { id: "cases", code: "P4", group: "run", label: ["รายการจัดซื้อ", "Case files"], roles: PR_WORK,
+    sub: ["รายการจัดซื้อ 7 แผงหลักตั้งแต่กำหนดแผนถึงปิดโครงการ และไทม์ไลน์ของทุกรายการจัดซื้อ", "The case file in seven main panels, from the plan to the close, and a timeline of every case"],
+    tabs: [{ id: "cases", key: "cases", label: ["รายการจัดซื้อ", "Cases"], secs: ["cases"] },
       { id: "gantt", key: "gantt", label: ["ไทม์ไลน์", "Timeline"], secs: ["gantt"] }] },
   { id: "tor", code: "P5", group: "run", label: ["คลัง TOR", "TOR library"], roles: PR_OFF,
     sub: ["ขอบเขตงานที่หัวหน้าพัสดุอนุมัติ ใช้ซ้ำได้พร้อมฉบับ", "Approved terms of reference to reuse, with versions"],
@@ -42,8 +42,8 @@ const PROC_PAGES = [
   { id: "fees", code: "P8", group: "con", label: ["ค่าตอบแทนกรรมการ", "Committee fees"], feat: "commFee", roles: ["proc", "prochead", "exec", "fin", "finhead", "audit"],
     sub: ["ค่าตอบแทนคณะกรรมการตามอัตรา การอนุมัติตามวงเงิน และการส่งให้การเงิน", "Committee fees by rate, approval by amount, and passing them to Finance"],
     tabs: [{ id: "main", key: "fees", secs: ["fees"] }] },
-  { id: "suppliers", code: "P9", group: "con", label: ["ผู้ขาย", "Suppliers"], roles: ["proc", "prochead", "fin", "finhead", "audit"],
-    sub: ["ทะเบียนผู้ขายและประวัติ รายชื่อผู้ทิ้งงาน และการตรวจนิติบุคคล", "Supplier register and history, the abandoned-work list, and the legal-entity check"],
+  { id: "suppliers", code: "P9", group: "con", label: ["ผู้รับจ้าง/ผู้ขาย", "Contractors / suppliers"], roles: ["proc", "prochead", "fin", "finhead", "audit"],
+    sub: ["ทะเบียนผู้รับจ้าง/ผู้ขาย รายละเอียดและประวัติโครงการ รายชื่อผู้ทิ้งงาน และการตรวจนิติบุคคล", "Contractor and supplier register with details and project history, the abandoned-work list, and the legal-entity check"],
     top: ["supKpis"],
     tabs: [{ id: "reg", key: "suppliers", label: ["ทะเบียน", "Register"], secs: ["supRegister"] },
       { id: "bl", key: "suppliers", label: ["รายชื่อผู้ทิ้งงาน", "Abandoned-work list"], secs: ["supBlacklist"] },
@@ -141,7 +141,7 @@ PROC.todayKpis = () => {
   const mine = prMine(), live = (S.cases || []).filter(c => !c.cancelled && caseState(c) < 12), due = prDue(60), late = due.filter(d => d.due < TODAY);
   return `<section class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
     <div class="kpi hl"><span class="l">${L("งานของฉัน", "My work")}</span><span class="v">${mine.length}</span><span class="d" style="color:var(--rail-ink)">${mine.filter(x => x.due <= TODAY).length} ${L("ถึงกำหนดหรือเลยแล้ว", "due or overdue")}</span></div>
-    <div class="kpi"><span class="l">${L("แฟ้มที่ดำเนินการอยู่", "Cases in progress")}</span><span class="v">${live.length}</span></div>
+    <div class="kpi"><span class="l">${L("รายการจัดซื้อที่ดำเนินการอยู่", "Cases in progress")}</span><span class="v">${live.length}</span></div>
     <div class="kpi"><span class="l">${L("สัญญาที่ใช้อยู่", "Active contracts")}</span><span class="v">${(S.contracts || []).filter(c => c.status !== "terminated" && c.status !== "closed").length}</span></div>
     <div class="kpi"><span class="l">${L("ครบกำหนดใน 60 วัน", "Due in 60 days")}</span><span class="v">${due.length}</span><span class="d sub">${late.length} ${L("เลยกำหนด", "overdue")}</span></div>
   </section>`;

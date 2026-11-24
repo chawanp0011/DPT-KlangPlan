@@ -9,8 +9,7 @@
 const CW_ACT = ["fin", "finhead"]; // sample assumption: the accounting duties sit in the fin role (see ตรวจสอบสิทธิ์กองคลัง.md)
 const cwActor = () => CW_ACT.includes(ROLE);
 TIER_DOC.cwipx = ["โอนสินทรัพย์ก่อสร้างให้ อปท. (ตัดออกจากระบบ)", "Transfer of a built asset to a local authority"];
-const ASSET_CAT_MACH = { id: "7210", name: ["เครื่องจักรกลและเครื่องมือหนัก (เช่น รถผักตบ)", "Machinery and heavy equipment (e.g. water-hyacinth boat)"], life: 10 };
-if (!ASSET_CATS.some(c => c.id === ASSET_CAT_MACH.id)) ASSET_CATS.push(ASSET_CAT_MACH);
+// Machinery and heavy equipment (e.g. the water-hyacinth boat) is asset type 10.2 in the Comptroller General's table (see 84-erp-core).
 const CW_CLASS = { building: ["อาคาร", "Building"], structure: ["สิ่งก่อสร้างอื่น (ถนน ตลิ่ง เขื่อน)", "Other structure (road, embankment, dam)"], system: ["ระบบสาธารณูปโภค", "Utility system"] };
 const CW_LGU = ["เทศบาลตำบลตัวอย่าง", "องค์การบริหารส่วนตำบลตัวอย่าง", "เทศบาลเมืองตัวอย่าง", "องค์การบริหารส่วนจังหวัดตัวอย่าง"]; // sample names
 const CW_ST = {
@@ -93,7 +92,7 @@ CRUD.def("cwip", {
 let CW_FILT = { u: "", c: "", q: "" };
 function cwOverview() {
   const units = S.units.filter(u => u.parent), A = (S.assets || []).filter(a => !myUnitOnly() || a.unit === me().unit), W = (S.cwip || []).filter(cwVisible);
-  const cats = ASSET_CATS, inUse = A.filter(assetInService), nbvOf = list => sumv(list.map(a => assetDep(a).nbv));
+  const inUse = A.filter(assetInService), cats = ASSET_CATS.filter(c => inUse.some(a => a.cat === c.id)), nbvOf = list => sumv(list.map(a => assetDep(a).nbv));
   const rows = A.filter(a => (!CW_FILT.u || a.unit === CW_FILT.u) && (!CW_FILT.c || a.cat === CW_FILT.c) && (!CW_FILT.q || `${tx(a.name)} ${a.loc} ${a.tag}`.toLowerCase().includes(CW_FILT.q.toLowerCase())));
   const th = h => `<th class="n">${h}</th>`;
   return `${eHead("Fisko Assets", "CW2", ["ภาพรวมสินทรัพย์ทุกสำนักกอง", "Assets across all units"], ["กองคลังเห็นครุภัณฑ์ของทุกสำนักกองในที่เดียว แยกตามหน่วยและหมวด พร้อมที่ตั้ง และงานก่อสร้างที่ยังไม่ขึ้นเป็นสินทรัพย์ · อ่านจากทะเบียนครุภัณฑ์ (A2) เดิม ไม่แก้ทะเบียน · ข้อมูลตัวอย่าง ที่ตั้งเป็นข้อความที่กรอกในทะเบียน ไม่ใช่พิกัดแผนที่ · ไม่รวมที่ราชพัสดุและโทรศัพท์ (ยังไม่ทำ)", "The finance division sees every unit's assets in one place by unit and category, with location, plus construction not yet capitalised · read from the asset register (A2), which is unchanged · sample data; the location is the text in the register, not map coordinates · state property and phones are not covered"])}

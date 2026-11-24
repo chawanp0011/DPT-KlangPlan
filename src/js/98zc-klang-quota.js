@@ -34,6 +34,7 @@ function quotaBar(fy) {
 CRUD.def("quota", {
   noun: ["โควต้างบประมาณ", "Budget quota"], st: { live: [["ใช้งาน", "In use"], "p-ok"] }, status: () => "live", gone: () => false, id: q => String(q.fy), title: q => `${L("ปีงบประมาณ", "FY")} ${q.fy}`, sub: q => `${fmt(q.base)} · ${q.pct}%`,
   list: () => (S.quotas || []).slice().sort((a, b) => b.fy - a.fy), search: q => `${q.fy} ${q.note || ""}`,
+  filters: [{ id: "fy", label: ["ปีงบประมาณ", "Fiscal year"], opts: () => (S.quotas || []).slice().sort((x, y) => y.fy - x.fy).map(q => [String(q.fy), String(q.fy)]), get: q => q.fy }], // the year is a filter of this list (13 Nov 2569), not the top-bar selector
   cols: [{ h: ["ปีงบประมาณ", "FY"], c: q => `<b>${q.fy}</b>${q.fy === FORM_FY ? ` <span class="sub">(${L("ปีที่กำลังจัดทำ", "being prepared")})</span>` : ""}` }, { h: ["โควต้าตั้งต้น (บาท)", "Starting quota (baht)"], n: true, c: q => fmt(q.base) }, { h: ["เพดาน %", "Ceiling %"], n: true, c: q => q.pct },
     { h: ["ขีดจำกัดส่ง (บาท)", "Submit ceiling (baht)"], n: true, c: q => fmt(qtLimit(q)) }, { h: ["ยอดชุดส่ง (บาท)", "Package total (baht)"], n: true, c: q => (q.fy === FORM_FY ? fmt(qtTotal(q.fy)) : "–") },
     { h: ["สถานะ", "Status"], c: q => (q.fy === FORM_FY ? (quotaCheck(q.fy).ok ? tag(L("ไม่เกิน", "Within"), "p-ok") : tag(L("เกิน", "Over"), "p-bad")) : `<span class="sub">–</span>`) }],

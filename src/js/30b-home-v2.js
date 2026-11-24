@@ -14,7 +14,7 @@ function homeStats() {
   }
   if (S.cases) {
     const open = S.cases.filter(c => !c.cancelled && caseState(c) < 12), byStep = Array.from({ length: 12 }, (_, i) => S.cases.filter(c => !c.cancelled && caseState(c) === i + 1).length);
-    out.push(statCard({ label: L("แฟ้มจัดซื้อที่เปิดอยู่", "Open procurement cases"), value: open.length, icon: "folder", tone: "ok", spark: byStep, link: can("procurement") ? "prc-cases" : null, sub: "" }));
+    out.push(statCard({ label: L("รายการจัดซื้อที่เปิดอยู่", "Open procurement cases"), value: open.length, icon: "folder", tone: "ok", spark: byStep, link: can("procurement") ? "prc-cases" : null, sub: "" }));
   }
   if (S.payreqs && typeof monthly === "function") {
     const m = monthly().rows, paid = sumv(S.payreqs.filter(p => p.status === "approved").map(p => p.amount));

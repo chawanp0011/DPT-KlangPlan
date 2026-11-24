@@ -8,15 +8,15 @@ const CASE_STATES = [null,
   { k: "PLANNED", th: "อยู่ในแผน", en: "Planned" }, { k: "REQUESTED", th: "ขอซื้อขอจ้าง", en: "Requested" }, { k: "APPROVED", th: "อนุมัติหลักการ", en: "Approved" },
   { k: "SPECIFYING", th: "TOR และราคากลาง", en: "Specifying" }, { k: "SOURCING", th: "สรรหาผู้เสนอราคาใน e-GP", en: "Supplier sourcing in e-GP" }, { k: "EVALUATING", th: "พิจารณาผล", en: "Evaluating" },
   { k: "AWARDED", th: "ประกาศผู้ชนะ", en: "Awarded" }, { k: "CONTRACTING", th: "ทำสัญญา", en: "Contracting" }, { k: "IN DELIVERY", th: "บริหารสัญญา", en: "In delivery" },
-  { k: "ACCEPTED", th: "ตรวจรับครบ", en: "Accepted" }, { k: "PAYMENT", th: "เบิกจ่าย", en: "Payment" }, { k: "CLOSED", th: "ปิดแฟ้ม", en: "Closed" }];
+  { k: "ACCEPTED", th: "ตรวจรับครบ", en: "Accepted" }, { k: "PAYMENT", th: "เบิกจ่าย", en: "Payment" }, { k: "CLOSED", th: "ปิดการจัดซื้อ", en: "Closed" }];
 const KINDS = { goods: ["ซื้อพัสดุ", "Goods"], service: ["จ้างบริการ", "Services"], construction: ["จ้างก่อสร้าง", "Construction"], consult: ["ที่ปรึกษาและออกแบบ", "Consulting and design"] };
 const SPECIAL = { urgent: ["ฉุกเฉินที่ไม่อาจคาดหมาย", "Unforeseeable emergency"], sole: ["ผู้ผลิตหรือผู้ให้บริการรายเดียว", "Sole source"], repeat: ["ซื้อเพิ่มจากสัญญาเดิม", "Repeat purchase"] };
 const BASIS = { std: ["บัญชีราคามาตรฐาน (M10)", "Standard price list (M10)"], contract: ["ราคาในสัญญาเดิม", "Price in a past contract"], quotes: ["ใบเสนอราคาหลายราย", "Several quotations"], egp: ["ราคากลางอิเล็กทรอนิกส์ e-GP", "e-GP electronic reference price"] };
 const COMMITTEES = { tor: ["คณะกรรมการจัดทำ TOR และราคากลาง", "TOR and reference-price committee"], eval: ["คณะกรรมการพิจารณาผลการประกวดราคา", "Bid evaluation committee"], buy: ["คณะกรรมการซื้อหรือจ้าง (วิธีคัดเลือก)", "Purchasing committee (selective)"] };
-const CASE_EV = { created: ["สร้างแฟ้ม", "Case created"], requested: ["ขอซื้อขอจ้าง", "Requisition raised"], approved: ["อนุมัติหลักการ", "Approved in principle"], rejected: ["ไม่อนุมัติ", "Rejected"],
+const CASE_EV = { created: ["สร้างรายการจัดซื้อ", "Case created"], requested: ["ขอซื้อขอจ้าง", "Requisition raised"], approved: ["อนุมัติหลักการ", "Approved in principle"], rejected: ["ไม่อนุมัติ", "Rejected"],
   method: ["เลือกวิธีจัดซื้อ", "Method chosen"], method_ok: ["หัวหน้าพัสดุอนุมัติวิธี", "Head approved the method"], method_no: ["หัวหน้าพัสดุไม่อนุมัติวิธี", "Head rejected the method"], specifying: ["เริ่มจัดทำ TOR", "Specifying started"],
   committee: ["แต่งตั้งคณะกรรมการ", "Committee appointed"], ref: ["บันทึกราคากลาง", "Reference price recorded"], tor: ["แนบ TOR", "TOR attached"], egp: ["บันทึกข้อมูล e-GP", "e-GP details recorded"],
-  sourcing: ["เข้าสู่การดำเนินการใน e-GP", "Sourcing started"], closed: ["ปิดรับข้อเสนอ", "Bids closed"], closed_case: ["ปิดแฟ้ม", "Case closed"], bidders: ["บันทึกจำนวนผู้ยื่น", "Bidders recorded"], quote: ["บันทึกใบเสนอราคา", "Quotation recorded"],
+  sourcing: ["เข้าสู่การดำเนินการใน e-GP", "Sourcing started"], closed: ["ปิดรับข้อเสนอ", "Bids closed"], closed_case: ["ปิดการจัดซื้อ", "Case closed"], bidders: ["บันทึกจำนวนผู้ยื่น", "Bidders recorded"], quote: ["บันทึกใบเสนอราคา", "Quotation recorded"],
   award: ["ประกาศผู้ชนะ", "Winner announced"], failed: ["ล้มเหลว ดำเนินการใหม่", "Failed, rerun"], appeal_filed: ["มีการอุทธรณ์", "Appeal filed"], appeal_dismissed: ["ยกอุทธรณ์", "Appeal dismissed"],
   appeal_upheld: ["รับอุทธรณ์ กลับไปพิจารณาผล", "Appeal upheld, back to evaluation"], appeal_elapsed: ["พ้นกำหนดอุทธรณ์", "Appeal period over"], contracting: ["เข้าขั้นทำสัญญา", "Ready for contract"],
   contract: ["ลงนามสัญญา", "Contract signed"], cancelled: ["ยกเลิกการจัดซื้อ", "Procurement cancelled"], split: ["ชี้แจงการแตกซื้อ", "Split-purchase explanation"] };
@@ -47,7 +47,8 @@ function caseState(c) {
   if (live.every(ph => pays.some(p => p.phase === ph.n && p.status === "approved"))) return c.close ? 12 : 11;
   return pays.length ? 11 : 10;
 }
-const caseStTag = c => { const n = caseState(c); return n === 0 ? tag(L("ยกเลิก", "Cancelled"), "p-mute") : tag(tx([CASE_STATES[n].th, CASE_STATES[n].en]), n >= 9 ? "p-ok" : n >= 5 ? "p-info" : "p-warn"); };
+const caseMainNow = c => { if (c.cancelled || caseState(c) === 0) return 0; return typeof casePhases === "function" ? casePhases(c).cur : 1; }; // the main panel (1 to 7) a case is in now
+const caseStTag = c => { const n = caseState(c); if (n !== 0 && typeof casePhases === "function") { const m = casePhases(c), cur = m.cur, done = !!c.close || m.phases[6].done; return done ? tag(L("ปิดการจัดซื้อแล้ว", "Closed"), "p-ok") : tag(`${cur}. ${tx(CASE_MAIN_NAMES[cur - 1])}`, cur >= 5 ? "p-ok" : cur >= 3 ? "p-info" : "p-warn"); } return n === 0 ? tag(L("ยกเลิก", "Cancelled"), "p-mute") : tag(tx([CASE_STATES[n].th, CASE_STATES[n].en]), n >= 9 ? "p-ok" : n >= 5 ? "p-info" : "p-warn"); };
 function caseLog(c, type, detail) {
   S.caseEvents.unshift({ t: nowIso(), case: c.id, type, by: me().id, detail: detail || "", state: caseState(c) });
   if (S.caseEvents.length > 1000) S.caseEvents.length = 1000;
@@ -103,7 +104,7 @@ function caseNext(c) {
   if (n === 0) return { who: "none", th: "ยกเลิกแล้ว", en: "Cancelled" };
   if (n === 1) return { who: "req", th: "ผู้ขอส่งใบขอซื้อขอจ้าง", en: "Requester raises the requisition" };
   if (n === 2) return { who: "exec", th: "ผู้มีอำนาจอนุมัติใบขอซื้อ", en: "The approver decides the requisition" };
-  if (n >= 9) return { who: "con", th: n === 9 ? "บริหารสัญญาและตรวจรับ" : n === 10 ? "ขอเบิกจ่าย" : n === 11 ? "อนุมัติเบิกจ่ายและกระทบยอด" : "ปิดแฟ้ม", en: n === 9 ? "Manage the contract and accept the work" : n === 10 ? "Request payment" : n === 11 ? "Approve payments and reconcile" : "Close the case" };
+  if (n >= 9) return { who: "con", th: n === 9 ? "บริหารสัญญาและตรวจรับ" : n === 10 ? "ขอเบิกจ่าย" : n === 11 ? "อนุมัติเบิกจ่ายและกระทบยอด" : "ปิดการจัดซื้อ", en: n === 9 ? "Manage the contract and accept the work" : n === 10 ? "Request payment" : n === 11 ? "Approve payments and reconcile" : "Close the case" };
   if (n === 8) return { who: "proc", th: "สร้างสัญญา", en: "Create the contract" };
   if (n === 3 && c.methodApproval && c.methodApproval.status === "pending") return { who: "head", th: "หัวหน้าพัสดุอนุมัติวิธี", en: "Head of procurement approves the method" };
   if (n === 7 && c.appeal && c.appeal.status === "open") return { who: "head", th: "ตัดสินอุทธรณ์", en: "Decide the appeal" };
@@ -154,8 +155,8 @@ function caseNew(p) {
 function guessKind(line, name) { return line.type === "inv" ? (/ปรับปรุง|ก่อสร้าง|อาคาร|ซ่อม|เขื่อน|ตลิ่ง|ถนน|renovat|construct|building|repair|embank/i.test(name.join(" ")) ? "construction" : "goods") : "service"; }
 
 // ---------- views ----------
-const GROUPS_CASE = [["", L => L("ทั้งหมด", "All")], ["early", L => L("ก่อนสรรหา (1-4)", "Before sourcing (1-4)")], ["source", L => L("สรรหาและพิจารณา (5-7)", "Sourcing and evaluation (5-7)")], ["contract", L => L("สัญญา (8-12)", "Contract (8-12)")], ["cancel", L => L("ยกเลิก", "Cancelled")]];
-const inGroup = (c, g) => { const n = caseState(c); return !g || (g === "early" && n >= 1 && n <= 4) || (g === "source" && n >= 5 && n <= 7) || (g === "contract" && n >= 8) || (g === "cancel" && n === 0); };
+const GROUPS_CASE = [["", L => L("ทั้งหมด", "All")], ...[1, 2, 3, 4, 5, 7].map(i => ["m" + i, L => { const nm = i === 5 ? ["บริหารสัญญาและเบิกจ่าย", "Contract management and payment"] : CASE_MAIN_NAMES[i - 1]; return `${i === 7 ? 6 : i}. ${L(nm[0], nm[1])}`; }]), ["cancel", L => L("ยกเลิก", "Cancelled")]];
+const inGroup = (c, g) => !g || (g === "cancel" ? caseState(c) === 0 || !!c.cancelled : /^m\d$/.test(g) && (caseMainNow(c) === Number(g[1]) || (g === "m5" && caseMainNow(c) === 6)));
 const whoTag = w => ({ proc: tag(L("เจ้าหน้าที่พัสดุ", "Procurement"), "p-info"), head: tag(L("หัวหน้าพัสดุ", "Head"), "p-warn"), exec: tag(L("ผู้อนุมัติ", "Approver"), "p-warn"), req: tag(L("ผู้ขอ", "Requester"), "p-mute"), wait: tag(L("รอ", "Waiting"), "p-mute"), con: tag(L("สัญญา", "Contract"), "p-ok"), none: "" }[w] || "");
 
 PROC.cases = () => CASE_OPEN && caseOf(CASE_OPEN) ? caseDetail(caseOf(CASE_OPEN)) : caseList();
@@ -163,24 +164,24 @@ function caseList() {
   const all = S.cases, list = all.filter(c => inGroup(c, CASE_GROUP)), cnt = g => all.filter(c => inGroup(c, g)).length, demo = all.find(c => c.demoTour), contractDemo = all.find(c => caseState(c) === 8 && c.award && !c.contract), stageDemos = CASE_STATES.slice(1).map((s, i) => ({ n: i + 1, s, c: all.find(c => caseState(c) === i + 1) }));
   return `
   <section class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
-    <div class="kpi"><span class="l">${L("แฟ้มทั้งหมด", "Cases")}</span><span class="v">${all.length}</span></div>
-    <div class="kpi"><span class="l">${L("ก่อนดำเนินการ", "Before sourcing")}</span><span class="v">${cnt("early")}</span></div>
-    <div class="kpi"><span class="l">${L("สรรหาและพิจารณา", "Sourcing and evaluation")}</span><span class="v">${cnt("source")}</span></div>
-    <div class="kpi"><span class="l">${L("ขั้นสัญญาขึ้นไป", "Contract stage and on")}</span><span class="v">${cnt("contract")}</span></div>
+    <div class="kpi"><span class="l">${L("รายการจัดซื้อทั้งหมด", "Cases")}</span><span class="v">${all.length}</span></div>
+    <div class="kpi"><span class="l">${L("กำหนดแผนและจัดทำข้อมูล (1-2)", "Plan and prepare (1-2)")}</span><span class="v">${cnt("m1") + cnt("m2")}</span></div>
+    <div class="kpi"><span class="l">${L("ส่ง e-GP (3)", "In e-GP (3)")}</span><span class="v">${cnt("m3")}</span></div>
+    <div class="kpi"><span class="l">${L("ทำสัญญาและบริหารสัญญา (4-5)", "Contract and its management (4-5)")}</span><span class="v">${cnt("m4") + cnt("m5")}</span></div>
   </section>
-  <section class="panel"><header><h2>${L("แฟ้มจัดซื้อจัดจ้าง", "Procurement cases")}</h2><span class="sp"></span>
+  <section class="panel"><header><h2>${L("รายการจัดซื้อจัดจ้าง", "Procurement cases")}</h2><span class="sp"></span>
       <label class="field-inline" for="cs-grp">${L("แสดง", "Show")} <select id="cs-grp">${GROUPS_CASE.map(([k, f]) => `<option value="${k}" ${k === CASE_GROUP ? "selected" : ""}>${f(L)}</option>`).join("")}</select></label></header>
-    <div class="tbl-wrap"><table><thead><tr><th>${L("แฟ้ม", "Case")}</th><th>${L("รายการ", "Item")}</th><th>${L("ชนิด · วิธี", "Kind · method")}</th><th>${L("ขั้นตอน", "Step")}</th><th>${L("สิ่งที่ต้องทำต่อ", "What's next")}</th><th>e-GP</th><th></th></tr></thead>
+    <div class="tbl-wrap"><table><thead><tr><th>${L("รายการจัดซื้อ", "Case")}</th><th>${L("รายการ", "Item")}</th><th>${L("ชนิด · วิธี", "Kind · method")}</th><th>${L("ขั้นตอน", "Step")}</th><th>${L("สิ่งที่ต้องทำต่อ", "What's next")}</th><th>e-GP</th><th></th></tr></thead>
       <tbody>${list.map(c => { const nx = caseNext(c), p = famPlan(c.plan);
         return `<tr><td class="mono">${c.id}</td><td><b style="font-weight:600">${esc(caseName(c))}</b><div class="sub">${esc(lineLabel(famLine(c.line)))} · ${mb(caseReq(c) ? caseReq(c).amount : p.est)} ${L("ลบ.", "M")}</div></td>
           <td class="sub">${tx(KINDS[c.kind])}<div>${c.method ? tx(PMETHOD[c.method]) : "—"}</div></td><td>${caseStTag(c)}</td>
           <td>${whoTag(nx.who)} <span class="sub">${esc(nx.raw ? nx.th : L(nx.th, nx.en))}</span></td><td class="sub">${c.egp && c.egp.no ? `<span class="mono">${esc(c.egp.no)}</span>` : "—"}</td>
-          <td><div class="row" style="flex-wrap:nowrap"><button class="btn primary" type="button" data-copen="${c.id}">${L("เปิดแฟ้ม", "Open")}</button>${historyBtn(c.id, c.id)}</div></td></tr>`; }).join("")
-        || `<tr><td colspan="7" class="sub">${L("ไม่มีแฟ้มในกลุ่มนี้", "No cases in this group")}</td></tr>`}</tbody></table></div></section>`;
+          <td><div class="row" style="flex-wrap:nowrap"><button class="btn primary" type="button" data-copen="${c.id}">${L("เปิดการจัดซื้อ", "Open")}</button>${historyBtn(c.id, c.id)}</div></td></tr>`; }).join("")
+        || `<tr><td colspan="7" class="sub">${L("ไม่มีรายการจัดซื้อในกลุ่มนี้", "No cases in this group")}</td></tr>`}</tbody></table></div></section>`;
 }
 function stepper(c) {
   const n = caseState(c);
-  return `<ol class="stepper" aria-label="${L("ขั้นตอนของแฟ้ม กดเพื่อเปิดรายละเอียด", "Case steps; select to open details")}">${CASE_STATES.slice(1).map((s, i) => `<li class="${n === 0 ? "" : i + 1 < n ? "done" : i + 1 === n ? "now" : ""}"><button type="button" class="step-hit" data-case-step="${i + 1}" title="${L("เปิดรายละเอียดขั้น", "Open step")} ${i + 1}: ${esc(tx([s.th, s.en]))}"><span class="dot">${i + 1}</span><span class="nm">${tx([s.th, s.en])}</span></button></li>`).join("")}</ol>`;
+  return `<ol class="stepper" aria-label="${L("ขั้นตอนของรายการจัดซื้อ กดเพื่อเปิดรายละเอียด", "Case steps; select to open details")}">${CASE_STATES.slice(1).map((s, i) => `<li class="${n === 0 ? "" : i + 1 < n ? "done" : i + 1 === n ? "now" : ""}"><button type="button" class="step-hit" data-case-step="${i + 1}" title="${L("เปิดรายละเอียดขั้น", "Open step")} ${i + 1}: ${esc(tx([s.th, s.en]))}"><span class="dot">${i + 1}</span><span class="nm">${tx([s.th, s.en])}</span></button></li>`).join("")}</ol>`;
 }
 const people = () => famPeople().filter(u => u.id !== me().id);
 function memberPick(name, selected) { return people().map(u => `<label class="field-inline"><input type="checkbox" name="${name}" value="${u.id}" ${selected.includes(u.id) ? "checked" : ""}> ${esc(tx(u.name))} <span class="sub">· ${tx(ROLES[u.role])}</span></label>`).join(""); }
@@ -203,12 +204,12 @@ function caseDetail(c) {
         <div class="facts"><span class="fact">${svgI("building")}${esc(lineLabel(famLine(c.line)))}</span><span class="fact">${svgI("tag")}${tx(KINDS[c.kind])}${c.method ? " · " + tx(PMETHOD[c.method]) : ""}</span><span class="fact">${svgI("coins")}<b>${mb(rq ? rq.amount : p.est)}</b> ${L("ลบ.", "M")}</span>${rq ? `<span class="fact">${svgI("file")}<span class="mono">${rq.id}</span></span>` : ""}${con ? `<span class="fact">${svgI("pen")}<span class="mono">${con.id}</span></span>` : ""}
           ${rq && rq.splitWhy ? tag(L("มีคำชี้แจงการแตกซื้อ", "Split explained"), "p-warn") : ""}${c.egp && c.egp.bidders === 1 ? tag(L("ผู้ยื่นรายเดียว", "Single bidder"), "p-warn") : ""}</div></div>
       <div class="row">${historyBtn(c.id, c.id)}</div></div></section>
-  ${rq ? `<section class="panel"><header><h2>${L("รายละเอียดโครงการที่ขอซื้อขอจ้าง", "Project details of the requisition")}</h2><span class="sp"></span><span class="sub mono">${rq.id}</span></header><div class="body">${reqDetailHtml(rq, p)}</div></section>` : ""}
-  <section class="panel" id="case-step-2"><header><h2>${L("แผนจัดซื้อและใบขอซื้อขอจ้าง", "Procurement plan and requisition")}</h2></header><div class="body">
+  <section class="panel" id="case-step-2"><header><h2>${L("รายละเอียดโครงการที่ขอซื้อขอจ้าง", "Project details of the requisition")}</h2><span class="sp"></span>${rq ? `<span class="sub mono">${rq.id}</span>` : ""}</header><div class="body">
     <div class="facts"><span class="fact">${svgI("tag")}${L("รหัสโครงการ", "Project ID")} <b class="mono">${esc(p.pid || "—")}</b></span><span class="fact">${svgI("file")}${L("รายการแผน", "Plan item")} <b class="mono">${esc(p.id)}</b></span>${p.egp && p.egp.no ? `<span class="fact">e-GP <b class="mono">${esc(p.egp.no)}</b></span>` : ""}</div>
     ${rq ? `<div style="margin-top:10px"><b>${L("ใบขอซื้อขอจ้าง", "Requisition")} <span class="mono">${esc(rq.id)}</span></b> · ${baht(rq.amount)} · ${stTag(REQ_ST, rq.status)}<div class="sub">${L("ผู้ขอ", "Requester")}: ${esc(userName(rq.by))}${rq.decided ? ` · ${L("พิจารณาเมื่อ", "Decided")} ${fdate(rq.decided.t, true)}` : ""}</div></div>` : `<div class="sub">${L("รายการนี้ยังไม่มีใบขอซื้อขอจ้าง", "No requisition has been raised for this plan item")}</div>`}
+    ${rq ? `<div style="margin-top:12px">${reqDetailHtml(rq, p)}</div>` : ""}
   </div></section>
-  ${c.cancelled ? `<div class="alert"><div class="ic" style="background:var(--bad-soft);color:var(--bad)">!</div><div><b>${L("แฟ้มนี้ถูกยกเลิก", "This case was cancelled")}</b><p>${esc(c.cancelled.why)} · ${esc(userName(c.cancelled.by))} · ${fdate(c.cancelled.t, true)}</p></div></div>` : ""}
+  ${c.cancelled ? `<div class="alert"><div class="ic" style="background:var(--bad-soft);color:var(--bad)">!</div><div><b>${L("รายการจัดซื้อนี้ถูกยกเลิก", "This case was cancelled")}</b><p>${esc(c.cancelled.why)} · ${esc(userName(c.cancelled.by))} · ${fdate(c.cancelled.t, true)}</p></div></div>` : ""}
   <div class="case-grid"><div class="case-main">
   ${sec(1, L("วิธีจัดซื้อ", "Procurement method"), `
     <div class="row"><span class="sub">${L("ชนิดงาน", "Kind")}</span><b>${tx(KINDS[c.kind])}</b><span class="sub">·</span><span class="sub">${L("ระบบแนะนำ", "Advice")}</span><b>${rec.method ? tx(PMETHOD[rec.method]) : "—"}</b>${rec.rule ? tag(`${L("กฎ", "Rule")} ${rec.rule.id} · ${rec.rule.conf}`, rec.rule.conf === "A" ? "p-ok" : rec.rule.conf === "B" ? "p-info" : "p-mute") : ""}</div>
@@ -271,7 +272,7 @@ function caseDetail(c) {
         ${(edit && n >= 4 && n <= 7) || (isProcRole() && n >= 2 && n <= 8) ? `<input type="text" id="case-reason" placeholder="${L("เหตุผล (สำหรับล้มเหลวหรือยกเลิก)", "Reason (for failed or cancel)")}" style="min-width:220px" aria-label="${L("เหตุผล", "Reason")}">` : ""}
         ${edit && n >= 4 && n <= 7 ? `<button class="btn" type="button" id="case-fail">${L("ล้มเหลว ดำเนินการใหม่", "Failed, rerun")}</button>` : ""}
         ${isProcRole() && n >= 2 && n <= 8 ? `<button class="btn danger" type="button" id="case-cancel">${L("ยกเลิกการจัดซื้อ", "Cancel procurement")}</button>` : ""}</div></div></section>` : ""}
-  <section class="panel"><header><h2>${L("ไทม์ไลน์ของแฟ้ม", "Case timeline")}</h2><span class="sp"></span><span class="sub">${ev.length} ${L("เหตุการณ์", "events")}</span></header>
+  <section class="panel"><header><h2>${L("ไทม์ไลน์ของรายการจัดซื้อ", "Case timeline")}</h2><span class="sp"></span><span class="sub">${ev.length} ${L("เหตุการณ์", "events")}</span></header>
     <div class="body"><ol class="timeline">${ev.map(e => `<li class="done"><span class="dot"></span><div><b style="font-weight:600">${tx(CASE_EV[e.type] || [e.type, e.type])}</b><small>${esc(userName(e.by))} · ${fdate(e.t, true)}</small>${e.detail ? `<div class="sub">${esc(e.detail)}</div>` : ""}</div></li>`).join("") || `<li class="sub">—</li>`}</ol></div></section></aside></div>`;
 }
 
@@ -293,7 +294,7 @@ function bindCases() {
     }
     if (step <= 8) {
       const el = $(`#case-step-${step}`); if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); el.classList.add("flow-focus"); setTimeout(() => el.classList.remove("flow-focus"), 1400); }
-      else toast(L("แฟ้มนี้ยังไม่ถึงขั้นดังกล่าว", "This case has not reached that step yet"));
+      else toast(L("รายการจัดซื้อนี้ยังไม่ถึงขั้นดังกล่าว", "This case has not reached that step yet"));
       return;
     }
     if (step === 12) {
@@ -307,7 +308,7 @@ function bindCases() {
   const done = msg => { commit(); renderShell(); route(); if (msg) toast(msg); };
   const mv = $("#case-move"); if (mv) mv.onclick = () => { if (caseMove(c)) done(L("ไปขั้นต่อไปแล้ว", "Moved to the next step")); };
   const tc = $("#case-tocon"); if (tc) tc.onclick = () => { CT_FROM = c.id; CT_OPEN = true; PROC_TAB = "contracts"; route(); };
-  const gc = $("#case-gocon"); if (gc) gc.onclick = () => { PROC_TAB = "contracts"; route(); };
+  const gc = $("#case-gocon"); if (gc) gc.onclick = () => { const k = caseCon(c); if (k) { CON_OPEN = k.id; CON_TAB = "phases"; procSet("contracts:main"); } else PROC_TAB = "contracts"; route(); }; // opens that contract, not the list (13 Nov 2569)
   const fl = $("#case-fail"); if (fl) fl.onclick = () => {
     const why = ($("#case-reason").value || "").trim();
     if (why.length < 5) { toast(L("ระบุเหตุผลอย่างน้อย 5 ตัวอักษร", "Give a reason of at least 5 characters")); return; } caseFail(c, why); done(L("กลับไปขั้นจัดทำ TOR เพื่อดำเนินการใหม่", "Back to specifying to rerun"));
@@ -327,7 +328,7 @@ function bindCases() {
     
     done(needHead ? L("บันทึกวิธีแล้ว ผู้มีอำนาจของสำนัก/กองอนุมัติพร้อมใบขอซื้อ", "Method saved; the division's authority approves it with the requisition") : L("บันทึกวิธีแล้ว", "Method saved"));
   };
-  const head = ok => { c.methodApproval = { status: ok ? "approved" : "none", t: nowIso(), by: me().id }; if (!ok) { c.method = null; c.methodWhy = null; } audit([ok ? "อนุมัติวิธีจัดซื้อ" : "ไม่อนุมัติวิธีจัดซื้อ", ok ? "Approved a method" : "Rejected a method"], c.id); caseLog(c, ok ? "method_ok" : "method_no"); notify(["proc"], [`แฟ้ม ${c.id} ${ok ? "ได้รับอนุมัติวิธีแล้ว" : "ไม่ได้รับอนุมัติวิธี ต้องเลือกใหม่"}`, `Case ${c.id}: the method was ${ok ? "approved" : "rejected, choose again"}`], `case:${c.id}`); done(ok ? L("อนุมัติแล้ว", "Approved") : L("ไม่อนุมัติ", "Rejected")); };
+  const head = ok => { c.methodApproval = { status: ok ? "approved" : "none", t: nowIso(), by: me().id }; if (!ok) { c.method = null; c.methodWhy = null; } audit([ok ? "อนุมัติวิธีจัดซื้อ" : "ไม่อนุมัติวิธีจัดซื้อ", ok ? "Approved a method" : "Rejected a method"], c.id); caseLog(c, ok ? "method_ok" : "method_no"); notify(["proc"], [`รายการจัดซื้อ ${c.id} ${ok ? "ได้รับอนุมัติวิธีแล้ว" : "ไม่ได้รับอนุมัติวิธี ต้องเลือกใหม่"}`, `Case ${c.id}: the method was ${ok ? "approved" : "rejected, choose again"}`], `case:${c.id}`); done(ok ? L("อนุมัติแล้ว", "Approved") : L("ไม่อนุมัติ", "Rejected")); };
   const mo = $("#mt-ok"); if (mo) mo.onclick = () => head(true);
   const mn = $("#mt-no"); if (mn) mn.onclick = () => head(false);
   const rf = $("#ref-form");
@@ -346,7 +347,7 @@ function bindCases() {
     if (close < ann) { toast(L("วันปิดรับต้องไม่ก่อนวันประกาศ", "The closing date can't be before the announcement")); return; }
     c.egp = Object.assign(c.egp || {}, { no, announce: ann, close, stage: c.egp && c.egp.stage || [["ประกาศเชิญชวน", "Invitation"][0], "Invitation"], date: ann, bidders: c.egp ? c.egp.bidders : null });
     famPlan(c.plan).egp = { no, stage: c.egp.stage, date: ann };
-    audit(["บันทึกข้อมูล e-GP ของแฟ้ม", "Recorded e-GP details for a case"], `${c.id} ${no}`); caseLog(c, "egp", `${no} · ${fdate(ann)} – ${fdate(close)}`); done(L("บันทึกข้อมูล e-GP แล้ว", "e-GP details saved"));
+    audit(["บันทึกข้อมูล e-GP ของรายการจัดซื้อ", "Recorded e-GP details for a case"], `${c.id} ${no}`); caseLog(c, "egp", `${no} · ${fdate(ann)} – ${fdate(close)}`); done(L("บันทึกข้อมูล e-GP แล้ว", "e-GP details saved"));
   };
   const cl = $("#case-close"); if (cl) cl.onclick = () => { c.closeElapsed = true; caseLog(c, "closed", c.egp.close); done(); };
   const bf = $("#bid-form");
@@ -374,7 +375,7 @@ function bindCases() {
     done(rule.appeal ? L(`ประกาศผู้ชนะแล้ว กำหนดอุทธรณ์สิ้นสุด ${fdate(c.award.appealEnd)}`, `Winner announced; appeals close ${fdate(c.award.appealEnd)}`) : L("ประกาศผู้ชนะแล้ว", "Winner announced"));
   };
   const an = $("#ap-none"); if (an) an.onclick = () => { c.appealElapsed = true; caseLog(c, "appeal_elapsed", fdate(c.award.appealEnd)); done(L("พ้นกำหนดอุทธรณ์แล้ว", "The appeal period is over")); };
-  const af2 = $("#ap-file"); if (af2) af2.onclick = () => { c.appeal = { status: "open", t: nowIso() }; audit(["มีการอุทธรณ์ผลการพิจารณา", "An appeal was filed"], c.id); caseLog(c, "appeal_filed"); notify(["exec"], [`แฟ้ม ${c.id} มีการอุทธรณ์`, `Case ${c.id} has an appeal`], `case:${c.id}`); done(L("บันทึกการอุทธรณ์แล้ว ห้ามทำสัญญาจนกว่าจะมีผล", "Appeal recorded; no contract until it is decided")); };
+  const af2 = $("#ap-file"); if (af2) af2.onclick = () => { c.appeal = { status: "open", t: nowIso() }; audit(["มีการอุทธรณ์ผลการพิจารณา", "An appeal was filed"], c.id); caseLog(c, "appeal_filed"); notify(["exec"], [`รายการจัดซื้อ ${c.id} มีการอุทธรณ์`, `Case ${c.id} has an appeal`], `case:${c.id}`); done(L("บันทึกการอุทธรณ์แล้ว ห้ามทำสัญญาจนกว่าจะมีผล", "Appeal recorded; no contract until it is decided")); };
   const ad = $("#ap-dismiss"); if (ad) ad.onclick = () => { c.appeal.status = "dismissed"; c.appealElapsed = true; audit(["ยกอุทธรณ์", "Dismissed an appeal"], c.id); caseLog(c, "appeal_dismissed"); done(L("ยกอุทธรณ์แล้ว", "Appeal dismissed")); };
   const au = $("#ap-uphold"); if (au) au.onclick = () => { c.appeal.status = "upheld"; const aw = c.award; c.award = null; c.appealElapsed = false; setState(c, 6, "appeal_upheld", aw ? fmt(aw.price) : ""); audit(["รับอุทธรณ์", "Upheld an appeal"], c.id); done(L("รับอุทธรณ์ กลับไปพิจารณาผลใหม่", "Upheld; back to evaluation")); };
   CASE_BINDS.forEach(f => f(c, done));
@@ -404,7 +405,7 @@ function bindCases() {
     });
   };
   const sbase = searchItems;
-  Object.assign(STYPE, { pcase: ["แฟ้มจัดซื้อ", "Procurement case"] });
+  Object.assign(STYPE, { pcase: ["รายการจัดซื้อ", "Procurement case"] });
   searchItems = () => {
     const out = sbase();
     if (allowed("procurement")) (S.cases || []).forEach(c => { const label = `${c.id} ${caseName(c)}`, sub = c.cancelled ? L("ยกเลิก", "Cancelled") : tx([CASE_STATES[caseState(c)].th, CASE_STATES[caseState(c)].en]); out.push({ type: "pcase", label, sub, run: () => jump("case:" + c.id), hay: (label + " " + sub + " " + famPlan(c.plan).name.join(" ") + " " + (c.egp ? c.egp.no : "")).toLowerCase() }); });
@@ -523,9 +524,10 @@ function seedCases(s, K) {
   });
   // Add one independent sample case for every stage that the base data does not already represent.
   // These records let a presenter open any step directly without changing another demo case first.
-  const addStageSample = stage => {
+  const MAIN_OF = { 3: [2, "จัดทำข้อมูล", "Prepare the data"], 4: [3, "ส่ง e-GP", "Send to e-GP"], 5: [3, "ส่ง e-GP", "Send to e-GP"], 6: [3, "ส่ง e-GP", "Send to e-GP"], 7: [3, "ส่ง e-GP", "Send to e-GP"], 10: [6, "เบิกจ่าย", "Payment"], 11: [6, "เบิกจ่าย", "Payment"], 12: [7, "ปิดการจัดซื้อ", "Close the case"] };
+  const addStageSample = (stage, allPaid) => {
     const base = s.pplan[2] || s.pplan[0], line = base.line, seq = s.pplan.length + 1;
-    const p = { id: `PP-2570-${String(seq).padStart(3, "0")}`, line, name: [`ข้อมูลตัวอย่างขั้นที่ ${stage} · ${CASE_STATES[stage].th}`, `Step ${stage} sample · ${CASE_STATES[stage].en}`], est: 1200000 + stage * 100000, method: "ebid", month: "2027-05-15", by: K.PO, status: stage >= 9 ? "contracted" : stage >= 2 ? "requisitioned" : "planned", egp: null, kind: "service" };
+    const p = { id: `PP-2570-${String(seq).padStart(3, "0")}`, line, name: allPaid ? ["ข้อมูลตัวอย่าง แผงที่ 7 · ประเมินผู้ค้าและปิดการจัดซื้อ (จ่ายครบแล้ว)", "Sample, panel 7 · rate the supplier and close (all paid)"] : [`ข้อมูลตัวอย่าง แผงที่ ${MAIN_OF[stage][0]} ${MAIN_OF[stage][1]} · ${CASE_STATES[stage].th}`, `Sample, panel ${MAIN_OF[stage][0]} ${MAIN_OF[stage][2]} · ${CASE_STATES[stage].en}`], est: 1200000 + stage * 100000, method: "ebid", month: "2027-05-15", by: K.PO, status: stage >= 9 ? "contracted" : stage >= 2 ? "requisitioned" : "planned", egp: null, kind: "service" };
     s.pplan.push(p);
     let rq = null;
     if (stage >= 2) {
@@ -547,13 +549,17 @@ function seedCases(s, K) {
       const con = { id: cid, reqn: rq.id, plan: p.id, line, vendor: K.vend[0], no: `CT-70/DEMO-${stage}`, signed: "2026-10-14", amount, by: K.PO, inspectors: [K.PL, K.DV], status: "active", phases, base: amount, ver: 1, versions: [{ v: 1, amount, t: "2026-10-14T14:00", by: K.PO, why: "" }], vars: [], guarantee: null, warrantyMonths: 0, supervision: null, defects: [], letters: [] };
       s.contracts.push(con); c.contract = cid;
       if (stage >= 11) {
-        const payPhases = stage === 11 ? [1] : [1, 2];
+        const payPhases = stage === 11 && !allPaid ? [1] : [1, 2];
         payPhases.forEach(n => { const ph = phases[n - 1]; s.payreqs.push({ id: `PY-2570-${String(s.payreqs.length + 1).padStart(3, "0")}`, contract: cid, phase: n, amount: ph.amount, by: K.FN, status: "approved", t: "2026-10-20T10:00", decided: { by: K.EX, holder: K.EX, via: null, t: "2026-10-20T16:00" }, recon: stage === 12 ? { state: "matched", file: "GF-DEMO", t: "2026-10-21T08:00" } : null }); });
       }
-      if (stage === 12) c.close = { by: K.PO, t: "2026-10-22T10:00", note: "ข้อมูลตัวอย่าง: ตรวจรับและเบิกจ่ายครบ ปิดแฟ้มแล้ว" };
+      if (stage === 12) c.close = { by: K.PO, t: "2026-10-22T10:00", note: "ข้อมูลตัวอย่าง: ตรวจรับและเบิกจ่ายครบ ปิดการจัดซื้อแล้ว" };
     }
     s.cases.push(c); ev(c, "2026-10-01T09:00", "created", K.PO, `ตัวอย่างขั้น ${stage}`);
   };
-  [3, 4, 5, 6, 7, 10, 11, 12].forEach(addStageSample);
+  [3, 4, 5, 6, 7, 10, 11, 12].forEach(st => addStageSample(st));
+  addStageSample(11, true); // every phase paid, not yet rated or closed: panel 7 in progress
+  { const base = s.pplan[2] || s.pplan[0], p = { id: `PP-2570-${String(s.pplan.length + 1).padStart(3, "0")}`, line: base.line, name: ["ข้อมูลตัวอย่าง แผงที่ 1 กำหนดแผนงาน · ยังไม่อยู่ในแผนที่ประกาศ", "Sample, panel 1 Plan · not in the published plan yet"], est: 900000, method: "ebid", month: "2027-06-15", by: K.PO, status: "planned", egp: null, kind: "service" };
+    s.pplan.push(p); const c = { id: `PC-2570-${String(s.cases.length + 1).padStart(3, "0")}`, plan: p.id, reqn: null, line: p.line, kind: p.kind, state: 1, method: null, methodWhy: null, special: null, methodApproval: null, committees: {}, ref: null, tor: null, egp: null, quotes: [], award: null, appeal: null, appealElapsed: false, closeElapsed: false, contract: null, cancelled: null };
+    s.cases.push(c); ev(c, "2026-10-01T09:00", "created", K.PO, "ตัวอย่างแผงที่ 1"); }
   s.caseEvents.sort((a, b) => (a.t < b.t ? 1 : -1));
 }

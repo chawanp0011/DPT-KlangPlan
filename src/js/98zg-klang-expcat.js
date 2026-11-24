@@ -9,8 +9,9 @@
 // expenditure category" (the earlier screenshot had 700 / 700); OBJC, the group above them, has no name in the form, so I
 // call it "group of categories". Under the main categories 100 to 700 the file lists one sub category with the same code; under
 // 800 (subsidies) and 900 (other) it lists all twelve, so a subsidy can be spent as any kind of category.
-// The seed below is rebuilt from the file by code, so it does NOT keep the file's REF_ID values; the import on page BQ3 does
-// (it keeps REF_ID as the id), so loading the real file replaces my rebuilt ids. One name in the picture reads "ค้างจ้างประจำ"
+// The seed below is rebuilt from the file by code, so it does NOT keep the file's REF_ID values. Page BQ3 is a register that is
+// keyed in by hand (13 Nov 2569, at the user's word: no file import; before that it had an import and an export of this file).
+// One name in the picture reads "ค้างจ้างประจำ"
 // for group 1; I used the usual wording "ค่าจ้างประจำ" in the seed, so check it.
 // What the request form does with it: choose the budget type (blank = the type of the budget lines), then the main category
 // from those under that type, then the sub category under the main one. The earlier fields c1code (main) and c2code (sub) are
@@ -71,9 +72,7 @@ CRUD.def("expCat", {
   view: c => kv([[L("ระดับ", "Level"), esc(tx(EC_LV[c.level]))], [L("รหัส", "Code"), esc(c.code)], [L("ชื่อ", "Name"), esc(tx(c.name))], [L("ลำดับชั้น", "Path"), esc(ecPath(c).map(x => `${x.code} ${tx(x.name)}`).join(" › "))], c.ref && [L("REF_ID", "REF_ID"), `<span class="mono">${esc(c.ref)}</span>`], [L("รายการลูก", "Children"), String(ecKids(c.id).length)]]),
 });
 
-// ---------- import and export of the reference file (page BQ3) ----------
-const EC_HEAD = ["REF_ID", "REF_CODE", "REF_NAME", "REF_TYPE", "PARENT_ID"];
-let EC_IMP = { text: "", name: "", rows: null };
+// ---------- reading a comma or tab separated text (page BQ7 reads its file with this; page BQ3 no longer imports) ----------
 function ecParse(text) {
   const t = String(text || "").replace(/^﻿/, "").replace(/\r/g, ""), delim = t.split("\n")[0].includes("\t") ? "\t" : ",", rows = []; let row = [], cell = "", q = false;
   for (let i = 0; i < t.length; i++) { const ch = t[i];
@@ -81,26 +80,6 @@ function ecParse(text) {
     else if (ch === '"') q = true; else if (ch === delim) { row.push(cell); cell = ""; } else if (ch === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; } else cell += ch; }
   if (cell !== "" || row.length) { row.push(cell); rows.push(row); } return rows.filter(r => r.some(x => String(x).trim() !== ""));
 }
-function ecCheck(text) {
-  const all = ecParse(text); if (!all.length) return { err: L("ไม่มีข้อมูล", "No data"), rows: [] };
-  const head = all[0].map(x => String(x).trim().toUpperCase()), idx = EC_HEAD.map(h => head.indexOf(h)); if (idx.some(i => i < 0)) return { err: `${L("ไม่พบหัวคอลัมน์ครบ", "Header columns missing")}: ${EC_HEAD.join(", ")}`, rows: [] };
-  const rows = all.slice(1).map((r, n) => { const g = i => String(r[idx[i]] === undefined ? "" : r[idx[i]]).trim(); return { n: n + 2, id: g(0), code: g(1), name: g(2), type: g(3).toUpperCase(), parent: g(4), err: "" }; });
-  const byId = new Map(); rows.forEach(r => { if (r.id) { if (byId.has(r.id)) r.err = L("REF_ID ซ้ำในไฟล์", "Duplicate REF_ID in the file"); else byId.set(r.id, r); } });
-  const lvOf = id => { const f = byId.get(id); if (f) return EC_TYPE[f.type]; const e = ecById(id); return e ? e.level : null; };
-  rows.forEach(r => { if (r.err) return; const lv = EC_TYPE[r.type];
-    if (!r.id) r.err = L("ไม่มี REF_ID", "No REF_ID"); else if (!lv) r.err = `${L("REF_TYPE ไม่รู้จัก", "Unknown REF_TYPE")}: ${r.type || "–"}`; else if (!r.code) r.err = L("ไม่มี REF_CODE", "No REF_CODE"); else if (!r.name) r.err = L("ไม่มี REF_NAME", "No REF_NAME");
-    else if (EC_PARENT[lv] && !r.parent) r.err = L("ไม่มี PARENT_ID", "No PARENT_ID"); else if (EC_PARENT[lv] && lvOf(r.parent) !== EC_PARENT[lv]) r.err = `${L("PARENT_ID ต้องเป็นระดับ", "PARENT_ID must be a")} ${tx(EC_LV[EC_PARENT[lv]])}`;
-    else { const ex = ecById(r.id); if (ex && ex.level !== lv) r.err = L("เปลี่ยนระดับของรายการเดิมไม่ได้", "Can't change the level of an existing row"); }
-    r.lv = lv; });
-  rows.forEach(r => { if (r.err) return; const key = `${r.lv}|${r.parent}|${r.code}`; const dup = rows.find(x => x !== r && !x.err && `${x.lv}|${x.parent}|${x.code}` === key && x.id !== r.id); if (dup) r.err = L("รหัสซ้ำใต้รายการเดียวกันในไฟล์", "Same code under the same parent in the file"); });
-  return { rows, err: "" };
-}
-function ecApply(rows) {
-  let add = 0, upd = 0;
-  rows.filter(r => !r.err).forEach(r => { const ex = ecById(r.id), nm = [r.name, r.name]; if (ex) { Object.assign(ex, { code: r.code, name: nm, parent: EC_PARENT[r.lv] ? r.parent : undefined, ref: r.id }); delete ex.retired; upd++; } else { S.expCats.push(Object.assign({ id: r.id, ref: r.id, level: r.lv, code: r.code, name: nm }, EC_PARENT[r.lv] ? { parent: r.parent } : {})); add++; } });
-  return { add, upd };
-}
-const ecCsv = () => { const q = s => (/[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')}"` : String(s)); const T = { bud: "BUD_TYPE", grp: "OBJC", main: "SUB_OBJC", sub: "OBJC_SUB" }; return [EC_HEAD.join(","), ...(S.expCats || []).filter(x => !x.retired).map(x => [x.ref || x.id, x.code, tx(x.name), T[x.level], x.parent || ""].map(q).join(","))].join("\n"); };
 
 // ---------- seed: rebuilt from the file by code ----------
 Object.keys(SEEDS).forEach(k => {
@@ -118,22 +97,8 @@ Object.keys(SEEDS).forEach(k => {
 
 // ---------- page BQ3 ----------
 ePageDef("budget", "bq-cat", "BQ3", "form", KROLES, ["ตารางอ้างอิงรายจ่าย", "Expenditure reference table"], () => {
-  const can = rqmCan(), n = lv => (S.expCats || []).filter(x => x.level === lv && !x.retired).length, R = EC_IMP.rows, ok = R ? R.filter(x => !x.err) : [];
-  return `${eHead("DPT Budget", "BQ3", ["ตารางอ้างอิงรายจ่าย: ประเภทงบ หมวด หมวดรายจ่ายหลัก/ย่อย", "Expenditure reference: budget type, group, main and sub category"], ["ฟอร์มคำขอเลือกประเภทงบประมาณ หมวดรายจ่ายหลัก และหมวดรายจ่ายย่อยจากตารางนี้ · ตั้งต้นสร้างจากไฟล์อ้างอิงที่ผู้ใช้ให้ (BUD_TYPE, OBJC, SUB_OBJC, OBJC_SUB) โดยผมจัดตามรหัส จึงไม่เก็บ REF_ID เดิม · นำเข้าไฟล์จริงเพื่อใช้ REF_ID ตามต้นฉบับ · กองแผนงานดูแล", "The request form picks the budget type, main and sub category from this table · the starting rows are rebuilt from the reference file the user gave (BUD_TYPE, OBJC, SUB_OBJC, OBJC_SUB) by code, so the original REF_ID values are not kept · import the real file to use its REF_ID · Planning keeps it"])}
+  const n = lv => (S.expCats || []).filter(x => x.level === lv && !x.retired).length;
+  return `${eHead("DPT Budget", "BQ3", ["ตารางอ้างอิงรายจ่าย: ประเภทงบ หมวด หมวดรายจ่ายหลัก/ย่อย", "Expenditure reference: budget type, group, main and sub category"], ["ฟอร์มคำขอเลือกประเภทงบประมาณ หมวดรายจ่ายหลัก และหมวดรายจ่ายย่อยจากตารางนี้ · แสดงเป็นทะเบียน กองแผนงานเพิ่ม แก้ไข และเลิกใช้ด้วยการคีย์ ไม่มีการนำเข้าไฟล์ · ตั้งต้นสร้างจากตารางอ้างอิงที่ผู้ใช้ให้ (ประเภทงบ หมวด หมวดรายจ่ายหลัก/ย่อย)", "The request form picks the budget type, main and sub category from this table · shown as a register; Planning adds, edits and retires rows by keying them in, there is no file import · the starting rows are rebuilt from the reference table the user gave"])}
     ${eKpis([[L("ประเภทงบ", "Budget types"), n("bud")], [L("หมวด (กลุ่ม)", "Groups"), n("grp")], [L("หมวดรายจ่ายหลัก", "Main categories"), n("main")], [L("หมวดรายจ่ายย่อย", "Sub categories"), n("sub")]])}
-    <section class="panel"><header><h2>${L("นำเข้า / ส่งออกไฟล์อ้างอิง", "Import and export the reference file")}</h2></header><div class="body">
-      <div class="row"><input type="file" id="ec-file" accept=".csv,.tsv,.txt" ${can ? "" : "disabled"}><button class="btn" type="button" id="ec-check" ${can ? "" : "disabled"}>${L("ตรวจไฟล์", "Check")}</button><button class="btn" type="button" id="ec-export">${L("ส่งออก CSV ปัจจุบัน", "Export the current CSV")}</button></div>
-      <p class="sub">${L("คอลัมน์", "Columns")}: <span class="mono">${EC_HEAD.join(", ")}</span> · REF_TYPE: <span class="mono">BUD_TYPE, OBJC, SUB_OBJC, OBJC_SUB</span> · ${L("คั่นด้วยคอมมาหรือแท็บ นำเข้าจาก Excel โดยบันทึกเป็น CSV · รายการที่มี REF_ID ตรงกันถูกแก้ ที่ไม่ตรงถูกเพิ่ม ไม่มีการลบ", "comma or tab separated; save from Excel as CSV · a row with a matching REF_ID is updated, others are added, nothing is deleted")}</p>
-      <textarea id="ec-text" rows="4" style="width:100%;font-family:monospace" ${can ? "" : "disabled"}>${esc(EC_IMP.text)}</textarea>
-      ${R ? `${R.length ? `<div class="tbl-wrap" style="max-height:220px;overflow:auto"><table><thead><tr><th>#</th><th>REF_TYPE</th><th>${L("รหัส", "Code")}</th><th>${L("ชื่อ", "Name")}</th><th>${L("ผลตรวจ", "Check")}</th></tr></thead><tbody>${R.slice(0, 200).map(x => `<tr><td>${x.n}</td><td class="mono">${esc(x.type)}</td><td class="mono">${esc(x.code)}</td><td>${esc(x.name)}</td><td>${x.err ? tag(esc(x.err), "p-bad") : tag(L("พร้อมนำเข้า", "Ready"), "p-ok")}</td></tr>`).join("")}</tbody></table></div>` : ""}
-        <div class="row" style="margin-top:8px"><button class="btn primary" type="button" id="ec-go" ${ok.length && can ? "" : "disabled"}>${L("นำเข้า", "Import")} ${ok.length} ${L("รายการ", "rows")}</button><span class="sub">${R.length - ok.length ? `${R.length - ok.length} ${L("แถวมีข้อผิดพลาด จะไม่ถูกนำเข้า", "rows have errors and are skipped")}` : ""}</span><button class="btn ghost" type="button" id="ec-clear">${L("ล้าง", "Clear")}</button></div>` : ""}
-      ${EC_IMP.err ? `<p>${tag(esc(EC_IMP.err), "p-bad")}</p>` : ""}${!can ? `<p class="sub">${L("เฉพาะกองแผนงานนำเข้าได้", "Only Planning can import")}</p>` : ""}</div></section>
     ${rqmBar()}${crudList("expCat", { head: `<h2>${L("ตารางอ้างอิงรายจ่าย", "Reference table")}</h2>` })}`;
-}, () => {
-  const t = $("#ec-text"), sync = () => { if (t) EC_IMP.text = t.value; };
-  const chk = $("#ec-check"); if (chk) chk.onclick = () => { sync(); const r = ecCheck(EC_IMP.text); EC_IMP.rows = r.err ? null : r.rows; EC_IMP.err = r.err; route(); };
-  const f = $("#ec-file"); if (f) f.onchange = e => { const file = e.target.files[0]; if (!file) return; const rd = new FileReader(); rd.onload = () => { EC_IMP.text = String(rd.result); EC_IMP.name = file.name; const r = ecCheck(EC_IMP.text); EC_IMP.rows = r.err ? null : r.rows; EC_IMP.err = r.err; route(); }; rd.readAsText(file, "utf-8"); };
-  const go = $("#ec-go"); if (go) go.onclick = () => { sync(); const r = ecCheck(EC_IMP.text); if (r.err) return; const { add, upd } = ecApply(r.rows); audit(["นำเข้าตารางอ้างอิงรายจ่าย", "Imported the expenditure reference table"], `+${add} ~${upd} · ${EC_IMP.name || ""}`); EC_IMP = { text: "", name: "", rows: null }; commit(); route(); toast(L(`นำเข้าแล้ว เพิ่ม ${add} แก้ ${upd}`, `Imported: ${add} added, ${upd} updated`)); };
-  const clr = $("#ec-clear"); if (clr) clr.onclick = () => { EC_IMP = { text: "", name: "", rows: null }; route(); };
-  const ex = $("#ec-export"); if (ex) ex.onclick = () => { const blob = new Blob(["﻿" + ecCsv()], { type: "text/csv;charset=utf-8" }), a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "expenditure_reference.csv"; document.body.appendChild(a); a.click(); a.remove(); };
-});
+}, () => {});

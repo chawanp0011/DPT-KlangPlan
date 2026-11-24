@@ -9,11 +9,12 @@
 // price comparison, RFQ letters, bid details, audit dossier) sit in a folded "background" part of their main panel.
 // The sub-panels for the plan, contract management, payment and close are read-only summaries built here; the work itself is on
 // the contract pages (button "open the contract").
-const CASE_MAIN_NAMES = [["กำหนดแผนงาน", "Plan"], ["จัดทำข้อมูล", "Prepare the data"], ["ส่ง e-GP", "Send to e-GP"], ["ทำสัญญา", "Contract"], ["บริหารสัญญา", "Contract management"], ["เบิกจ่าย", "Payment"], ["ปิดแฟ้ม", "Close the case"]];
+const CASE_MAIN_NAMES = [["กำหนดแผนงาน", "Plan"], ["จัดทำข้อมูล", "Prepare the data"], ["ส่ง e-GP", "Send to e-GP"], ["ทำสัญญา", "Contract"], ["บริหารสัญญา", "Contract management"], ["เบิกจ่าย", "Payment"], ["ปิดการจัดซื้อและส่งมอบ", "Close and hand over"]];
 const CASE_MAIN_WHO = [["กองแผนงาน", "Planning division"], ["สำนัก / กอง", "Division or bureau"], ["เจ้าหน้าที่พัสดุ (กองคลัง)", "Procurement officers (Finance Division)"], ["เจ้าหน้าที่พัสดุ", "Procurement officers"], ["เจ้าหน้าที่พัสดุ", "Procurement officers"], ["เจ้าหน้าที่พัสดุ", "Procurement officers"], ["เจ้าหน้าที่พัสดุ", "Procurement officers"]];
 // heading (Thai or English) -> [main, order, folded]
 const CASE_SUBS = (() => { const m = {}, add = (th, en, main, ord, fold) => { m[th] = m[en] = [main, ord, !!fold]; };
-  add("รายละเอียดโครงการที่ขอซื้อขอจ้าง", "Project details of the requisition", 2, 1); add("แผนจัดซื้อและใบขอซื้อขอจ้าง", "Procurement plan and requisition", 2, 2); add("วิธีจัดซื้อ", "Procurement method", 2, 3);
+  // the project details (plan, requisition and its details) stay at the top of the page, above the seven main panels
+  add("วิธีจัดซื้อ", "Procurement method", 2, 3);
   add("ราคากลาง", "Reference price", 2, 4); add("TOR", "TOR", 2, 5); add("คณะกรรมการ", "Committees", 2, 6); add("ส่งเอกสารเตรียมให้กองคลัง", "Hand over the prepared papers to Finance", 2, 7);
   add("การสำรวจตลาด", "Market research", 2, 8, 1); add("ข้อมูลเพิ่มเติมของรายการ", "Item details", 2, 9, 1); add("ราคากลาง: เทียบและดัชนีราคา", "Reference price: comparison and indices", 2, 10, 1);
   add("การสรรหาผู้เสนอราคาใน e-GP", "Supplier sourcing in e-GP", 3, 1); add("การสรรหาโดยใบเสนอราคา", "Sourcing by quotations", 3, 1); add("เกณฑ์พิจารณาข้อเสนอ", "Evaluation criteria", 3, 2);
@@ -33,10 +34,14 @@ function caseMainState(c) {
     [ok(n >= 3, "ใบขอซื้อได้รับอนุมัติหลักการ", "The requisition is approved in principle"), ...casePrepItems(c), ok(prepSent(c) || prepRecv(c) || n >= 5, "ส่งเอกสารเตรียมให้กองคลัง", "Hand the prepared papers to the Finance Division")],
     [ok(c.method && n >= 4, "วิธีจัดหาได้รับอนุมัติ", "The method is approved"), ok(prepRecv(c) || n >= 5, "พัสดุรับเรื่อง", "Procurement took the case"), ok(comp ? c.egp && c.egp.no : (c.quotes && c.quotes.some(q => q.win)) || n >= 5, comp ? "บันทึกข้อมูล e-GP" : "บันทึกใบเสนอราคา", comp ? "Record the e-GP details" : "Record the quotations"),
       ok(n >= 6 || (!comp && n >= 5), "ปิดรับและบันทึกผู้ยื่น", "Bids closed and recorded"), ok(n >= 8, "ประกาศผู้ชนะและพ้นกำหนดอุทธรณ์", "Winner announced and appeal period over")],
-    [ok(n >= 9, "ลงนามสัญญา", "Contract signed")],
-    [ok(n >= 10, "ตรวจรับครบทุกงวด", "Every phase accepted"), ok(!con || (typeof handAll !== "function") || handAll(con), "สำนัก/กองส่งมอบต่อให้ อปท./เจ้าของโครงการครบทุกงวด", "Every phase handed on to the local authority / the owner")],
-    [ok(pays.length > 0, "เริ่มเบิกจ่าย", "Payment started"), ok(allPaid, "เบิกจ่ายครบทุกงวด", "Every phase paid")],
-    [ok(c.close && typeof c.close.score === "number", "ประเมินผู้ค้า", "Supplier rated"), ok(c.close, "ปิดแฟ้ม", "Case closed")]];
+    // 4. the contract: signed (the warranty months are set on the signing form) and the guarantee recorded
+    [ok(n >= 9, "ลงนามสัญญาและกำหนดระยะรับประกัน", "Contract signed, warranty period set"), ok(!!con && (!!con.guarantee || n >= 12), "บันทึกหลักประกันสัญญา", "Contract guarantee recorded")],
+    // 5. managing the contract: every phase delivered, every phase accepted, no change waiting
+    [ok(!!con && live.length > 0 && live.every(ph => !!ph.delivered || phaseAccepted(ph)), "ส่งมอบครบทุกงวด", "Every phase delivered"), ok(n >= 10, "ตรวจรับครบทุกงวด", "Every phase accepted"), ok(!!con && !(con.vars || []).some(v => ["pending", "prep", "check"].includes(v.status)), "ไม่มีคำขอแก้ไขสัญญาค้าง", "No contract change waiting")],
+    // 6. payment: an invoice, a payment request, every phase paid
+    [ok(!!con && (pays.length > 0 || live.some(ph => !!ph.invoice)), "มีใบแจ้งหนี้", "An invoice is recorded"), ok(pays.length > 0, "เริ่มเบิกจ่าย", "Payment started"), ok(allPaid, "เบิกจ่ายครบทุกงวด", "Every phase paid")],
+    // 7. closing: the warranty is over with no open defect, the guarantee is returned, the supplier is rated, the case is closed, then procurement hands the work on
+    [ok(!!con && ((typeof warrantyOver === "function" ? warrantyOver(con) && !(typeof openDefects === "function" && openDefects(con).length) : true) || (c.close && typeof c.close.score === "number")), "พ้นระยะรับประกันและไม่มีรายการแจ้งซ่อมค้าง", "The warranty is over with no open defect"), ok(!!con && (!con.guarantee || con.guarantee.status === "returned" || (c.close && typeof c.close.score === "number")), "คืนหลักประกันสัญญา", "The guarantee is returned"), ok(c.close && typeof c.close.score === "number", "ประเมินผู้ค้า", "Supplier rated"), ok(c.close, "ปิดการจัดซื้อ", "Case closed"), ok(!!con && !!c.close && typeof handAll === "function" && handAll(con), "เจ้าหน้าที่พัสดุส่งมอบต่อให้ อปท./เจ้าของโครงการ (หลังปิดการจัดซื้อ)", "Procurement hands the work on to the local authority / the owner (after the close)")]];
   return items;
 }
 function casePhases(c) {
@@ -49,7 +54,7 @@ function casePhases(c) {
 const casePhase = c => casePhases(c).cur;
 function casePhaseBar(c) {
   const { phases, cur } = casePhases(c), sel = CASE_MAIN[c.id] || cur || 1, st = { done: [L("เสร็จ", "Done"), "p-ok"], now: [L("กำลังทำ", "In progress"), "p-info"], todo: [L("รอ", "Waiting"), "p-mute"], cancel: [L("ยกเลิก", "Cancelled"), "p-mute"] };
-  return `<div class="cphases" role="tablist" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px" aria-label="${L("แผงหลักของแฟ้ม", "Main panels of the case")}">${phases.map(p => `<button type="button" role="tab" class="cphase" data-cphase="${p.k}" data-cstate="${p.state}" aria-selected="${p.k === sel}" style="flex:1 1 118px;text-align:left;cursor:pointer;background:transparent;font:inherit;color:inherit;border:${p.k === sel ? "2px solid var(--info)" : "1px solid var(--line)"};border-radius:10px;padding:8px 10px">
+  return `<div class="cphases" role="tablist" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px" aria-label="${L("แผงหลักของรายการจัดซื้อ", "Main panels of the case")}">${phases.map(p => `<button type="button" role="tab" class="cphase" data-cphase="${p.k}" data-cstate="${p.state}" aria-selected="${p.k === sel}" style="flex:1 1 118px;text-align:left;cursor:pointer;background:transparent;font:inherit;color:inherit;border:${p.k === sel ? "2px solid var(--info)" : "1px solid var(--line)"};border-radius:10px;padding:8px 10px">
     <div class="row" style="gap:6px;flex-wrap:nowrap"><span class="mono sub">${p.k}</span><b style="font-weight:600">${esc(tx(CASE_MAIN_NAMES[p.k - 1]))}</b></div>
     <div class="sub">${esc(tx(CASE_MAIN_WHO[p.k - 1]))}</div>
     <div style="margin-top:3px">${tag(st[p.state][0], st[p.state][1])} <span class="sub">${p.items.filter(x => x.ok).length}/${p.items.length}</span></div></button>`).join("")}</div>`;
@@ -57,7 +62,7 @@ function casePhaseBar(c) {
 
 // ---------- read-only sub-panels built here ----------
 const cmPanel = (main, ord, title, body) => ({ main, ord, el: (() => { const s = document.createElement("section"); s.className = "panel"; s.innerHTML = `<header><h2>${title}</h2></header><div class="body" style="display:flex;flex-direction:column;gap:10px">${body}</div>`; return s; })() });
-const cmGoBtn = c => `<div class="row"><button class="btn" type="button" data-cgocon="${c.id}">${L("เปิดสัญญา", "Open the contract")}</button></div>`;
+const cmGoBtn = c => { const k = caseCon(c); return k ? `<div class="row"><button class="btn" type="button" data-cgocon="${k.id}">${L("เปิดสัญญา", "Open the contract")}</button></div>` : ""; }; // the button carries the contract, and opens that contract (not the list)
 function caseExtraPanels(c) {
   const p = famPlan(c.plan), con = caseCon(c), none = `<span class="sub">${L("ยังไม่มีสัญญา", "No contract yet")}</span>`, V = (S.planDoc && S.planDoc.versions) || [], v = V.slice().reverse().find(x => (x.items || []).some(i => i.id === p.id));
   const out = [];
@@ -72,9 +77,10 @@ function caseExtraPanels(c) {
       ${row(4, "เลือกวิธีจัดหาให้ตรงวงเงินและระเบียบ สร้างและประกาศเชิญชวน", "Choose the method to fit the amount and rules, create and publish the invitation", !!(c.method && n >= 4 && c.egp && c.egp.no) && (typeof hearReqNow !== "function" || !hearReqNow(c) || hearingDone(c)), L("แผงย่อยวิธีจัดซื้อ และการสรรหาใน e-GP", "Method and sourcing panels"), `${c.egp && c.egp.no ? c.egp.no + " · " + L("ประกาศ", "announced") + " " + fdate(c.egp.announce) + " · " : ""}${L("รับฟังความคิดเห็น", "hearing")}: ${typeof hearLabel === "function" ? hearLabel(c) : "–"}${L(" · ร่างประกาศและร่างเอกสารซื้อจ้างให้ผู้มีอำนาจอนุมัติเผยแพร่: ระบบนี้ยังไม่มีข้อมูล", " · the draft notice and RFP for the approver to release: not held in this system")}`)}
       ${row(5, "ผู้ประกอบการยื่นข้อเสนอ ปิดรับซอง และคณะกรรมการเปิดซอง", "Bidders submit, the envelopes close, the committee opens them", n >= 6 || (!comp && n >= 5), L("การสรรหาใน e-GP · ผู้ยื่นและคะแนน", "Sourcing and bidder panels"), c.egp && c.egp.bidders != null ? `${L("ปิดรับ", "Closed")} ${fdate(c.egp.close)} · ${c.egp.bidders} ${L("ราย", "bidders")}` : "")}
       ${row(6, "พิจารณาผล บันทึกผลและผู้ชนะ (รวมผู้ไม่ผ่านคุณสมบัติและการต่อรองราคา) ประกาศผู้ชนะ รอพ้นอุทธรณ์", "Evaluate, record the winner (with disqualified bidders and any price negotiation), announce, wait out the appeal", n >= 8 && !!c.award && (typeof negoNeeded !== "function" || !negoNeeded(c) || negoDone(c)), L("การพิจารณาผลและประกาศผู้ชนะ · อุทธรณ์", "Evaluation, award and appeal panels"), `${c.award ? tx(c.award.winner) + " · " + fmt(c.award.price) + " " + L("บาท", "baht") + " · " : ""}${L("ต่อรองราคา", "negotiation")}: ${typeof negoLabel === "function" ? negoLabel(c) : "–"}${L(" · รายชื่อผู้ไม่ผ่านคุณสมบัติ: ระบบนี้ยังไม่มีข้อมูล", " · disqualified bidders: not held in this system")}`)}
-      ${row(7, "ทำสัญญา บันทึกส่งมอบ ตรวจรับ และเบิกจ่ายตามงวดเพื่อปิดโครงการ", "Contract, delivery, acceptance and payment by phase, to close the project", n >= 12, L("แผงหลักทำสัญญา ถึง ปิดแฟ้ม", "Contract to Close panels"), "")}
+      ${row(7, "ทำสัญญา บันทึกส่งมอบ ตรวจรับ และเบิกจ่ายตามงวดเพื่อปิดโครงการ", "Contract, delivery, acceptance and payment by phase, to close the project", n >= 12, L("แผงหลักทำสัญญา ถึง ปิดการจัดซื้อ", "Contract to Close panels"), "")}
       </tbody></table></div>`));
   }
+  { const ep = typeof egpUpdatePanel === "function" ? egpUpdatePanel(c) : null; if (ep) { const i = out.findIndex(x => x.main === 3 && x.ord === 0); if (i >= 0) out[i] = cmPanel(3, 0, ep.title, ep.body); } } // every e-GP step with what to update (file 98zp)
   { const r = typeof rqCasePanel === "function" ? rqCasePanel(c) : null; if (r) out.push(cmPanel(2, 0, r.title, r.body)); }
   { const r2 = typeof rqReadyPanel === "function" ? rqReadyPanel(c) : null; if (r2) out.push(cmPanel(2, 50, r2.title, r2.body)); } // "ready to send?" at the bottom of Prepare the data // the requisition form (file 98ze)
   { const r4 = typeof varPanel === "function" ? varPanel(c) : null; if (r4) out.push(cmPanel(4, 3, r4.title, r4.body)); } // extend the contract / change the amount (file 98zg)
@@ -86,19 +92,19 @@ function caseExtraPanels(c) {
   out.push(cmPanel(4, 2, L("หลักประกันและการแก้ไขสัญญา", "Guarantee and contract changes"), con ? `<div>${con.guarantee ? `${L("หลักประกัน", "Guarantee")}: ${fmt(con.guarantee.amount)} ${L("บาท", "baht")} · ${L("หมดอายุ", "expires")} ${fdate(con.guarantee.expires)}` : `<span class="sub">${L("ยังไม่ได้บันทึกหลักประกัน", "No guarantee recorded")}</span>`}</div>
     <div>${L("ฉบับที่", "Version")} ${con.ver || 1} · ${L("วงเงินสัญญา", "Amount")} ${fmt(con.amount)} ${L("บาท", "baht")}${(con.vars || []).length ? ` · ${(con.vars || []).length} ${L("รายการแก้ไข", "changes")}` : ""}</div>${cmGoBtn(c)}` : none));
   out.push(cmPanel(5, 1, L("ส่งมอบและตรวจรับ", "Delivery and acceptance"), con ? `<div class="tbl-wrap"><table><thead><tr><th>${L("งวด", "Phase")}</th><th>${L("กำหนดส่งมอบ", "Due")}</th><th>${L("ส่งมอบ", "Delivered")}</th><th>${L("ตรวจรับ", "Accepted")}</th></tr></thead><tbody>${con.phases.map(ph => `<tr><td>${tx(ph.name)}</td><td>${fdate(ph.due)}</td><td>${ph.delivered ? fdate(ph.delivered) : "—"}</td><td>${ph.cancelled ? tag(L("ยกเลิก", "Cancelled"), "p-mute") : phaseAccepted(ph) ? tag(L("ตรวจรับแล้ว", "Accepted"), "p-ok") : `<span class="sub">${ph.signs.length} ${L("ลายมือชื่อ", "signatures")}</span>`}</td></tr>`).join("")}</tbody></table></div>${cmGoBtn(c)}` : none));
-  { const hp = typeof handPanel === "function" ? handPanel(c) : null; if (hp) out.push(cmPanel(5, 1.5, hp.title, hp.body)); } // delivery chain: received, handed on (file 98zi)
+  { const hp = typeof handPanel === "function" ? handPanel(c) : null; if (hp) out.push(cmPanel(7, 3, hp.title, hp.body)); } // after the close, procurement hands the work on (file 98zi)
   out.push(cmPanel(5, 2, L("คณะกรรมการตรวจรับ", "Acceptance committee"), con ? `<div>${cmNames(con) || "—"}</div>${cmGoBtn(c)}` : none));
   out.push(cmPanel(6, 1, L("เบิกจ่ายตามงวด", "Payment by phase"), con ? `<div class="tbl-wrap"><table><thead><tr><th>${L("งวด", "Phase")}</th><th class="n">${L("วงเงิน (ลบ.)", "Amount (M)")}</th><th>${L("ใบแจ้งหนี้", "Invoice")}</th><th>${L("เบิกจ่าย", "Payment")}</th></tr></thead><tbody>${con.phases.filter(ph => !ph.cancelled).map(ph => { const pay = S.payreqs.find(x => x.contract === con.id && x.phase === ph.n && x.status !== "rejected");
       return `<tr><td>${tx(ph.name)}</td><td class="n">${mb(ph.amount)}</td><td>${ph.invoice ? `<span class="mono sub">${esc(ph.invoice.no)}</span>` : "—"}</td><td>${pay ? `<span class="mono sub">${pay.id}</span>${pay.batch ? ` <span class="sub">· ${L("เบิกรวมกับงวดอื่นในใบขอเบิก", "paid with other phases in")} ${pay.batch}</span>` : ""} ${tag(pay.status === "approved" ? L("อนุมัติแล้ว", "Approved") : L("รออนุมัติ", "Pending"), pay.status === "approved" ? "p-ok" : "p-warn")}` : "—"}</td></tr>`; }).join("")}</tbody></table></div>${cmGoBtn(c)}` : none));
   out.push(cmPanel(7, 1, L("ประเมินผู้ค้า", "Supplier rating"), c.close && typeof c.close.score === "number" ? `<div>${L("คะแนน", "Score")} <b>${c.close.score}</b></div>${c.close.lessons ? `<div class="sub">${esc(c.close.lessons)}</div>` : ""}` : `<span class="sub">${c.close ? L("ไม่ประเมิน (ปิดก่อนวันเริ่มใช้)", "Not rated (closed before the start date)") : L("ยังไม่ได้ประเมินผู้ค้า", "The supplier has not been rated")}</span><div class="sub">${L("ประเมินผู้ค้าบังคับตั้งแต่", "Supplier rating is required from")} ${fdate(vendorRateFrom())}</div>`));
-  out.push(cmPanel(7, 2, L("ปิดโครงการ", "Close the project"), c.close ? `<div>${tag(L("ปิดแฟ้มแล้ว", "Closed"), "p-ok")} ${fdate(c.close.t, true)} · ${esc(userName(c.close.by))}</div>` : `<span class="sub">${L("ยังไม่ปิดแฟ้ม", "Not closed yet")}</span>`));
+  out.push(cmPanel(7, 2, L("ปิดโครงการ", "Close the project"), c.close ? `<div>${tag(L("ปิดการจัดซื้อแล้ว", "Closed"), "p-ok")} ${fdate(c.close.t, true)} · ${esc(userName(c.close.by))}</div>` : `<span class="sub">${L("ยังไม่ปิดการจัดซื้อ", "Not closed yet")}</span>`));
   return out;
 }
 
 // ---------- move the drawn panels into the main panels ----------
 function caseRegroup(c) {
   const bar = document.querySelector(".cphases"), grid = document.querySelector(".case-grid"), main = grid && grid.querySelector(".case-main"); if (!bar || !main || main.dataset.grouped) return;
-  const holder = bar.parentElement, cands = [...holder.children].filter(el => el !== bar && el !== grid && el.matches("section.panel,div.panel") && !el.querySelector(".case-hero")).concat([...main.children]);
+  const holder = bar.parentElement, cands = [...holder.children].filter(el => el !== bar && el !== grid && el.id !== "case-step-2" && el.matches("section.panel,div.panel") && !el.querySelector(".case-hero")).concat([...main.children]);
   const first = el => (el.querySelector("h2") || {}).textContent ? el.querySelector("h2").textContent.trim() : "";
   const groups = Array.from({ length: 7 }, () => ({ show: [], fold: [] }));
   cands.forEach(el => { const t = first(el), hit = CASE_SUBS[t] || (t.startsWith("ข้อมูลตัวอย่างขั้น") ? null : [2, 99, true]); if (!hit) { el.remove(); return; } (hit[2] ? groups[hit[0] - 1].fold : groups[hit[0] - 1].show).push([hit[1], el]); });
@@ -112,6 +118,6 @@ function caseRegroup(c) {
     main.appendChild(box); });
   document.querySelectorAll(".cphase").forEach(b => (b.onclick = () => { CASE_MAIN[c.id] = Number(b.dataset.cphase); document.querySelectorAll(".cphase").forEach(x => { const on = x === b; x.setAttribute("aria-selected", String(on)); x.style.border = on ? "2px solid var(--info)" : "1px solid var(--line)"; }); document.querySelectorAll(".cmain").forEach(m => (m.hidden = m.dataset.cmain !== String(CASE_MAIN[c.id]))); }));
   const amt = document.getElementById("pr-amt"); if (amt) amt.dispatchEvent(new Event("input", { bubbles: true })); // shows the split-purchase box when it applies
-  document.querySelectorAll("[data-cgocon]").forEach(b => (b.onclick = () => { PROC_TAB = "contracts"; route(); }));
+  document.querySelectorAll("[data-cgocon]").forEach(b => (b.onclick = () => { CON_OPEN = b.dataset.cgocon; CON_TAB = "phases"; procSet("contracts:main"); route(); }));
 }
 { const base = bindCases; bindCases = () => { base(); const c = CASE_OPEN && caseOf(CASE_OPEN); if (c) caseRegroup(c); }; }

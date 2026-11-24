@@ -66,7 +66,7 @@ function conPanel(c, part) {
   // Round 45: named parts, so the contract detail can show them as tabs; with no part it is the full panel as before.
   const P = {
     head: () => `<header><h2><span class="mono">${c.id}</span> · ${esc(tx(famPlan(c.plan).name))}</h2><span class="sp"></span>${historyBtn(c.id, c.id)}${(c.ver || 1) > 1 ? tag(`${L("ฉบับที่", "Version")} ${c.ver}`, "p-info") : ""}${pen ? tag(`${L("ค่าปรับสะสม", "Penalty")} ${fmt(pen)}`, penaltyWarn(c) ? "p-bad" : "p-warn") : ""}${tag(`${L("วงเงินสัญญา", "Contract")} ${mb(c.amount)} ${L("ลบ.", "M")}`, "p-info")}</header>
-    ${phaseTrack(c)}
+    ${"" /* P52: the phase bar is not shown (contracts can have many phases) */}
     <div class="body row"><span>${esc(tx(c.vendor))}</span><span class="sub">·</span><span class="mono sub">${esc(c.no)}</span><span class="sub">·</span><span class="sub">${L("ลงนาม", "Signed")} ${fdate(c.signed)}</span><span class="sub">·</span><span class="sub">${esc(lineLabel(l))}</span>${typeof conPoTag === "function" ? conPoTag(c) : ""}
       ${famPlan(c.plan).egp ? `<span class="sub">·</span><span class="sub mono">${famPlan(c.plan).egp.no}</span>` : ""}${cs ? `<span class="sub">·</span><button class="btn ghost" type="button" data-copen2="${cs.id}">${cs.id}</button>` : ""}</div>
     <div class="body" style="padding-top:0"><span class="sub">${L("คณะกรรมการตรวจรับ", "Acceptance committee")}:</span> ${cmNames(c)}
@@ -124,12 +124,12 @@ function closeChecks(cs) {
     ok(!(c.vars || []).some(v => ["pending", "prep", "check"].includes(v.status)) && !c.phases.some(openDissent), "ไม่มีการแก้ไขสัญญาหรือความเห็นแย้งค้าง", "No pending change or dissent")];
 }
 function closePanel(cs, con) {
-  if (cs.close) return `<div class="callout" style="margin:0"><b>${L("ปิดแฟ้มแล้ว", "Closed")}</b> · ${esc(userName(cs.close.by))} · ${fdate(cs.close.t)}<div class="sub">${L("บทเรียน", "Lessons")}: ${esc(cs.close.lessons)}</div><div class="sub">${L("คะแนนผู้ขาย", "Supplier score")}: ${typeof cs.close.score === "number" ? cs.close.score + "/5" : L("ไม่ประเมิน", "not rated")}</div></div>`;
+  if (cs.close) return `<div class="callout" style="margin:0"><b>${L("ปิดการจัดซื้อแล้ว", "Closed")}</b> · ${esc(userName(cs.close.by))} · ${fdate(cs.close.t)}<div class="sub">${L("บทเรียน", "Lessons")}: ${esc(cs.close.lessons)}</div><div class="sub">${L("คะแนนผู้ขาย", "Supplier score")}: ${typeof cs.close.score === "number" ? cs.close.score + "/5" : L("ไม่ประเมิน", "not rated")}</div></div>`;
   const n = caseState(cs); if (n < 9) return "";
   const chk = closeChecks(cs), all = chk.every(x => x.ok);
-  return `<div><b style="font-weight:600">${L("ปิดแฟ้ม (R-12)", "Close the case (R-12)")}</b><ul class="check" style="margin-top:6px">${chk.map(x => `<li><span class="m ${x.ok ? "ok" : "no"}">${x.ok ? "✓" : "×"}</span><div>${esc(x.label)}</div></li>`).join("")}</ul>
+  return `<div><b style="font-weight:600">${L("ปิดการจัดซื้อ (R-12)", "Close the case (R-12)")}</b><ul class="check" style="margin-top:6px">${chk.map(x => `<li><span class="m ${x.ok ? "ok" : "no"}">${x.ok ? "✓" : "×"}</span><div>${esc(x.label)}</div></li>`).join("")}</ul>
     ${isProcRole() ? `<form class="inline-form" id="close-form" style="margin-top:8px"><div class="f" style="flex:2 1 280px"><label for="cl-les">${L("บทเรียนที่ได้", "Lessons learned")}</label><input type="text" id="cl-les" ${all ? "" : "disabled"}></div>
-      <div class="f" style="flex:0 1 130px"><label for="cl-sc">${L("คะแนนผู้ขาย", "Supplier score")}</label><select id="cl-sc" ${all ? "" : "disabled"}><option value="">${vendorRateOn() ? L("— เลือก (บังคับ) —", "— choose (required) —") : L("ไม่ประเมิน (ยังไม่ถึงวันเริ่มใช้)", "Not rated (not in force yet)")}</option>${[5, 4, 3, 2, 1].map(x => `<option>${x}</option>`).join("")}</select><div class="sub">${L("ประเมินผู้ค้าบังคับตั้งแต่", "Supplier rating is required from")} ${fdate(vendorRateFrom())}</div></div><button class="btn primary" type="submit" ${all ? "" : "disabled"}>${L("ปิดแฟ้ม", "Close the case")}</button></form>` : ""}</div>`;
+      <div class="f" style="flex:0 1 130px"><label for="cl-sc">${L("คะแนนผู้ขาย", "Supplier score")}</label><select id="cl-sc" ${all ? "" : "disabled"}><option value="">${vendorRateOn() ? L("— เลือก (บังคับ) —", "— choose (required) —") : L("ไม่ประเมิน (ยังไม่ถึงวันเริ่มใช้)", "Not rated (not in force yet)")}</option>${[5, 4, 3, 2, 1].map(x => `<option>${x}</option>`).join("")}</select><div class="sub">${L("ประเมินผู้ค้าบังคับตั้งแต่", "Supplier rating is required from")} ${fdate(vendorRateFrom())}</div></div><button class="btn primary" type="submit" ${all ? "" : "disabled"}>${L("ปิดการจัดซื้อ", "Close the case")}</button></form>` : ""}</div>`;
 }
 
 // ---------- actions ----------
@@ -206,11 +206,11 @@ function bindClose() {
   const f = $("#close-form"); if (!f) return;
   f.onsubmit = e => {
     e.preventDefault(); const cs = caseOf(CASE_OPEN), les = $("#cl-les").value.trim();
-    if (!closeChecks(cs).every(x => x.ok)) { toast(L("ยังปิดแฟ้มไม่ได้", "Can't close yet")); return; }
+    if (!closeChecks(cs).every(x => x.ok)) { toast(L("ยังปิดการจัดซื้อไม่ได้", "Can't close yet")); return; }
     if (les.length < 10) { toast(L("บันทึกบทเรียนอย่างน้อย 10 ตัวอักษร", "Write the lessons, at least 10 characters")); return; }
-    const sc = $("#cl-sc").value; if (vendorRateOn() && !sc) { toast(L(`ต้องประเมินผู้ค้าก่อนปิดแฟ้ม (บังคับตั้งแต่ ${fdate(vendorRateFrom())})`, `Rate the supplier before closing (required from ${fdate(vendorRateFrom())})`)); return; }
-    cs.close = { lessons: les, score: sc ? Number(sc) : null, by: me().id, t: nowIso() }; caseLog(cs, "closed_case", cs.close.score ? `${cs.close.score}/5` : L("ไม่ประเมิน", "not rated")); audit(["ปิดแฟ้มจัดซื้อ", "Closed a procurement case"], cs.id);
-    commit(); renderShell(); route(); toast(L("ปิดแฟ้มแล้ว", "Case closed"));
+    const sc = $("#cl-sc").value; if (vendorRateOn() && !sc) { toast(L(`ต้องประเมินผู้ค้าก่อนปิดการจัดซื้อ (บังคับตั้งแต่ ${fdate(vendorRateFrom())})`, `Rate the supplier before closing (required from ${fdate(vendorRateFrom())})`)); return; }
+    cs.close = { lessons: les, score: sc ? Number(sc) : null, by: me().id, t: nowIso() }; caseLog(cs, "closed_case", cs.close.score ? `${cs.close.score}/5` : L("ไม่ประเมิน", "not rated")); audit(["ปิดการจัดซื้อ", "Closed a procurement case"], cs.id);
+    commit(); renderShell(); route(); toast(L("ปิดการจัดซื้อแล้ว", "Case closed"));
   };
 }
 

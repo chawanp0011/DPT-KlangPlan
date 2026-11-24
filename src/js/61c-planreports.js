@@ -10,7 +10,7 @@ const catName = id => { const c = (S.pcat || []).find(x => x.id === id); return 
 const snap = p => ({ id: p.id, name: p.name, est: p.est, month: p.month, method: p.method, cat: p.cat || null, line: p.line });
 const planApproved = () => (S.planDoc.versions.filter(v => v.status === "approved").sort((a, b) => b.v - a.v)[0]) || null;
 const planPublished = () => (S.planDoc.versions.filter(v => v.status === "approved" && v.published).sort((a, b) => b.v - a.v)[0]) || null;
-const inPublishedPlan = p => { const v = planPublished(); return !!v && v.items.some(x => x.id === p.id); };
+const inPublishedPlan = p => !!(p.ap && p.ap.st === "approved"); // 16 Nov 2569 (round P25, file 98zzzj): a plan item is "in the plan" when Planning has approved its plan request, no longer when it sits in a published plan version
 function planDiff(base, cur) {
   const B = new Map((base ? base.items : []).map(x => [x.id, x])), C = new Map(cur.map(x => [x.id, x]));
   const added = cur.filter(x => !B.has(x.id)), removed = [...B.values()].filter(x => !C.has(x.id));
@@ -22,7 +22,7 @@ function planDiff(base, cur) {
 function planStage(p) {
   if (inPublishedPlan(p)) return null;
   const V = S.planDoc.versions, has = v => v.items.some(x => x.id === p.id), last = V.slice().sort((a, b) => b.v - a.v)[0];
-  if (V.some(v => v.status === "submitted" && has(v))) return ["wait", L("รอผู้บริหารอนุมัติแผน", "Waiting for the executive to approve the plan")];
+  if (V.some(v => v.status === "submitted" && has(v))) return ["wait", L("รอกองแผนงานอนุมัติแผน", "Waiting for the Planning division to approve the plan")];
   const A = planApproved(); if (A && !A.published && has(A)) return ["pub", L("อนุมัติแล้ว รอบันทึกประกาศใน e-GP", "Approved; waiting for the e-GP notice")];
   if (last && last.status === "rejected" && has(last)) return ["rej", L("แผนฉบับล่าสุดไม่อนุมัติ ปรับแล้วเสนอใหม่", "The latest plan was rejected; adjust and send again")];
   return ["new", L("ยังไม่ได้เสนอแผน", "Not proposed yet")];
@@ -30,7 +30,8 @@ function planStage(p) {
 const planStat = p => { const g = p.status === "planned" ? planStage(p) : null; return g ? tag(L("ร่างในแผน", "Draft in the plan"), "p-warn") : stTag(PLAN_ST, p.status); };
 const planTag = p => { const g = planStage(p); return g ? ` ${tag(g[1], g[0] === "rej" ? "p-bad" : "p-warn")}` : ""; };
 function planPanel() {
-  const A = planApproved(), Pb = planPublished(), cur = S.pplan.map(snap), d = planDiff(A, cur), pend = S.planDoc.versions.find(v => v.status === "submitted"), pr = isProcRole();
+  if (isProcRole()) { const Pb0 = planPublished(); return `<section class="panel"><header><h2>${L("แผนจัดซื้อที่ประกาศ", "Published procurement plan")}</h2></header><div class="body">${Pb0 ? tag(`${L("ประกาศแล้ว", "Published")} ${fdate(Pb0.published.date)} · ${esc(Pb0.published.ref)}`, "p-ok") : tag(L("ยังไม่ประกาศ", "Not published"), "p-warn")}<div class="sub">${L("ฉบับร่าง การเสนอ และการอนุมัติแผนเป็นของกองแผนงาน", "Drafts, proposals and approval of the plan belong to the Planning division")}</div></div></section>`; } // procurement officers only read the published plan
+  const A = planApproved(), Pb = planPublished(), cur = S.pplan.map(snap), d = planDiff(A, cur), pend = S.planDoc.versions.find(v => v.status === "submitted"), pr = isPlanRole();
   const row = (x, t, cls) => `<li><span class="mono">${x.id}</span> ${esc(tx(x.name))} ${tag(t, cls)}</li>`;
   return `<section class="panel"><header><h2>${L("ฉบับแผนจัดซื้อและการประกาศ", "Plan versions and publication")}</h2><span class="sp"></span><span class="sub">FR-PR-03 · FR-PR-37</span></header>
     <div class="body" style="display:flex;flex-direction:column;gap:10px">
@@ -39,8 +40,8 @@ function planPanel() {
         ${A && !A.published && pr ? `<input type="text" id="pv-ref" placeholder="${L("เลขที่ประกาศใน e-GP", "e-GP notice no.")}" style="min-width:160px"><button class="btn primary" type="button" id="pv-pub">${L("บันทึกว่าประกาศแล้ว", "Record as published")}</button>` : ""}</div>
       ${d.n ? `<div><b style="font-weight:600">${L("การเปลี่ยนแปลงที่ยังไม่อยู่ในฉบับที่อนุมัติ", "Changes not yet in the approved version")}</b><ul style="margin:6px 0 0;padding-left:18px">${d.added.map(x => row(x, L("เพิ่ม", "Added"), "p-info")).join("")}${d.changed.map(x => row(x, L("แก้ไข", "Changed"), "p-warn")).join("")}${d.removed.map(x => row(x, L("ตัดออก", "Removed"), "p-bad")).join("")}</ul></div>` : `<span class="sub">${L("แผนตรงกับฉบับที่อนุมัติ", "The plan matches the approved version")}</span>`}
       ${pend ? `<div class="callout" style="margin:0"><b>v${pend.v}</b> ${stTag(PV_ST, pend.status)} <span class="sub">${esc(userName(pend.by))} · ${fdate(pend.t, true)} · ${esc(pend.why)} · ${pend.items.length} ${L("รายการ", "items")} · ${mb(sumv(pend.items.map(x => x.est)))} ${L("ลบ.", "M")}</span>
-        ${ROLE === "exec" ? `<div class="row" style="margin-top:6px"><button class="btn primary" type="button" id="pv-ok">${L("อนุมัติแผนฉบับนี้", "Approve this plan")}</button><button class="btn danger" type="button" id="pv-no">${L("ไม่อนุมัติ", "Reject")}</button></div>` : ""}</div>`
-        : d.n && pr ? `<div class="row"><input type="text" id="pv-why" placeholder="${L("เหตุผลที่ปรับแผน", "Why the plan changes")}" style="min-width:240px"><button class="btn" type="button" id="pv-sub">${L("เสนอแผนฉบับใหม่ให้ผู้บริหาร", "Send the new version to the executive")}</button></div>` : ""}
+        ${isPlanRole() ? `<div class="row" style="margin-top:6px"><button class="btn primary" type="button" id="pv-ok">${L("อนุมัติแผนฉบับนี้", "Approve this plan")}</button><button class="btn danger" type="button" id="pv-no">${L("ไม่อนุมัติ", "Reject")}</button></div>` : ""}</div>`
+        : d.n && pr ? `<div class="row"><input type="text" id="pv-why" placeholder="${L("เหตุผลที่ปรับแผน", "Why the plan changes")}" style="min-width:240px"><button class="btn" type="button" id="pv-sub">${L("เสนอแผนฉบับใหม่เพื่ออนุมัติ", "Send the new version for approval")}</button></div>` : ""}
       <div class="sub">${L("ขอซื้อขอจ้างได้เฉพาะรายการที่อยู่ในแผนที่อนุมัติและประกาศแล้ว (ระดับ B ต้องยืนยันข้อยกเว้นตามระเบียบ)", "Requisitions are allowed only for items in the approved and published plan (level B; confirm the exceptions in the rules)")} · ${L("ฉบับทั้งหมด", "All versions")}: ${S.planDoc.versions.map(v => `v${v.v} ${tx(PV_ST[v.status][0])}`).join(" · ")}</div></div></section>`;
 }
 
@@ -53,7 +54,8 @@ function demand() {
   return { lines, items, groups };
 }
 function demandPanel() {
-  const d = demand(), pr = isProcRole();
+  if (isProcRole()) return `<section class="panel"><header><h2>${L("ความต้องการที่ยังไม่อยู่ในแผน", "Demand not yet in the plan")}</h2></header><div class="body sub">${L("เฉพาะกองแผนงาน", "Planning division only")}</div></section>`;
+  const d = demand(), pr = isPlanRole();
   return `<section class="panel"><header><h2>${L("ความต้องการที่ยังไม่อยู่ในแผน", "Demand not yet in the plan")}</h2><span class="sp"></span><span class="sub">FR-PR-36</span></header>
     <div class="body" style="display:flex;flex-direction:column;gap:10px">
       <div><b style="font-weight:600">${L("รายการจัดสรรปี", "FY")} ${FAM_FY} ${L("ที่ยังไม่มีรายการในแผน (M06)", "allocation lines with nothing in the plan (M06)")}</b>
@@ -69,16 +71,16 @@ function demandPanel() {
 }
 function bindPlan2() {
   const done = m => { commit(); renderShell(); route(); if (m) toast(m); };
-  const sb = $("#pv-sub"); if (sb) sb.onclick = () => { const why = $("#pv-why").value.trim(); if (why.length < 5) { toast(L("ระบุเหตุผลที่ปรับแผน", "Say why the plan changes")); return; }
+  const sb = $("#pv-sub"); if (sb) sb.onclick = () => { if (!isPlanRole()) return; const why = $("#pv-why").value.trim(); if (why.length < 5) { toast(L("ระบุเหตุผลที่ปรับแผน", "Say why the plan changes")); return; }
     const v = Math.max(...S.planDoc.versions.map(x => x.v)) + 1; S.planDoc.versions.push({ v, t: nowIso(), by: me().id, why, status: "submitted", items: S.pplan.map(snap), appr: null, published: null });
-    audit(["เสนอแผนจัดซื้อฉบับใหม่", "Proposed a new procurement plan version"], `v${v}`); notify(["exec"], [`แผนจัดซื้อฉบับ v${v} รออนุมัติ`, `Procurement plan v${v} needs approval`], "prc-plan"); done(L("ส่งผู้บริหารแล้ว", "Sent to the executive")); };
-  const dec = ok => { const v = S.planDoc.versions.find(x => x.status === "submitted"); v.status = ok ? "approved" : "rejected"; v.appr = { by: me().id, t: nowIso() };
+    audit(["เสนอแผนจัดซื้อฉบับใหม่", "Proposed a new procurement plan version"], `v${v}`); notify(["plan"], [`แผนจัดซื้อฉบับ v${v} รออนุมัติ`, `Procurement plan v${v} needs approval`], "prc-plan"); done(L("ส่งขออนุมัติแล้ว", "Sent for approval")); };
+  const dec = ok => { if (!isPlanRole()) return; const v = S.planDoc.versions.find(x => x.status === "submitted"); v.status = ok ? "approved" : "rejected"; v.appr = { by: me().id, t: nowIso() };
     audit([ok ? "อนุมัติแผนจัดซื้อ" : "ไม่อนุมัติแผนจัดซื้อ", ok ? "Approved the procurement plan" : "Rejected the procurement plan"], `v${v.v}`); notify(["proc", "prochead"], [`แผนจัดซื้อ v${v.v} ${ok ? "อนุมัติแล้ว ประกาศใน e-GP ได้" : "ไม่ได้รับอนุมัติ"}`, `Plan v${v.v} ${ok ? "approved; publish it in e-GP" : "was rejected"}`], "prc-plan"); done(); };
   const ok = $("#pv-ok"); if (ok) ok.onclick = () => dec(true);
   const no = $("#pv-no"); if (no) no.onclick = () => dec(false);
-  const pb = $("#pv-pub"); if (pb) pb.onclick = () => { const ref = $("#pv-ref").value.trim(); if (ref.length < 3) { toast(L("ใส่เลขที่ประกาศ", "Enter the notice number")); return; }
+  const pb = $("#pv-pub"); if (pb) pb.onclick = () => { if (!isPlanRole()) return; const ref = $("#pv-ref").value.trim(); if (ref.length < 3) { toast(L("ใส่เลขที่ประกาศ", "Enter the notice number")); return; }
     const A = planApproved(); A.published = { date: TODAY, ref, by: me().id }; audit(["บันทึกการประกาศแผนจัดซื้อ", "Recorded the plan publication"], `v${A.v} ${ref}`); done(L("บันทึกแล้ว ขอซื้อรายการในฉบับนี้ได้", "Recorded; items in this version can now be requisitioned")); };
-  $$("[data-dmadd]").forEach(b => (b.onclick = () => { const l = famLine(b.dataset.dmadd), est = Math.max(1e5, Math.round(l.amount * 0.5 / 1e5) * 1e5), kind = guessKind(l, l.name);
+  $$("[data-dmadd]").forEach(b => (b.onclick = () => { if (!isPlanRole()) return; const l = famLine(b.dataset.dmadd), est = Math.max(1e5, Math.round(l.amount * 0.5 / 1e5) * 1e5), kind = guessKind(l, l.name);
     const p = { id: nextId("PP", S.pplan), line: l.id, name: l.name, est, method: est <= S.pcfg.specificMax ? "specific" : "ebid", month: addDays(TODAY, 60), by: me().id, status: "planned", egp: null, kind, cat: guessCat(kind, l.name) };
     p.pid = pidNew();
     S.pjrows.push({ id: eNextId("BR-", S.pjrows), pid: p.pid, fy: FAM_FY, code: "ตัวอย่าง-" + p.line, fund: "act", gf: true, amount: p.est });
@@ -118,7 +120,7 @@ PROC.reports = () => {
   const ms = repMonths(); if (!REP_MONTH || !ms.includes(REP_MONTH)) REP_MONTH = ms[0];
   const rows = repRows(REP_MONTH), pub = S.monthly.find(x => x.month === REP_MONTH), bad = rows.filter(r => r.miss.length), head = ROLE === "prochead";
   return `
-  <div class="alert"><div class="ic" style="background:var(--info-soft);color:var(--info)">i</div><div><b>${L("สรุปผลการจัดซื้อจัดจ้างรายเดือน (แบบ สขร.1)", "Monthly procurement summary (สขร.1 layout)")}</b><p>${L("สร้างจากแฟ้มที่ประกาศผู้ชนะในเดือน ตรวจช่องที่ขาดก่อนเผยแพร่ และเก็บฉบับที่เผยแพร่ไว้ (R-18) คอลัมน์ตามแบบที่ใช้ทั่วไป ระดับ B ต้องยืนยันแบบที่หน่วยงานใช้จริง (D-P13)", "Built from cases with a winner announced that month. Gaps are checked before publishing and the published copy is kept (R-18). Columns follow the common layout; level B, confirm the agency's actual form (D-P13).")}</p></div></div>
+  <div class="alert"><div class="ic" style="background:var(--info-soft);color:var(--info)">i</div><div><b>${L("สรุปผลการจัดซื้อจัดจ้างรายเดือน (แบบ สขร.1)", "Monthly procurement summary (สขร.1 layout)")}</b><p>${L("สร้างจากรายการจัดซื้อที่ประกาศผู้ชนะในเดือน ตรวจช่องที่ขาดก่อนเผยแพร่ และเก็บฉบับที่เผยแพร่ไว้ (R-18) คอลัมน์ตามแบบที่ใช้ทั่วไป ระดับ B ต้องยืนยันแบบที่หน่วยงานใช้จริง (D-P13)", "Built from cases with a winner announced that month. Gaps are checked before publishing and the published copy is kept (R-18). Columns follow the common layout; level B, confirm the agency's actual form (D-P13).")}</p></div></div>
   <section class="panel"><header><h2>${L("เดือน", "Month")}</h2><span class="sp"></span><select id="rep-m" aria-label="${L("เดือน", "Month")}">${ms.map(m => `<option value="${m}" ${m === REP_MONTH ? "selected" : ""}>${monthLabel(m)}</option>`).join("")}</select>
       ${pub ? tag(`${L("เผยแพร่แล้ว", "Published")} ${fdate(pub.t)} · ${esc(userName(pub.by))}`, "p-ok") : tag(L("ยังไม่เผยแพร่", "Not published"), "p-warn")}</header>
     <div class="tbl-wrap"><table><thead><tr><th>${L("ลำดับ", "No.")}</th><th>${L("งานที่จัดซื้อจัดจ้าง", "Item")}</th><th class="n">${L("วงเงิน", "Budget")}</th><th class="n">${L("ราคากลาง", "Reference")}</th><th>${L("วิธี", "Method")}</th><th>${L("ผู้เสนอราคาและราคาที่เสนอ", "Offers")}</th><th>${L("ผู้ได้รับคัดเลือกและราคาที่ตกลง", "Selected and agreed price")}</th><th>${L("เหตุผลที่คัดเลือก", "Why selected")}</th><th>${L("เลขที่และวันที่สัญญา", "Contract no. and date")}</th></tr></thead>
@@ -180,7 +182,7 @@ PROC.gantt = () => {
         ${live ? fcMarker(c, x) : ""}
         <span title="${L("เดือนที่กำหนดในแผน", "Planned month")}" style="position:absolute;top:2px;bottom:2px;left:${x(p.month)}%;width:2px;background:var(--ink)"></span></div></div>`;
   }).join("");
-  return `<section class="panel"><header><h2>${L("ไทม์ไลน์แฟ้มทั้งหมด", "All cases on a timeline")}</h2><span class="sp"></span><span class="sub">FR-PR-55</span></header>
+  return `<section class="panel"><header><h2>${L("ไทม์ไลน์รายการจัดซื้อทั้งหมด", "All cases on a timeline")}</h2><span class="sp"></span><span class="sub">FR-PR-55</span></header>
     <div class="body row" style="gap:14px"><span class="row" style="gap:6px"><span style="width:14px;height:10px;background:var(--ch-2);border-radius:3px;display:inline-block"></span>${L("เตรียมการ", "Preparation")}</span><span class="row" style="gap:6px"><span style="width:14px;height:10px;background:var(--warn);border-radius:3px;display:inline-block"></span>${L("e-GP และพิจารณาผล", "Sourcing and evaluation")}</span><span class="row" style="gap:6px"><span style="width:14px;height:10px;background:var(--accent);border-radius:3px;display:inline-block"></span>${L("ช่วงสัญญา", "Contract period")}</span><span class="row" style="gap:6px"><span style="width:2px;height:12px;background:var(--ink);display:inline-block"></span>${L("เดือนในแผน", "Planned month")}</span><span class="row" style="gap:6px"><span style="width:2px;height:12px;background:var(--bad);display:inline-block"></span>${L("วันนี้", "Today")}</span></div>
     <div class="tbl-wrap"><div style="min-width:760px;padding:0 16px 12px">
       <div style="display:grid;grid-template-columns:200px 1fr;gap:10px"><div></div><div style="position:relative;height:22px">${months.map(m => `<span class="sub" style="position:absolute;left:${x(m)}%;font-size:11px">${monthLabel(m.slice(0, 7)).split(" ")[0].slice(0, LANG === "en" ? 3 : 4)}</span>`).join("")}</div></div>
@@ -202,8 +204,8 @@ function bindGantt() { $$("[data-gopen]").forEach(b => (b.onclick = () => { CASE
     base(R);
     if (!S.planDoc) return;
     const sub = S.planDoc.versions.find(v => v.status === "submitted"), A = planApproved();
-    if (sub && ROLE === "exec") R(`${L("อนุมัติแผนจัดซื้อ", "Approve the procurement plan")} v${sub.v}`, sub.why, TODAY, "prc-plan", "p-warn");
-    if (A && !A.published && isProcRole()) R(`${L("ประกาศแผนจัดซื้อ", "Publish the procurement plan")} v${A.v}`, L("บันทึกเลขที่ประกาศใน e-GP", "record the e-GP notice"), TODAY, "prc-plan", "p-warn");
+    if (sub && isPlanRole()) R(`${L("อนุมัติแผนจัดซื้อ", "Approve the procurement plan")} v${sub.v}`, sub.why, TODAY, "prc-plan", "p-warn");
+    if (A && !A.published && isPlanRole()) R(`${L("ประกาศแผนจัดซื้อ", "Publish the procurement plan")} v${A.v}`, L("บันทึกเลขที่ประกาศใน e-GP", "record the e-GP notice"), TODAY, "prc-plan", "p-warn");
     const prev = addMonths(TODAY.slice(0, 7) + "-01", -1).slice(0, 7);
     if (ROLE === "prochead" && repRows(prev).length && !S.monthly.some(m => m.month === prev)) R(`${L("เผยแพร่รายงานสรุปผลเดือน", "Publish the monthly summary for")} ${monthLabel(prev)}`, "", TODAY, "prc-reports", "p-warn");
   };

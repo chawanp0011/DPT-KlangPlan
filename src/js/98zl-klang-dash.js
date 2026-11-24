@@ -16,8 +16,8 @@ let DS = { scope: "live", unit: "" };
 const DS_SCOPE = { live: ["ยังไม่ถูกตีตก (ไม่นับที่ไม่เห็นชอบ)", "Still alive (rejected ones left out)"], approved: ["ผู้บริหารเห็นชอบแล้ว", "Approved"], all: ["ทั้งหมด รวมที่ไม่เห็นชอบ", "All, rejected ones too"] };
 const dsUnitSel = () => (typeof unitRole === "function" && unitRole() ? me().unit : DS.unit);
 const dsList = () => S.requests.filter(r => (!dsUnitSel() || r.unit === dsUnitSel()) && (DS.scope === "all" || (DS.scope === "approved" ? r.status === "approved" : r.status !== "rejected")));
-const dsKind = r => (r.cont ? "cont" : r.multi ? "multi" : "year");
-const DS_KIND = { year: ["รายการปีเดียว", "Single-year"], multi: ["รายการผูกพัน", "Multi-year commitment"], cont: ["ผูกพันต่อเนื่องจากปีก่อน", "Continuing from an earlier year"] };
+const dsKind = r => (r.multi ? "multi" : "year");
+const DS_KIND = { year: ["รายการปีเดียว", "Single-year"], multi: ["รายการผูกพัน", "Multi-year commitment"] };
 const dsAmt = r => Number(r.amount) || 0;
 const dsOut = r => { const lin = lineage(r.act) || []; return lin.find(n => n.lvl === "output") || null; };
 const dsProg = r => { const lin = lineage(r.act) || []; return lin.find(n => n.lvl === "program") || null; };
@@ -27,7 +27,7 @@ function dsGroup(list, keyFn, labelFn, amtFn) { const m = new Map(); list.forEac
 function dsSections(list) {
   const S_ = [], push = (id, th, en, rows, o) => S_.push(Object.assign({ id, t: [th, en], rows }, o || {})), one = f => r => [[f(r), 1]];
   push("nature", "ตามประเภทรายจ่าย (ประจำ/ลงทุน)", "By kind of expenditure (recurrent / investment)", dsGroup(list, one(r => rqNature(r)), k => (k === "inv" ? L("ลงทุน", "Investment") : L("ประจำ", "Recurrent"))).sort((a, b) => (a.k === "ope" ? -1 : 1)));
-  push("kind", "ตามประเภทคำขอ (ปีเดียว / ผูกพัน / ผูกพันต่อเนื่อง)", "By kind of request (single-year / commitment / continuing)", ["year", "multi", "cont"].map(k => { const l = list.filter(r => dsKind(r) === k); return { k, label: tx(DS_KIND[k]), n: l.length, amt: sumv(l.map(dsAmt)) }; }));
+  push("kind", "ตามประเภทคำขอ (ปีเดียว / ผูกพัน)", "By kind of request (single-year / commitment)", ["year", "multi"].map(k => { const l = list.filter(r => dsKind(r) === k); return { k, label: tx(DS_KIND[k]), n: l.length, amt: sumv(l.map(dsAmt)) }; }));
   const my = list.filter(r => r.multi && r.years), ys = [...new Set(my.flatMap(r => Object.keys(r.years)))].map(Number).sort();
   push("years", "วงเงินผูกพันแยกตามปีงบประมาณ (คำขอผูกพันและผูกพันต่อเนื่อง)", "Commitments by fiscal year (commitment and continuing requests)", ys.map(y => ({ k: y, label: String(y), n: my.filter(r => Number(r.years[y]) > 0).length, amt: sumv(my.map(r => Number(r.years[y]) || 0)) })), { total: false });
   push("btype", "ตามประเภทงบประมาณ", "By budget type", BUDGET_TYPES.map(t => { const l = list.filter(r => (rqCls(r).btype || rqDominant(r)) === t.id); return { k: t.id, label: `${String(t.code).padStart(2, "0")} ${tx(t.name)}`, n: l.length, amt: sumv(l.map(dsAmt)) }; }));
@@ -85,12 +85,12 @@ ePageDef("budget", "bq-dash", "BQ9", "form", KROLES, ["แดชบอร์ด�
 }, () => dsBindFilters());
 
 // ---------- BQ10: the summary report ----------
-ePageDef("budget", "bq-rpt", "BQ10", "form", KROLES, ["รายงานสรุปคำของบประมาณ", "Budget request summary report"], () => {
+ePageDef("budget", "bq-rpt", "BQ10", "form", KROLES, ["รายงานงบประมาณประจำปี", "Annual budget report"], () => {
   const list = dsList(), tot = dsTotals(list), secs = dsSections(list), st = (S.fyList || []).find(f => f.fy === FORM_FY) || {};
   return `<style>@media print { body * { visibility: hidden !important; } #ds-report, #ds-report * { visibility: visible !important; } #ds-report { position: absolute; left: 0; top: 0; width: 100%; } .no-print { display: none !important; } #ds-report .panel { break-inside: avoid; box-shadow: none; border: 1px solid #999; } }</style>
-    <div class="no-print">${eHead(DS_APP, "BQ10", ["รายงานสรุปคำของบประมาณ", "Budget request summary report"], ["รายงานตามตัวกรองเดียวกับแดชบอร์ด พิมพ์ได้ (ปุ่มพิมพ์ใช้การพิมพ์ของเบราว์เซอร์ เลือกบันทึกเป็น PDF ได้) และส่งออก CSV ของรายการคำขอและของตารางสรุป", "The report uses the same filters as the dashboard; print it (the button uses the browser's print, which can save as PDF) and export CSV of the list and of the sums"])}${dsFilters()}
+    <div class="no-print">${eHead(DS_APP, "BQ10", ["รายงานงบประมาณประจำปี", "Annual budget report"], ["รายงานตามตัวกรองเดียวกับแดชบอร์ด พิมพ์ได้ (ปุ่มพิมพ์ใช้การพิมพ์ของเบราว์เซอร์ เลือกบันทึกเป็น PDF ได้) และส่งออก CSV ของรายการคำขอและของตารางสรุป", "The report uses the same filters as the dashboard; print it (the button uses the browser's print, which can save as PDF) and export CSV of the list and of the sums"])}${dsFilters()}
       <div class="row" style="margin-bottom:10px"><button class="btn primary" type="button" id="ds-print">${L("พิมพ์รายงาน", "Print the report")}</button><button class="btn" type="button" id="ds-csv1">${L("ส่งออก CSV รายการคำขอ", "Export the request list (CSV)")}</button><button class="btn" type="button" id="ds-csv2">${L("ส่งออก CSV ตารางสรุป", "Export the sums (CSV)")}</button></div></div>
-    <div id="ds-report"><section class="panel"><div class="body"><h2 style="margin:0">${L("รายงานสรุปคำของบประมาณ ปีงบประมาณ", "Budget request summary, fiscal year")} ${FORM_FY}</h2>
+    <div id="ds-report"><section class="panel"><div class="body"><h2 style="margin:0">${L("รายงานสรุปงบประมาณ ปีงบประมาณ", "Budget summary report, fiscal year")} ${FORM_FY}</h2>
       <p class="sub" style="margin:4px 0 0">${esc(tx(S.org))} · ${L("ข้อมูล ณ วันที่", "as of")} ${fdate(TODAY)} · ${L("คำขอที่นับ", "requests counted")}: ${esc(tx(DS_SCOPE[DS.scope]))}${dsUnitSel() ? ` · ${esc(unitName(dsUnitSel()))}` : ""}${st.status ? ` · ${L("สถานะปีงบประมาณ", "year status")}: ${esc(tx(FY_STATUS[st.status] ? FY_STATUS[st.status][0] : [st.status, st.status]))}` : ""}</p>
       <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:10px"><div class="kpi"><span class="l">${L("คำขอ", "Requests")}</span><span class="v">${tot.n}</span></div><div class="kpi"><span class="l">${L("วงเงินที่ขอ (บาท)", "Asked (baht)")}</span><span class="v">${fmt(tot.amt)}</span></div><div class="kpi"><span class="l">${L("เงินนอกงบประมาณ (บาท)", "Off-budget (baht)")}</span><span class="v">${fmt(tot.off)}</span></div><div class="kpi"><span class="l">${L("ผลผลิต/โครงการ/กองทุน", "Outputs, projects, funds")}</span><span class="v">${tot.proj}</span></div></div></div></section>
       ${secs.map(s => dsTable(s, tot, false)).join("")}

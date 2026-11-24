@@ -35,7 +35,7 @@ STRAT.bank = () => {
           <td><div class="row" style="flex-wrap:nowrap">
             ${pl && (i.status === "proposed" || i.status === "screened") ? `<button class="btn" type="button" data-score="${i.id}">${i.scores ? L("ปรับคะแนน", "Rescore") : L("ให้คะแนน", "Score")}</button>` : ""}
             ${pl && i.status === "screened" ? `<button class="btn primary" type="button" data-iacc="${i.id}">${L("รับเข้าแผน", "Accept")}</button><button class="btn danger" type="button" data-irej="${i.id}">${L("ไม่รับ", "Decline")}</button>` : ""}
-            ${(mine || pl) && i.status === "accepted" ? `<button class="btn primary" type="button" data-iconv="${i.id}">${L("สร้างร่างคำขอ M02", "Create M02 draft")}</button>` : ""}
+            ${mine && i.status === "accepted" ? `<button class="btn primary" type="button" data-iconv="${i.id}">${L("สร้างร่างคำขอ M02", "Create M02 draft")}</button>` : ""}
             ${historyBtn(i.id, i.id)}</div></td></tr>
           ${IDEA_OPEN === i.id ? `<tr class="cmt-row"><td colspan="8"><div class="row" style="align-items:flex-end">
             ${CRIT.map((c, n) => `<div class="f"><label for="sc-${n}">${tx(c[0])} (${c[1]}%)</label><select id="sc-${n}">${[1, 2, 3, 4, 5].map(v => `<option ${(i.scores ? i.scores[n] : 3) === v ? "selected" : ""}>${v}</option>`).join("")}</select></div>`).join("")}

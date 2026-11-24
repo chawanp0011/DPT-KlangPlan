@@ -87,7 +87,7 @@ CASE_PANELS.push(c => {
 CASE_BINDS.push((c, done) => {
   const b = $("#bl-release"); if (b) b.onclick = () => { const note = $("#bl-note").value.trim(); if (note.length < 10) { toast(L("ระบุหลักฐานอย่างน้อย 10 ตัวอักษร", "Give evidence of at least 10 characters")); return; }
     const names = [...new Set([...(c.bids || []).map(x => x.name), ...(c.quotes || []).map(q => tx(q.vendor)), ...(c.award ? [tx(c.award.winner)] : [])])].filter(n => blHit(n));
-    c.blOverride = { by: me().id, note, t: nowIso(), names }; audit(["ปลดการตรวจพบรายชื่อผู้ทิ้งงาน", "Released an abandoned-work match"], `${c.id} ${names.join(", ")}`); notify(["audit"], [`แฟ้ม ${c.id} ปลดการตรวจพบรายชื่อผู้ทิ้งงาน`, `Case ${c.id}: an abandoned-work match was released`], `case:${c.id}`); done(L("บันทึกแล้ว แจ้งผู้ตรวจสอบแล้ว", "Recorded; Audit notified")); };
+    c.blOverride = { by: me().id, note, t: nowIso(), names }; audit(["ปลดการตรวจพบรายชื่อผู้ทิ้งงาน", "Released an abandoned-work match"], `${c.id} ${names.join(", ")}`); notify(["audit"], [`รายการจัดซื้อ ${c.id} ปลดการตรวจพบรายชื่อผู้ทิ้งงาน`, `Case ${c.id}: an abandoned-work match was released`], `case:${c.id}`); done(L("บันทึกแล้ว แจ้งผู้ตรวจสอบแล้ว", "Recorded; Audit notified")); };
 });
 
 // ---------- supervision and checkpoints ----------

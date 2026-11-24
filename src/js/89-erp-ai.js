@@ -21,13 +21,12 @@ const pad2 = n => String(n).padStart(2, "0");
 // Each agent returns { steps: [text], found: [{ sev: bad|warn|info, text, link }], props: [{ id, label, text, apply }] }.
 const ERP_AGENTS = {
   "AG-30": () => {
-    const A = S.assets || [], inS = A.filter(assetInService), found = [], intake = intakeRows(), cnt = (S.acount || []).find(x => x.status === "open");
-    intake.forEach(r => found.push({ sev: "warn", text: L(`${r.c.id} ${tx(r.ph.name)} ตรวจรับแล้วแต่ยังไม่ได้ลงทะเบียนครุภัณฑ์`, `${r.c.id} ${r.ph.name[1]} is accepted but not registered as an asset`), link: "as-intake" }));
+    const A = S.assets || [], inS = A.filter(assetInService), found = [], cnt = (S.acount || []).find(x => x.status === "open");
     A.filter(a => a.status === "pending").forEach(a => found.push({ sev: "warn", text: L(`${a.id} รอยืนยันขึ้นทะเบียน`, `${a.id} awaits registration`), link: "as-reg" }));
     inS.filter(a => !a.cust || !a.loc).forEach(a => found.push({ sev: "warn", text: L(`${a.tag || a.id} ยังไม่ระบุ${!a.cust ? "ผู้ดูแล" : "สถานที่"}`, `${a.tag || a.id} has no ${!a.cust ? "custodian" : "location"}`), link: "as-reg" }));
     inS.filter(a => a.cost >= ASSET_LOW).forEach(a => { const left = assetCat(a.cat).life * 12 - assetDep(a).months; if (left <= 6) found.push({ sev: "info", text: L(`${a.tag} ใกล้ครบอายุใช้งานอีก ${left} เดือน (มูลค่าตามบัญชี ${fmt(assetDep(a).nbv)} บาท)`, `${a.tag} ends its useful life in ${left} months (book ${fmt(assetDep(a).nbv)} baht)`), link: "as-reg" }); });
     if (cnt) found.push({ sev: "info", text: L(`รอบตรวจนับ ${cnt.id} นับแล้ว ${Object.keys(cnt.results).length}/${inS.length}`, `Count ${cnt.id}: ${Object.keys(cnt.results).length}/${inS.length} counted`), link: "as-count" });
-    return { steps: [L(`อ่านทะเบียนครุภัณฑ์ ${A.length} รายการ`, `Read ${A.length} register entries`), L(`เทียบงวดที่ตรวจรับแล้วกับทะเบียน (พบ ${intake.length} งวดที่ยังไม่ลงทะเบียน)`, `Compared accepted phases with the register (${intake.length} not registered)`), L("ตรวจผู้ดูแล สถานที่ และอายุใช้งาน", "Checked custodians, locations and useful life"), L("ตรวจความคืบหน้าการนับ", "Checked count progress")], found, props: [] };
+    return { steps: [L(`อ่านทะเบียนครุภัณฑ์ ${A.length} รายการ`, `Read ${A.length} register entries`), L(`ตรวจสถานะ ผู้ดูแล สถานที่ และอายุใช้งานของทะเบียน`, `Checked status, custodian, location and useful life`), L("ตรวจผู้ดูแล สถานที่ และอายุใช้งาน", "Checked custodians, locations and useful life"), L("ตรวจความคืบหน้าการนับ", "Checked count progress")], found, props: [] };
   },
   "AG-31": () => {
     const open = (S.reorder || []).filter(x => ["sent", "taken"].includes(x.status)).map(x => x.item), low = (S.sitems || []).filter(i => stockLow(i) && !open.includes(i.id));

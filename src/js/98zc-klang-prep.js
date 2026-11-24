@@ -26,26 +26,26 @@ function casePrepItems(c) {
 // ---------- the hand-over ----------
 const casePrepOpen = c => { const n = caseState(c); return n >= 1 && n <= 4 && !c.cancelled && (isProcRole() || (cmCanNew(c) && !prepSent(c) && !prepRecv(c))); };
 function casePrepSend(c, note) {
-  const n = caseState(c); if (c.cancelled || n < 3 || n > 4) return L("แฟ้มอยู่ขั้นที่ส่งต่อไม่ได้", "The case isn't at a step where it can be handed over");
+  const n = caseState(c); if (c.cancelled || n < 3 || n > 4) return L("รายการจัดซื้ออยู่ขั้นที่ส่งต่อไม่ได้", "The case isn't at a step where it can be handed over");
   if (!(isProcRole() || cmCanNew(c))) return L("สำนัก/กองเจ้าของเรื่องหรือเจ้าหน้าที่พัสดุเท่านั้นที่ส่งได้", "Only the owning division or procurement can send it");
   if (prepSent(c) || prepRecv(c)) return L("ส่งไปแล้ว", "Already handed over");
   const bad = casePrepItems(c).find(x => !x.ok); if (bad) return `${L("ยังส่งไม่ได้", "Can't send yet")}: ${bad.label}`;
   c.prep = Object.assign(c.prep || {}, { sent: { by: me().id, t: nowIso(), note: note || "" }, recv: null, returned: null });
   audit(["ส่งเอกสารเตรียมให้กองคลัง", "Handed the prepared papers to Finance"], `${c.id}${note ? " · " + note : ""}`); caseLog(c, "prep_sent", note || "");
-  notify(["proc", "prochead"], [`แฟ้ม ${c.id} สำนัก/กองส่งเอกสารเตรียมให้กองคลัง รอรับเรื่อง`, `Case ${c.id}: the division handed over the prepared papers; take the case`], "case:" + c.id); return "";
+  notify(["proc", "prochead"], [`รายการจัดซื้อ ${c.id} สำนัก/กองส่งเอกสารเตรียมให้กองคลัง รอรับเรื่อง`, `Case ${c.id}: the division handed over the prepared papers; take the case`], "case:" + c.id); return "";
 }
 function casePrepRecv(c) {
   if (!isProcRole()) return L("เจ้าหน้าที่พัสดุเท่านั้นที่รับเรื่องได้", "Only procurement can take the case"); if (!prepSent(c) || prepRecv(c)) return L("ไม่มีเรื่องรอรับ", "Nothing waits to be taken");
-  if (caseState(c) === 3 && !caseMove(c)) return L("ไปขั้นถัดไปไม่ได้ ดูรายการตรวจของแฟ้ม", "Can't move on; see the case checks"); // taking the case moves it from step 3 to step 4
+  if (caseState(c) === 3 && !caseMove(c)) return L("ไปขั้นถัดไปไม่ได้ ดูรายการตรวจของรายการจัดซื้อ", "Can't move on; see the case checks"); // taking the case moves it from step 3 to step 4
   c.prep.recv = { by: me().id, t: nowIso() }; audit(["พัสดุรับเรื่อง", "Procurement took the case"], c.id); caseLog(c, "prep_recv", "");
-  notify(["div", "divhead"], [`แฟ้ม ${c.id} พัสดุรับเรื่องแล้ว`, `Case ${c.id}: procurement took the case`], "case:" + c.id); return "";
+  notify(["div", "divhead"], [`รายการจัดซื้อ ${c.id} พัสดุรับเรื่องแล้ว`, `Case ${c.id}: procurement took the case`], "case:" + c.id); return "";
 }
 function casePrepReturn(c, note) {
   if (!isProcRole()) return L("เจ้าหน้าที่พัสดุเท่านั้นที่ส่งกลับได้", "Only procurement can send it back"); const n = caseState(c); if (!prepSent(c) || n > 4) return L("ไม่มีเรื่องที่ส่งกลับได้", "Nothing to send back");
   if (String(note || "").trim().length < 3) return L("ระบุคำแนะนำให้สำนัก/กองแก้ไข", "Give the division advice on what to fix");
   c.prep.sent = null; c.prep.recv = null; c.prep.returned = { by: me().id, t: nowIso(), note: String(note).trim() };
   audit(["พัสดุส่งกลับให้สำนัก/กองแก้ไข", "Sent back to the division"], `${c.id} · ${c.prep.returned.note}`); caseLog(c, "prep_return", c.prep.returned.note);
-  notify(["div", "divhead"], [`แฟ้ม ${c.id} พัสดุส่งกลับให้แก้ไข: ${c.prep.returned.note}`, `Case ${c.id} was sent back: ${c.prep.returned.note}`], "case:" + c.id); return "";
+  notify(["div", "divhead"], [`รายการจัดซื้อ ${c.id} พัสดุส่งกลับให้แก้ไข: ${c.prep.returned.note}`, `Case ${c.id} was sent back: ${c.prep.returned.note}`], "case:" + c.id); return "";
 }
 function casePrepPanel(c) {
   const n = caseState(c), P = c.prep || {}, items = casePrepItems(c), allOk = items.every(x => x.ok), open = n <= 4 && !c.cancelled;

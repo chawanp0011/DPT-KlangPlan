@@ -46,7 +46,7 @@ CRUD.def("sbBatch", {
     if (!ids.length) return [{ f: null, m: L("เลือกคำขออย่างน้อยหนึ่งรายการ", "Pick at least one request") }];
     const bad = ids.filter(id => sbBlocked(S.requests.find(r => r.id === id)));
     { const qc = quotaCheck(FORM_FY, sumv(ids.map(id => subAmt(S.requests.find(r => r.id === id)))), b); if (!qc.ok) return [{ f: null, m: qc.msg }]; } // the quota ceiling (file 98zc)
-    return bad.length ? [{ f: null, m: `${L("ยังไม่ผ่านการตรวจก่อนส่ง", "Not passing the checks")}: ${bad.join(", ")} · ${L("แก้ที่แท็บตรวจก่อนส่ง", "fix them on the checks tab")}` }] : [];
+    return bad.length ? [{ f: null, m: `${L("ยังไม่ผ่านการตรวจก่อนส่ง", "Not passing the checks")}: ${bad.join(", ")} · ${L("แก้ที่แท็บปรับปรุงสถานะ สงป.", "fix them on the tab Update the Bureau status")}` }] : [];
   },
   create: { can: () => ROLE === "plan" && sbReady().length > 0 && !sbBatches().some(b => b.status === "prep"), label: ["สร้างชุดส่ง", "New batch"],
     run: v => { const sb = sbS(); sb.seq = Math.max(sb.seq || 0, sbBatches().length) + 1;

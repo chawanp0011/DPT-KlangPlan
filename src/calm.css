@@ -295,3 +295,8 @@ ul.plain { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-di
 .asof label svg { width: 16px; height: 16px; }
 .asof-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px; margin: 0 0 14px; border: 1px solid var(--warn); background: var(--warn-soft); color: var(--ink); border-radius: 10px; font-size: 13px; }
 .asof-bar svg { width: 15px; height: 15px; vertical-align: -3px; }
+/* the file picker looks like the other buttons (23 Nov 2569) */
+input[type="file"] { font: inherit; font-size: 13px; color: var(--ink-2); max-width: 100%; }
+input[type="file"]::file-selector-button { border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 6px 12px; margin-right: 10px; cursor: pointer; font: inherit; font-weight: 600; font-size: 13px; }
+input[type="file"]::file-selector-button:hover { border-color: var(--muted); }
+input[type="file"]:disabled::file-selector-button { opacity: .5; cursor: not-allowed; }

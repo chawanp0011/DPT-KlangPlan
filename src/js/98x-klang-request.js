@@ -53,7 +53,7 @@ function rqSetApproved(r, v) {
 function rqToAlloc(r) {
   const amt = actAmount(r); if (amt == null) return L("ยังไม่มียอดที่ได้รับอนุมัติ", "No approved amount yet");
   if (rqAllocLine(r)) return L("นำไปจัดสรรแล้ว", "Already in the allocation");
-  const P = S.parl, done = P && P.stage >= PARL_STEPS.length; let A = S.allocs[FORM_FY];
+  const P = S.parl, done = actInForce(); let A = S.allocs[FORM_FY];
   if (A && A.fromAct && !A.draft) return L("จัดสรรตาม พ.ร.บ. แล้ว เพิ่มรายการที่หน้าจัดสรร", "Already allocated under the act; add lines on the allocation page");
   if (!A) A = S.allocs[FORM_FY] = { fy: FORM_FY, draft: true, fromAct: false, act: [`ร่างการจัดสรรปี ${FORM_FY} จากผลพิจารณาของสำนักงบประมาณ`, `FY${FORM_FY} draft allocation from the Budget Bureau result`], date: TODAY, total: 0, byType: {}, lines: [], transfers: [], releases: [] };
   A.lines.push({ id: "N" + (Math.max(0, ...A.lines.map(l => Number(String(l.id).replace(/\D/g, "")) || 0)) + 1), req: r.id, unit: r.unit, name: r.name, type: rqDominant(r), amount: amt, act: r.act, plan: planFromQ(r, amt) });
@@ -72,10 +72,9 @@ function rqPanel(r, ed) {
     <div class="f"><label for="rq-prog">${L("แผนงาน", "Programme")}</label><select id="rq-prog" ${ds}><option value="">${L("— เลือกแผนงาน —", "— Choose a programme —")}</option>${opt(progs, c.prog, rqNodeName)}</select></div>
     <div class="f"><label for="rq-proj">${L("ผลผลิต/โครงการ", "Output or project")}</label><select id="rq-proj" ${ds || !c.prog ? "disabled" : ""}><option value="">${L("— เลือกผลผลิต/โครงการ —", "— Choose an output or project —")}</option>${opt(outs, c.proj, rqNodeName)}</select></div>
     <div class="f"><label for="rq-act">${L("กิจกรรม", "Activity")}</label><select id="rq-act" ${ds || !c.proj ? "disabled" : ""}><option value="">${L("— เลือกกิจกรรม —", "— Choose an activity —")}</option>${opt(acts, r.act, rqNodeName)}</select></div>
-    <div class="f"><label>${L("ประเภทงบรายจ่าย (จากรายการงบประมาณ)", "Expenditure type (from the budget lines)")}</label><div class="row"><b>${esc(String(BUDGET_TYPES.find(t => t.id === rqDominant(r)).code).padStart(2, "0"))} : ${esc(typeName(rqDominant(r)))}</b></div></div>
     ${rqCatFields(c, ds, r)}
     <div class="f"><label for="rq-nature">${L("ประจำ/ลงทุน", "Recurrent or investment")}</label><select id="rq-nature" ${ds}><option value="" ${!c.nature ? "selected" : ""}>${L("ตามรายการงบประมาณ", "From the budget lines")} (${nat === "inv" ? L("ลงทุน", "investment") : L("ประจำ", "recurrent")})</option><option value="inv" ${c.nature === "inv" ? "selected" : ""}>${L("ลงทุน", "Investment")}</option><option value="ope" ${c.nature === "ope" ? "selected" : ""}>${L("ประจำ", "Recurrent")}</option></select></div>
-    <div class="f"><label>${L("ประเภทบัญชี (1 ถึง 4)", "Account type (1 to 4)")}</label><div class="row">${[0, 1, 2, 3].map(i => chk("rq-acct" + i, c.acct[i], `${L("บัญชีที่", "Account")} ${i + 1}`)).join("")}</div></div>
+    <div class="f"><label>${L("ประเภทบัญชี (1 ถึง 4)", "Account type (1 to 4)")}</label><div class="row">${[0, 1, 2, 3].map(i => chk("rq-acct" + i, c.acct[i], typeof acctLabel === "function" ? acctLabel(i) : `${L("บัญชีที่", "Account")} ${i + 1}`)).join("")}</div></div>
     <div class="f full"><label>${L("เงินงบประมาณ — ประเภทเงิน (ตั้งที่ BQ2)", "Budget money — kind (set on BQ2)")}</label><div class="row" style="flex-wrap:wrap">${rqMoneyTypes("bud").map(t => chk("rq-m-" + t.id, c.money.includes(t.id), esc(tx(t.name)))).join("")}</div>
       ${c.money.includes("base") ? `<div class="row" style="margin-left:22px;flex-wrap:wrap">${RQ_BASE.map(([k, l]) => chk("rq-b-" + k, c.base.includes(k), esc(tx(l)))).join("")}</div>` : ""}
       ${c.money.includes("multi") && !r.multi ? `<span class="hint">${L("เลือกรายจ่ายผูกพัน แต่คำขอนี้ยังเป็นรายการปีเดียว", "Multi-year commitment is ticked but the request is single-year")}</span>` : ""}</div>
@@ -161,7 +160,7 @@ reqRows = f => {
   const list = (unitRole() ? S.requests.filter(r => r.unit === me().unit) : S.requests).filter(r => (!f || r.status === f) && (!RQ_F2 || rqFund(r) === RQ_F2)), lim = (rule("BR-04") || {}).param || 20;
   return list.map(r => {
     const d = r.prev ? (r.amount / r.prev - 1) * 100 : null, dt = d === null ? tag(L("โครงการใหม่", "New"), "p-info") : `<span style="color:${d > lim ? "var(--warn)" : "var(--ink-2)"}">${d >= 0 ? "+" : ""}${fmt(d, 1)}%</span>`, pj = rqProjNode(r), fs = rqFund(r), act = actAmount(r);
-    return `<tr class="click" tabindex="0" data-id="${r.id}"><td class="mono">${r.id}${r.id === S.story ? " ★" : ""}</td><td>${pj ? `<span class="mono sub">${esc(pj.code)}</span> ${esc(tx(pj.name))}` : `<span class="sub">–</span>`}</td><td>${esc(tx(r.name))}${r.cont ? ` ${tag(L("ผูกพันต่อเนื่อง", "Continuing"), "p-warn")}` : r.multi ? ` ${tag(L("ผูกพัน", "Multi-year"), "p-info")}` : ""}</td><td class="sub">${unitName(r.unit)}</td><td class="n">${fmt(r.amount)}</td><td class="n">${dt}</td><td>${pill(r.status)}</td>
+    return `<tr class="click" tabindex="0" data-id="${r.id}"><td class="mono">${r.id}${r.id === S.story ? " ★" : ""}</td><td>${pj ? `<span class="mono sub">${esc(pj.code)}</span> ${esc(tx(pj.name))}` : `<span class="sub">–</span>`}</td><td>${esc(tx(r.name))}${r.multi ? ` ${tag(L("ผูกพัน", "Multi-year"), "p-info")}` : ""}</td><td class="sub">${unitName(r.unit)}</td><td class="n">${fmt(r.amount)}</td><td class="n">${dt}</td><td>${pill(r.status)}</td>
       <td>${fs ? tag(tx(RQ_FUND[fs][0]), RQ_FUND[fs][1]) + (act != null ? `<div class="sub">${mb(act)} ${L("ลบ.", "M")}</div>` : "") : `<span class="sub">–</span>`}</td><td class="sub">${fdate(r.updated)}</td></tr>`;
   }).join("") || `<tr><td colspan="9" class="sub">${L("ไม่มีคำขอในสถานะนี้", "No requests with this status")}</td></tr>`;
 };

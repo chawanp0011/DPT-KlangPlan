@@ -9,7 +9,7 @@
 const B_ALL = ["div", "plan", "exec", "fin", "audit"];
 const BUD_MOD = {
   strategy: { get: () => STRAT_TAB, set: v => (STRAT_TAB = v) },
-  consolidation: { get: () => CONS_TAB, set: v => (CONS_TAB = v) },
+  consolidation: { get: () => CN_TAB, set: v => (CN_TAB = v) },
   review: { get: () => REV_TAB, set: v => (REV_TAB = v) },
   submission: { get: () => SUB_TAB, set: v => (SUB_TAB = v) },
   allocation: { get: () => ALLOC_TAB, set: v => (ALLOC_TAB = v) },
@@ -27,9 +27,8 @@ const BUD_PAGES = [
       { id: "align", roles: ["plan", "exec", "audit"] }, { id: "bank" }, { id: "revise", roles: ["plan", "exec", "audit"] }] },
   { id: "requests", code: "B3", m: "M02", group: "form" },
   { id: "consolidation", code: "B4", m: "M03", group: "form", mod: "consolidation",
-    tabs: ["overview", "priority", { id: "ceil", label: ["เพดานวงเงินและคำตอบหน่วยงาน", "Ceilings and replies"], keys: ["ceilings", "responses"] }, "programme",
-      { id: "analysis", label: ["วิเคราะห์ 3 ปีและฐานศูนย์", "Three-year and zero-base"], keys: ["r3", "zbb"] }, "forward"] },
-  { id: "review", code: "B5", m: "M04", group: "form", mod: "review", tabs: ["queue", "rounds", "meetings", "compare", "hearings", "impact"] },
+    tabs: ["overview", "list", "nonbudget"] },
+  { id: "review", code: "B5", m: "M04", group: "form", mod: "review", tabs: ["rounds", "queue", "meetings", "hearings", "flow"] },
   { id: "submission", code: "B6", m: "M05", group: "form", mod: "submission",
     tabs: ["checks", { id: "pack", label: ["ชุดคำขอและแบบฟอร์ม", "Pack and forms"], keys: ["pack", "form", "export"] },
       { id: "status", label: ["สถานะและรัฐสภา", "Status and Parliament"], keys: ["status", "parliament"] }, "brief"] },

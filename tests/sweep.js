@@ -79,9 +79,10 @@
       // Round C2: requests, the department ceiling, duplicates, meetings and hearings, for every role that sees them
       if (o.suites.includes("render") && typeof CRUD !== "undefined" && CRUD.defs.rqReq) for (const role of ["div", "divhead", "plan", "exec", "audit", "admin", "fin"].filter(r => o.roles.includes(r))) {
         ROLE = role; LANG = o.langs[0]; safe("shell", renderShell);
-        const where = { rqReq: ["requests", () => {}], csCeil: ["consolidation", () => (CONS_TAB = "ceilings")], csDup: ["consolidation", () => (CONS_TAB = "overview")], rvMeet: ["review", () => (REV_TAB = "meetings")], rvHear: ["review", () => (REV_TAB = "hearings")],
-          sbBatch: ["submission", () => (SUB_TAB = "status")], sbRev: ["submission", () => (SUB_TAB = "status")], plCut: ["submission", () => (SUB_TAB = "parliament")], plApp: ["submission", () => (SUB_TAB = "parliament")],
-          stNode: ["strategy", () => (STRAT_TAB = "map")], stKpi: ["strategy", () => (STRAT_TAB = "kpis")], stIdea: ["strategy", () => (STRAT_TAB = "bank")], stRev: ["strategy", () => (STRAT_TAB = "revise")], pfOut: ["performance", () => (PERF_TAB = "kpis")],
+        const where = { rqReq: ["requests", () => {}], csDup: ["consolidation", () => (CN_TAB = "list")], rvMeet: ["review", () => (REV_TAB = "meetings")], rvHear: ["review", () => (REV_TAB = "hearings")],
+          // (16 Nov 2569) the batch, Bureau-answer and parliament lists sat on the tabs status and parliament of B6, which are out for now
+          agStrat: ["agrev", () => (AGR_TAB = "map")], agSvc: ["agrev", () => (AGR_TAB = "kpis")], stKpi: ["agrev", () => (AGR_TAB = "kpis")], agOut: ["agrev", () => (AGR_TAB = "ag-out")], agOutK: ["agrev", () => (AGR_TAB = "ag-out")], agProg: ["agrev", () => (AGR_TAB = "ag-prog")], acct: ["rg-acct", () => {}], minStrat: ["rg-mstrat", () => {}], minSvc: ["rg-msvc", () => {}], // (13 Nov 2569, menu round M2) the strategy-and-goal list was split into agStrat and agSvc, and the new lists of the menu are opened too
+           pfOut: ["performance", () => (PERF_TAB = "kpis")],
           adUnit: ["admin", () => (ADMIN_TAB = "master")], adPrice: ["admin", () => (ADMIN_TAB = "master")], adFy: ["admin", () => (ADMIN_TAB = "fiscal")], adCal: ["admin", () => (ADMIN_TAB = "fiscal")], adNode: ["admin", () => (ADMIN_TAB = "structure")],
           adCm: ["admin", () => (ADMIN_TAB = "bmaster")], adMp: ["admin", () => (ADMIN_TAB = "bmaster")], adCs: ["admin", () => (ADMIN_TAB = "bmaster")],
           wiSc: ["insight", () => (INTEL_TAB = "whatif")], anDone: ["insight", () => (INTEL_TAB = "anoms")], agRun: ["assistant", () => (INTEL_TAB = "bagents")],

@@ -87,7 +87,7 @@ const vReady = v => vEvidence(v).every(e => e.ok) && vRules(v).every(r => r.ok |
 const vLog = (v, act, note) => (v.log = v.log || []).push({ t: nowIso(), by: me().id, role: ROLE, act, note: note || "" });
 const nextVc = () => `VC-${FAM_FY}-${String(Math.max(0, ...(S.vouchers || []).map(v => Number(v.id.split("-")[2]) || 0)) + 1).padStart(3, "0")}`;
 const vcCanApprove = () => canSpend();
-const vcIsMaker = v => v.maker === me().id;
+const vcIsMaker = v => v.maker === me().id || (!v.maker && !!v.reqBy && ROLE === "fin"); // a request made by procurement has no maker until the finance officer takes it (P32)
 // Voucher checking groups (duty list of the Finance Division): group 2 checks investment, construction, consultant and procurement above 100,000 baht; group 1 checks the rest.
 const VC_GROUP_LIMIT = 100000;
 // Fisko-KlangFinance R2: a voucher of any kind charged to an investment line also goes to group 2 (the duty list names investment spending, not only procurement).
@@ -263,6 +263,7 @@ function vcMake(cid, n, extra) {
   commit(); renderShell(); route(); toast(L("สร้างใบขอเบิกแล้ว · ตรวจยอดและภาษี แล้วส่งตรวจ", "Voucher created · check the amounts and tax, then send for checking"));
 }
 function vcAct(v, a) {
+  if (!v.maker && v.reqBy && ROLE === "fin") { v.maker = me().id; vLog(v, ["การเงินรับเรื่องจากพัสดุ", "Finance took the request from procurement"]); }
   const why = ($("#vc-why") || { value: "" }).value.trim(), done = (msg, roles, text) => { if (roles) notify(roles, text, "fnc-pay"); commit(); renderShell(); route(); toast(msg); };
   if (["return", "reject", "cancel"].includes(a) && why.length < 5) { toast(L("ระบุเหตุผลอย่างน้อย 5 ตัวอักษร", "Give a reason of at least 5 characters")); return; }
   if (a === "submit") {

@@ -7,7 +7,7 @@
 //   st: { key: [[th, en], pillClass] }, status: r => key, gone: r => true when cancelled/withdrawn (hidden by default),
 //   cols: [{ h: label, c: r => html, n: true for numbers }], search: r => text,
 //   filters: [{ id, label, opts: () => [[value, label]], get: r => value }],
-//   fields: (r | null, vals) => [{ id, label, type: text|money|number|select|date|textarea|check|info, opts, req, min, max, lock, hint, wide }],
+//   fields: (r | null, vals) => [{ id, label, type: text|money|number|select|date|textarea|check|checks (a list of tick boxes, value is an array)|info, opts, req, min, max, lock, hint, wide }],
 //   check: (vals, r | null) => [{ f: fieldId | null, m: message }],
 //   create: { can: () => bool, label: [th, en], run: vals => record },   // run returns the new record
 //   edit: { can: r => bool, run: (r, vals, why) => void, why: r => bool },  // why: ask for a reason when saving
@@ -45,8 +45,8 @@ function crudList(key, opts = {}) {
     <span class="sp"></span><span class="sub">${rows.length} ${L("รายการ", "records")}</span>
     ${canNew ? `<button class="btn primary" type="button" data-crnew="${key}">+ ${tx(sp.create.label)}</button>` : ""}</div>`;
   const table = rows.length ? `<div class="tbl-wrap"><table class="cr-tbl"><thead><tr>${sp.cols.map(c => `<th${c.n ? ` class="n"` : ""}>${tx(c.h)}</th>`).join("")}${sp.st ? `<th>${L("สถานะ", "Status")}</th>` : ""}</tr></thead>
-    <tbody>${rows.map(r => { const id = sp.id(r), on = CR_OPEN && CR_OPEN.key === key && String(CR_OPEN.id) === String(id);
-      return `<tr class="click ${sp.gone && sp.gone(r) ? "cr-gone" : ""} ${on ? "cr-on" : ""}" data-cropen="${key}|${esc(id)}" tabindex="0" aria-label="${L("เปิด", "Open")} ${esc(id)}">${sp.cols.map(c => `<td${c.n ? ` class="n"` : ""}>${c.c(r)}</td>`).join("")}${sp.st ? `<td>${crPill(sp, r)}</td>` : ""}</tr>`; }).join("")}</tbody>
+    <tbody>${(() => { let lg = null; return rows.map(r => { const id = sp.id(r), on = CR_OPEN && CR_OPEN.key === key && String(CR_OPEN.id) === String(id), g = sp.group ? sp.group(r) : null, gh = g && g !== lg ? `<tr class="cr-group"><td colspan="${sp.cols.length + (sp.st ? 1 : 0)}" style="background:var(--bg);font-weight:600">${g}</td></tr>` : ""; lg = g;
+      return gh + `<tr class="click ${sp.gone && sp.gone(r) ? "cr-gone" : ""} ${on ? "cr-on" : ""}" data-cropen="${key}|${esc(id)}" tabindex="0" aria-label="${L("เปิด", "Open")} ${esc(id)}">${sp.cols.map(c => `<td${c.n ? ` class="n"` : ""}>${c.c(r)}</td>`).join("")}${sp.st ? `<td>${crPill(sp, r)}</td>` : ""}</tr>`; }).join(""); })()}</tbody>
     ${opts.foot ? `<tfoot>${opts.foot}</tfoot>` : ""}</table></div>`
     : `<div class="body sub cr-empty">${F.q || Object.values(F.f).some(Boolean) ? L("ไม่พบรายการที่ตรงกับตัวกรอง", "Nothing matches the filters") : opts.empty || L("ยังไม่มีรายการ", "Nothing here yet")}${canNew && !F.q ? ` · <button class="btn ghost" type="button" data-crnew="${key}">+ ${tx(sp.create.label)}</button>` : ""}</div>`;
   return `<section class="panel cr-list" data-crlist="${key}">${opts.head ? `<header>${opts.head}</header>` : ""}${bar}${table}${opts.after || ""}</section>${CR_OPEN && CR_OPEN.key === key ? crDrawer() : ""}`;
@@ -80,7 +80,7 @@ function crActBar(sp, r) {
       <div class="row"><button class="btn ${a.kind === "danger" ? "danger" : "primary"}" type="submit">${L("ยืนยัน", "Confirm")}</button><button class="btn ghost" type="button" data-crask="">${L("ยกเลิก", "Back")}</button></div></form>`;
   }
   if (!acts.length && !canEd) return "";
-  return `<div class="cr-acts">${canEd ? `<button class="btn" type="button" data-credit>${L("แก้ไข", "Edit")}</button>` : ""}${acts.map(a => `<button class="btn ${a.kind || ""}" type="button" data-crask="${a.id}">${a.label}</button>`).join("")}</div>`;
+  return `<div class="cr-acts">${canEd ? `<button class="btn ${sp.edit.primary && (typeof sp.edit.primary !== "function" || sp.edit.primary(r)) ? "primary" : ""}" type="button" data-credit>${sp.edit.label ? tx(typeof sp.edit.label === "function" ? sp.edit.label(r) : sp.edit.label) : L("แก้ไข", "Edit")}</button>` : ""}${acts.map(a => `<button class="btn ${a.kind || ""}" type="button" data-crask="${a.id}">${a.label}</button>`).join("")}</div>`;
 }
 function crHist(sp, r) {
   const key = sp.hist ? sp.hist(r) : String(sp.id(r)), items = typeof historyItems === "function" ? historyItems(key) : [];
@@ -100,6 +100,7 @@ function crForm(sp, r) {
     if (f.type === "select") inp = `<select id="${id}" name="${f.id}"${req}${bad}>${f.blank ? `<option value="">${f.blank}</option>` : ""}${f.opts.map(([k, l]) => `<option value="${esc(k)}" ${String(v) === String(k) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
     else if (f.type === "textarea") inp = `<textarea id="${id}" name="${f.id}" rows="3"${req}${bad}>${esc(v || "")}</textarea>`;
     else if (f.type === "check") return `<div class="cr-f ${f.wide ? "wide" : ""}"><label class="field-inline" for="${id}"><input type="checkbox" id="${id}" name="${f.id}" ${v ? "checked" : ""}> ${tx(f.label)}</label>${hint}</div>`;
+    else if (f.type === "checks") { const on = (Array.isArray(v) ? v : []).map(String); return `<div class="cr-f wide"><span class="cr-lab">${tx(f.label)}${f.req ? ` <span class="cr-req" aria-hidden="true">*</span>` : ""}</span><div class="cr-checks" role="group" aria-label="${esc(tx(f.label))}" style="max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px">${f.opts.length ? f.opts.map(([k, l]) => `<label class="field-inline" style="display:flex;gap:6px;padding:3px 0"><input type="checkbox" name="${f.id}" value="${esc(k)}" ${on.includes(String(k)) ? "checked" : ""}> <span>${esc(l)}</span></label>`).join("") : `<span class="sub">${f.none || L("ไม่มีรายการให้เลือก", "Nothing to choose")}</span>`}</div>${hint}${eOf(f.id)}</div>`; }
     else if (f.type === "money") inp = `<input type="number" id="${id}" name="${f.id}" step="0.01" min="${f.min != null ? crMoney(f.min) : "0"}"${f.max != null ? ` max="${crMoney(f.max)}"` : ""} value="${typeof v === "number" ? crMoney(v) : esc(v ?? "")}" inputmode="decimal"${req}${bad}>`;
     else inp = `<input type="${f.type || "text"}" id="${id}" name="${f.id}" value="${esc(v ?? "")}"${f.min != null ? ` min="${f.min}"` : ""}${f.max != null ? ` max="${f.max}"` : ""}${req}${bad}>`;
     return `<div class="cr-f ${f.wide ? "wide" : ""}">${lab}${inp}${hint}${eOf(f.id)}</div>`;
@@ -109,13 +110,14 @@ function crForm(sp, r) {
     ${top.length ? `<div class="cr-errsum" role="alert">${top.map(e => `<div>${esc(e.m)}</div>`).join("")}</div>` : errs.length ? `<div class="cr-errsum" role="alert">${L("แก้ช่องที่มีข้อผิดพลาดก่อนบันทึก", "Fix the fields marked below before saving")}</div>` : ""}
     <div class="cr-grid">${F.map(field).join("")}
     ${why ? `<div class="cr-f wide"><label for="crx-_why">${L("เหตุผลที่แก้ไข", "Reason for the change")} <span class="cr-req" aria-hidden="true">*</span></label><textarea id="crx-_why" name="_why" rows="2">${esc((vals && vals._why) || "")}</textarea>${eOf("_why")}</div>` : ""}</div>
-    <div class="cr-acts"><button class="btn primary" type="submit">${r ? L("บันทึก", "Save") : tx(sp.create.label)}</button><button class="btn ghost" type="button" data-crcancel>${L("ยกเลิก", "Cancel")}</button></div></form>`;
+    <div class="cr-acts"><button class="btn primary" type="submit">${r ? (sp.edit && sp.edit.save ? tx(typeof sp.edit.save === "function" ? sp.edit.save(r) : sp.edit.save) : L("บันทึก", "Save")) : tx(sp.create.label)}</button><button class="btn ghost" type="button" data-crcancel>${L("ยกเลิก", "Cancel")}</button></div></form>`;
 }
 // Read the form into values: money fields become baht, checkboxes booleans.
 function crRead(sp, r) {
   const f = $("#cr-form"), out = {};
   if (!f) return out;
   sp.fields(r, CR_OPEN.draft || {}).forEach(fd => {
+    if (fd.type === "checks" && !fd.lock) { out[fd.id] = [...f.querySelectorAll(`input[name="${fd.id}"]:checked`)].map(i => i.value); return; }
     const el = f.querySelector(`[name="${fd.id}"]`); if (!el || fd.lock || fd.type === "info") return;
     out[fd.id] = fd.type === "check" ? el.checked : fd.type === "money" ? (el.value === "" ? "" : Math.round(Number(el.value) * 1e6)) : fd.type === "number" ? (el.value === "" ? "" : Number(el.value)) : el.value.trim();
   });
@@ -175,7 +177,7 @@ document.addEventListener("submit", e => {
   e.preventDefault();
   const sp = crSpec(CR_OPEN.key), r = CR_OPEN.id ? crRec(CR_OPEN.key, CR_OPEN.id) : null, vals = crRead(sp, r);
   const F = sp.fields(r, vals), errs = [];
-  F.forEach(f => { if (f.req && !f.lock && f.type !== "info" && f.type !== "check" && (vals[f.id] === "" || vals[f.id] == null)) errs.push({ f: f.id, m: L("ต้องกรอก", "Required") });
+  F.forEach(f => { if (f.req && !f.lock && f.type !== "info" && f.type !== "check" && (vals[f.id] === "" || vals[f.id] == null || (Array.isArray(vals[f.id]) && !vals[f.id].length))) errs.push({ f: f.id, m: L("ต้องกรอก", "Required") });
     if (f.type === "money" && vals[f.id] !== "" && vals[f.id] != null && !f.lock) { if (f.min != null && vals[f.id] < f.min) errs.push({ f: f.id, m: `${L("ไม่น้อยกว่า", "At least")} ${mb(f.min)} ${L("ลบ.", "M")}` }); if (f.max != null && vals[f.id] > f.max) errs.push({ f: f.id, m: `${L("ไม่เกิน", "At most")} ${mb(f.max)} ${L("ลบ.", "M")}` }); } });
   if (r && sp.edit && sp.edit.why && sp.edit.why(r) && (vals._why || "").length < 10) errs.push({ f: "_why", m: L("ใส่เหตุผลอย่างน้อย 10 ตัวอักษร", "Give a reason of at least 10 characters") });
   if (!errs.length && sp.check) errs.push(...sp.check(vals, r));

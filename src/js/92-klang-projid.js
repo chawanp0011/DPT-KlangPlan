@@ -40,7 +40,7 @@ function pjLoop(p) {
     [L("ได้รับจัดสรรจาก eBud", "Allocated from eBud"), !!line.amount, `${tx(line.name)} · ${baht(line.amount)}`],
     [L("อยู่ในแผนจัดซื้อ (ออกรหัสโครงการ)", "In the procurement plan (Project ID issued)"), true, `${p.id} · ${baht(p.est)}`],
     [L("ขอซื้อขอจ้าง", "Requisition"), !!rq && ["approved", "contracted"].includes(rq.status), rq ? `${rq.id} · ${tx((REQ_ST[rq.status] || [[rq.status, rq.status]])[0])}` : L("ยังไม่ขอ", "Not raised")],
-    [L("แฟ้มจัดซื้อ", "Procurement file"), !!ct, cst ? tx([cst.th, cst.en]) : "–"],
+    [L("รายการจัดซื้อ", "Procurement file"), !!ct, cst ? tx([cst.th, cst.en]) : "–"],
     [L("ส่ง e-GP และผูกเลข", "Sent to e-GP and number linked"), st === "linked", st === "linked" ? p.egp.no : tx(PJ_ST[st][0])],
     [L("ทำสัญญา", "Contract"), !!ct, ct ? `${ct.id} · ${baht(ct.amount)} · ${esc(tx(ct.vendor))}` : "–"],
     [L("ตรวจรับงาน", "Acceptance"), !!ct && accN === ct.phases.length, ct ? `${accN}/${ct.phases.length} ${L("งวด", "phases")}` : "–"],
@@ -48,7 +48,7 @@ function pjLoop(p) {
   ];
   const cur = steps.findIndex(s => !s[1]);
   return `<ol class="pj-loop" style="list-style:none;margin:0;padding:0">${steps.map((s, i) => `<li style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)">${dotI(s[1] ? "ok" : i === cur ? "warn" : "muted")}<b style="font-weight:600;min-width:12em">${i + 1}. ${s[0]}</b><span class="sub">${s[2]}</span>${i === cur ? tag(L("ขั้นปัจจุบัน", "Current step"), "p-warn") : ""}</li>`).join("")}</ol>
-    <p class="sub">${L("ที่มา: อ่านจากแผน ใบขอซื้อ แฟ้มจัดซื้อ สัญญา และใบอนุมัติเบิกจ่ายที่มีใน Fisko (ข้อมูลตัวอย่าง) ไม่ได้ติดตามผลเบิกจ่ายจริงจาก GFMIS", "Read from the plan, requisitions, procurement files, contracts and payment approvals already in Fisko (sample data); real GFMIS disbursement is not tracked")}</p>`;
+    <p class="sub">${L("ที่มา: อ่านจากแผน ใบขอซื้อ รายการจัดซื้อ สัญญา และใบอนุมัติเบิกจ่ายที่มีใน Fisko (ข้อมูลตัวอย่าง) ไม่ได้ติดตามผลเบิกจ่ายจริงจาก GFMIS", "Read from the plan, requisitions, procurement files, contracts and payment approvals already in Fisko (sample data); real GFMIS disbursement is not tracked")}</p>`;
 }
 
 // ---------- seed: every sample plan item gets a Project ID, budget rows, and a short link history ----------

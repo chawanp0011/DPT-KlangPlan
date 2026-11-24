@@ -26,7 +26,7 @@ const CW_META = {
   "AG-07": ["procurement", "file", "L1", [["ร่าง TOR คำสั่ง และหนังสือ", "Draft TORs, orders and letters"]]],
   "AG-08": ["procurement", "clock", "L2", [["สัญญาและงวดงานที่ล่าช้า", "Late contracts and phases"], ["หลักประกันใกล้หมดอายุ", "Guarantees near expiry"]]],
   "AG-10": ["procurement", "chart", "L0", [["ตอบจากตัวชี้วัด KPI-01 ถึง 14", "Answer from KPI-01 to 14"], ["สรุปผลงานผู้ขาย", "Summarise a supplier record"]]],
-  "AG-11": ["procurement", "folder", "L2", [["สถานะแฟ้มจัดซื้อ", "Case status"], ["เตรียมแฟ้มให้พร้อมประกาศ", "Get a case ready for the notice"]]],
+  "AG-11": ["procurement", "folder", "L2", [["สถานะรายการจัดซื้อ", "Case status"], ["เตรียมรายการจัดซื้อให้พร้อมประกาศ", "Get a case ready for the notice"]]],
   "AG-12": ["procurement", "shield", "L3", [["ตรวจสัญญาทุกฉบับ", "Check every contract"], ["ร่างหนังสือเร่งรัด", "Draft reminder letters"]]],
   "AG-13": ["procurement", "list", "L1", [["สรุปผลรายเดือน (สขร.1)", "Monthly summary (สขร.1)"]]],
   "AG-14": ["procurement", "scan", "L1", [["อ่านใบแจ้งหนี้ ใบส่งของ หลักประกัน", "Read invoices, delivery notes, guarantees"], ["ตรวจกับสัญญา", "Check against the contract"]]],
@@ -69,7 +69,7 @@ const CW_SUGGEST = {
   dashboard: [["หน่วยงานไหนเบิกจ่ายช้ากว่าแผน", "Which units are behind their spending plan?"], ["มีความผิดปกติในการใช้จ่ายไหม", "Any spending anomalies?"]],
   review: [["ถ้ากรอบลดลง 10% จะกระทบอะไร", "What if the ceiling drops 10%?"]],
   consolidation: [["ถ้ากรอบลดลง 15% จะกระทบอะไร", "What if the ceiling drops 15%?"], ["สรุปคำขอตามงบรายจ่าย", "Summarise requests by budget type"]],
-  procurement: [["แฟ้มไหนติดอยู่นานที่สุด", "Which cases are stuck the longest?"], ["สัญญาไหนล่าช้า", "Which contracts are late?"], ["สัดส่วนการแข่งขันเป็นเท่าไร", "What is the share of competitive cases?"]],
+  procurement: [["รายการจัดซื้อไหนติดอยู่นานที่สุด", "Which cases are stuck the longest?"], ["สัญญาไหนล่าช้า", "Which contracts are late?"], ["สัดส่วนการแข่งขันเป็นเท่าไร", "What is the share of competitive cases?"]],
   finance: [["สรุปการเบิกจ่ายปีนี้", "Summarise payments this year"]],
   home: [["วันนี้ฉันควรทำอะไรก่อน", "What should I do first today?"], ["สรุปภาพรวมงบประมาณ", "Give me a budget overview"]],
 };
@@ -85,7 +85,7 @@ const CW_ROUTE = [
   [/ลด.*%|ลดลง|กรอบ|what.?if|cut|ceiling|จำลอง/i, "AG-04"], [/ช้ากว่าแผน|เบิกจ่าย|ผิดปกติ|behind|anomal|spend/i, "AG-05"],
   [/สรุปคำขอ|ตามสถานะ|งบรายจ่าย|ปีก่อน|เกินเกณฑ์|summar|by status|by type|last year|threshold/i, "AG-03"],
   [/ใบแจ้งหนี้|ใบส่งของ|หลักประกัน|เอกสาร|สแกน|invoice|delivery note|guarantee|document|scan|ocr/i, "AG-14"],
-  [/สัญญา|ล่าช้า|ค่าปรับ|contract|late|penalt/i, "AG-08"], [/แฟ้ม|ติดอยู่|ขั้น|case|stuck|step/i, "AG-11"],
+  [/สัญญา|ล่าช้า|ค่าปรับ|contract|late|penalt/i, "AG-08"], [/รายการจัดซื้อ|ติดอยู่|ขั้น|case|stuck|step/i, "AG-11"],
   [/แข่งขัน|รายเดียว|ผู้ยื่น|ราคากลาง|ตรงเวลา|ผู้ขาย|competi|single|bidder|reference|supplier|vendor|kpi/i, "AG-10"],
   [/ภาพรวม|ผู้บริหาร|overview|executive/i, "AG-06"],
 ];
@@ -184,9 +184,9 @@ function cwAnswer(agentId, text, files, recs) {
     return { agent: id, steps, html: rows.length ? `<p>${L("งวดงานที่ล่าช้า", "Late phases")}: ${rows.length}</p>${cwTable([[L("สัญญา", "Contract")], [L("ผู้ขาย", "Supplier")], [L("งวด", "Phase")], [L("ล่าช้า", "Late"), 1]], rows)}` : `<p>${L("ไม่มีงวดงานที่ล่าช้าในขณะนี้", "No late phases right now")}</p>`, actions: [cwAct(L("เปิดสัญญา", "Open contracts"), "jump", "prc-contracts", true)] };
   }
   if (id === "AG-11") {
-    steps.push(step("case.read", L("อ่านแฟ้มจัดซื้อ", "Read the case files")));
+    steps.push(step("case.read", L("อ่านรายการจัดซื้อ", "Read the case files")));
     const open = (S.cases || []).filter(c => !c.cancelled && caseState(c) < 12).sort((x, y) => caseState(x) - caseState(y));
-    return { agent: id, steps, html: `<p>${L("แฟ้มที่เปิดอยู่", "Open cases")}: ${open.length}</p>${cwTable([[L("แฟ้ม", "Case")], [L("ชื่อ", "Name")], [L("ขั้น", "Step"), 1]], open.slice(0, 6).map(c => [`<span class="mono">${c.id}</span>`, esc(caseName(c)), `${caseState(c)}/12`]))}<p class="sub">${L("ให้ Case Copilot เตรียมแฟ้มได้ที่แท็บ AI Agents ของจัดซื้อ ทุกขั้นที่เขียนข้อมูลรอคุณอนุมัติ", "Case Copilot can prepare a case from the procurement AI agents tab; every step that writes data waits for you.")}</p>`, actions: [cwAct(L("เปิดแฟ้มจัดซื้อ", "Open case files"), "jump", "prc-cases", true)] };
+    return { agent: id, steps, html: `<p>${L("รายการจัดซื้อที่เปิดอยู่", "Open cases")}: ${open.length}</p>${cwTable([[L("รายการจัดซื้อ", "Case")], [L("ชื่อ", "Name")], [L("ขั้น", "Step"), 1]], open.slice(0, 6).map(c => [`<span class="mono">${c.id}</span>`, esc(caseName(c)), `${caseState(c)}/12`]))}<p class="sub">${L("ให้ Case Copilot เตรียมรายการจัดซื้อได้ที่แท็บ AI Agents ของจัดซื้อ ทุกขั้นที่เขียนข้อมูลรอคุณอนุมัติ", "Case Copilot can prepare a case from the procurement AI agents tab; every step that writes data waits for you.")}</p>`, actions: [cwAct(L("เปิดการจัดซื้อ", "Open case files"), "jump", "prc-cases", true)] };
   }
   if (id === "AG-10" && typeof aiAnswer === "function") {
     steps.push(step("kpi.query", L("ค้นจากชั้นตัวชี้วัด", "Queried the KPI layer")));
