@@ -73,3 +73,6 @@ function d90Strip(h) { return String(h).replace(/(<th[^>]*>)\s*\d+ · /g, "$1").
 SPT.m = "";
 // P90d: "เลขที่หนังสือ/ว/ด/ป" is written "เลขที่หนังสือ (ว/ด/ป)"
 { const base = d90Strip; d90Strip = function (h) { return base(h).replace(/\s*\/\s*ว\/ด\/ป/g, " (ว/ด/ป)"); }; }
+// P90e: one year for every tab of ติดตามความก้าวหน้า; the demo month selector "ข้อมูล ณ" is taken off every tab
+{ const base = d90Strip; d90Strip = function (h) { h = base(h).replace(/<div class="asof"><label for="asof-sel">[\s\S]*?<\/select><span class="sub">[^<]*<\/span><\/div>/g, "");
+    if (!/id="pr-fy"/.test(h)) h = h.replace(/(<div class="tabs" role="tablist")/, `<div class="tf-top" style="display:flex;gap:10px;align-items:center;margin:0 0 6px">${prFySel().replace("margin:0 0 10px", "margin:0")}</div>$1`); return h; }; }
