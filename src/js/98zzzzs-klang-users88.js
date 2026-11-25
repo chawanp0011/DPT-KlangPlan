@@ -22,7 +22,10 @@ function us88Seed(s) { if (!s || !s.users || s.us88) return; s.us88 = 1; const p
 Object.keys(SEEDS).forEach(n => { const prev = SEEDS[n].seed; SEEDS[n].seed = () => { const s = prev(); try { us88Seed(s); } catch (e) {} return s; }; });
 // the rights a role has per page: from S.navRoles when the admin changed them
 const US88_R0 = {}; NAV.forEach(n => (US88_R0[n.id] = n.roles.slice()));
-function us88ApplyNav() { if (typeof S === "undefined" || !S) return; const o = S.navRoles || {}; NAV.forEach(n => { if (!US88_R0[n.id]) US88_R0[n.id] = n.roles.slice(); const want = o[n.id] || US88_R0[n.id]; if (n.roles.join() !== want.join()) n.roles.splice(0, n.roles.length, ...want); }); }
+const US88_ON = new Set(); // the pages whose roles the admin changed (only these are touched)
+function us88ApplyNav() { if (typeof S === "undefined" || !S) return; const o = S.navRoles || {};
+  US88_ON.forEach(id => { if (!o[id]) { const n = NAV.find(x => x.id === id); if (n && US88_R0[id]) n.roles.splice(0, n.roles.length, ...US88_R0[id]); US88_ON.delete(id); } });
+  Object.keys(o).forEach(id => { const n = NAV.find(x => x.id === id); if (!n) return; if (!US88_R0[id]) US88_R0[id] = n.roles.slice(); if (n.roles.join() !== o[id].join()) n.roles.splice(0, n.roles.length, ...o[id]); US88_ON.add(id); }); }
 { const base = route; route = function () { try { if (S && S.users && !S.us88) us88Seed(S); us88ApplyNav(); } catch (e) {} return base.apply(this, arguments); }; }
 const us88Log = (what, target) => { (S.userLog = S.userLog || []).unshift({ t: nowIso(), by: me().id, what, target }); audit([what, what], target); };
 

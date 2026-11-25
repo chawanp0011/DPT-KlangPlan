@@ -30642,7 +30642,10 @@ function us88Seed(s) { if (!s || !s.users || s.us88) return; s.us88 = 1; const p
 Object.keys(SEEDS).forEach(n => { const prev = SEEDS[n].seed; SEEDS[n].seed = () => { const s = prev(); try { us88Seed(s); } catch (e) {} return s; }; });
 // the rights a role has per page: from S.navRoles when the admin changed them
 const US88_R0 = {}; NAV.forEach(n => (US88_R0[n.id] = n.roles.slice()));
-function us88ApplyNav() { if (typeof S === "undefined" || !S) return; const o = S.navRoles || {}; NAV.forEach(n => { if (!US88_R0[n.id]) US88_R0[n.id] = n.roles.slice(); const want = o[n.id] || US88_R0[n.id]; if (n.roles.join() !== want.join()) n.roles.splice(0, n.roles.length, ...want); }); }
+const US88_ON = new Set(); // the pages whose roles the admin changed (only these are touched)
+function us88ApplyNav() { if (typeof S === "undefined" || !S) return; const o = S.navRoles || {};
+  US88_ON.forEach(id => { if (!o[id]) { const n = NAV.find(x => x.id === id); if (n && US88_R0[id]) n.roles.splice(0, n.roles.length, ...US88_R0[id]); US88_ON.delete(id); } });
+  Object.keys(o).forEach(id => { const n = NAV.find(x => x.id === id); if (!n) return; if (!US88_R0[id]) US88_R0[id] = n.roles.slice(); if (n.roles.join() !== o[id].join()) n.roles.splice(0, n.roles.length, ...o[id]); US88_ON.add(id); }); }
 { const base = route; route = function () { try { if (S && S.users && !S.us88) us88Seed(S); us88ApplyNav(); } catch (e) {} return base.apply(this, arguments); }; }
 const us88Log = (what, target) => { (S.userLog = S.userLog || []).unshift({ t: nowIso(), by: me().id, what, target }); audit([what, what], target); };
 
@@ -30997,6 +31000,99 @@ function p92Detail(x) { const H = PR_XL_TRACK67_H, W = PR_XL_TRACK67_W, v = x.r6
   const val = y => (y === "" || y == null || y === 0 ? `<span class="sub">–</span>` : esc(typeof y === "number" ? (Number.isInteger(y) && y >= 2500 && y <= 2600 ? String(y) : fmt(y, Number.isInteger(y) ? 0 : 4)) : y));
   return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;padding:6px 0">${Object.entries(groups).map(([g, l]) => `<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><b>${esc(g)}</b><div class="sub" style="margin-bottom:4px">บันทึกที่: ${esc(P92_SRC[g] || g)}</div><dl style="display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,1fr);gap:3px 10px;margin:0;font-size:12.5px">${l.map(([h, y]) => `<dt class="sub">${esc(h)}</dt><dd style="margin:0">${val(y)}</dd>`).join("")}</dl></div>`).join("")}</div>`; }
 document.addEventListener("click", e => { const b = e.target && e.target.closest && e.target.closest("[data-p92open]"); if (b) { P92.open = P92.open === b.dataset.p92open ? null : b.dataset.p92open; route(); } });
+
+/* ---- 98zzzzx-klang-rmsend.js ---- */
+// Fisko-KlangFinance, round P93 (25 Nov 2569): เตรียมคำของบประมาณ gets its last step (asked for: "รัน flow ให้ครบ").
+// The flow was run through with the demo users and the sample files: the division makes the case and sends it, Planning receives it,
+// processes it, forwards what is missing, the division returns it, Planning processes again and sets "พร้อมส่ง สงป.". It worked to there,
+// but nothing came after "ready": the pages that send to the Bureau are hidden in the trimmed menus. Now Planning records the sending
+// on the case: the number of the cover letter and the date (both made up in the demo). The case stays "ready" (locked as before) and
+// carries c.sent = { no, date, by, t }; the flow line and the overview show "ส่ง สงป. แล้ว".
+function rmSendBureau(id, v) { const c = rmCase(id); if (!c) return "ไม่พบเรื่อง"; if (ROLE !== "plan") return "เฉพาะกองแผนงานนำส่ง สงป."; if (c.status !== "ready") return "ต้องตั้งสถานะพร้อมส่ง สงป. ก่อน"; if (c.sent) return "นำส่ง สงป. แล้ว";
+  const no = String(v.no || "").trim(), date = String(v.date || "").trim(); if (!no) return "ระบุเลขที่หนังสือนำส่ง"; if (!date) return "ระบุวันที่นำส่ง"; if (date < (c.readyAt || "")) return "วันที่นำส่งต้องไม่ก่อนวันที่พร้อมส่ง";
+  c.sent = { no: no.slice(0, 60), date, by: me().id, t: nowIso() }; rmLog(c, "นำส่ง สงป. แล้ว", `หนังสือ ${c.sent.no} ลงวันที่ ${date}`); audit(["นำส่งคำของบประมาณให้ สงป.", "Sent the request to the Bureau"], `${c.id} ${c.sent.no}`);
+  notify(["div", "divhead", "exec"], [`คำของบประมาณ ${c.id} นำส่ง สงป. แล้ว (${c.sent.no})`, `Request ${c.id} sent to the Bureau`], "rmake"); return ""; }
+{ const base = rmFwView; rmFwView = function (c) { let h = base(c); if (!c || c.status !== "ready") return h;
+    h = h.replace(/( → <span class="pill [^"]*">พร้อมส่ง สงป\.<\/span>)(<\/div>)/, `$1 → <span class="pill ${c.sent ? "p-ok" : "p-mute"}">ส่ง สงป. แล้ว</span>$2`);
+    const sentBox = c.sent ? `${tag(`นำส่ง สงป. แล้ว · หนังสือ ${c.sent.no} · ${fdate(c.sent.date)}`, "p-ok")}`
+      : ROLE === "plan" ? `<form data-rmsend="${esc(c.id)}" class="row" style="gap:8px;flex-wrap:wrap;align-items:flex-end"><div class="f"><label>เลขที่หนังสือนำส่ง *</label><input name="no" value="กผ ${String((S.rmk || []).filter(x => x.sent).length + 1).padStart(4, "0")}/${c.fy} (ตัวอย่าง)"></div><div class="f"><label>วันที่นำส่ง *</label><input name="date" type="date" value="${TODAY}"></div><button class="btn primary" type="submit">นำส่ง สงป.</button></form>`
+      : `<span class="sub">พร้อมส่ง สงป. รอกองแผนงานนำส่ง</span>`;
+    return h.replace(/<span class="pill p-ok">พร้อมส่ง สงป\. แล้ว<\/span>|<span class="[^"]*p-ok[^"]*">[^<]*พร้อมส่ง สงป\. แล้ว[^<]*<\/span>/, sentBox); }; }
+{ const base = RM_VIEW.ov; RM_VIEW.ov = function () { const h = base(), cs = (S.rmk || []).filter(c => c.fy === FORM_FY), n = cs.filter(c => c.sent).length, r = cs.filter(c => c.status === "ready" && !c.sent).length;
+    return `<div class="row" style="gap:10px;flex-wrap:wrap;margin:0 0 10px"><span class="pill p-info">พร้อมส่ง รอนำส่ง สงป. ${r} เรื่อง</span><span class="pill p-ok">นำส่ง สงป. แล้ว ${n} เรื่อง</span></div>` + h; }; }
+document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches || !f.matches("[data-rmsend]")) return; e.preventDefault(); const d = new FormData(f), m = rmSendBureau(f.dataset.rmsend, { no: d.get("no"), date: d.get("date") }); if (m) { toast(m); return; } commit(); renderShell(); route(); toast("นำส่ง สงป. แล้ว"); });
+
+/* ---- 98zzzzy-klang-risk94.js ---- */
+// Fisko-KlangFinance, round P94 (25 Nov 2569), ติดตามความก้าวหน้า, as asked:
+// 1. รายงานความก้าวหน้า: "รายการที่ต้องติดตาม" is no longer a separate box: it is part of the item table. Each row shows its follow-up
+//    issues as tags (มีปัญหา, วงเงินสูงยังเตรียมการ, รอลงนาม, เบิกจ่ายต่ำกว่าแผน); the filter bar has the issues next to the statuses, and
+//    the rows with an issue come first in each status.
+// 2. คาดการณ์สิ้นปี becomes คาดการณ์การเบิกจ่าย: which budget items risk not being paid out this year, how much is budgeted, paid and left,
+//    how much is expected to be paid by September and how much is at risk, by หน่วยงาน and by ผลผลิต/โครงการ, with the items.
+//    The forecast is a rule of thumb (no model): it reads the stage of the item and its payments against its money plan to date.
+
+const P94 = { f: "", risk: "", g: { k: "", v: "" } };
+const P94_ISS = [["prob", "มีปัญหา/อุปสรรค", "#dc2626"], ["prep", "วงเงินสูง ยังเตรียมการ", "#64748b"], ["wait", "รอลงนามสัญญา", "#3b82f6"], ["slow", "เบิกจ่ายต่ำกว่าแผน", "#f59e0b"]];
+function p94Iss(x, bigPrep) { const out = [], st = x.st, row = x.row, mi = Math.min(11, prMonIdx(TODAY)), plan = x.r.plan.slice(0, mi + 1).reduce((a, b) => a + b, 0), paid = x.r.act.reduce((a, b) => a + b, 0);
+  if (sptHas(row[60])) out.push("prob"); if (["s0", "s1", "s2"].includes(st) && x.r.alloc >= bigPrep) out.push("prep"); if (st === "s4") out.push("wait"); if (["s5", "s6"].includes(st) && plan > 0 && paid < plan * 0.8) out.push("slow"); return out; }
+const p94Tag = k => { const i = P94_ISS.find(x => x[0] === k); return `<span class="pill" style="border:1px solid ${i[2]};color:${i[2]};background:transparent;margin:1px 2px 1px 0">${i[1]}</span>`; };
+MON_PANELS.progress = () => { const fy = BI.fy, D = prDtRows(fy, false), book = prTrackBook(fy)[0].rows.slice(5), B67 = m88Track67(fy)[0].rows.slice(5), mine = ["div", "divhead"].includes(ROLE) ? unitName(me().unit) : null;
+  const it = D.map((r, i) => ({ r, row: book[i] || [], r67: B67[i] || [] })).filter(x => !mine || x.r.unit === mine).map(x => Object.assign(x, { st: p92St(x.row) }));
+  const allocs = it.map(x => x.r.alloc).sort((a, b) => b - a), bigPrep = allocs[Math.floor(allocs.length / 4)] || 0; it.forEach(x => (x.iss = p94Iss(x, bigPrep)));
+  const ord = k => P92_ST.findIndex(s => s[0] === k), list = it.filter(x => (!P92.st || x.st === P92.st) && (!P94.f || (P94.f === "any" ? x.iss.length : x.iss.includes(P94.f)))).sort((a, b) => ord(a.st) - ord(b.st) || b.iss.length - a.iss.length || b.r.alloc - a.r.alloc);
+  const chip = (attr, val, on, label, n, col) => `<button type="button" class="p92-chip ${on ? "on" : ""}" ${attr}="${on ? "" : val}" style="border-left:5px solid ${col}"><span>${esc(label)}</span><b>${n}</b></button>`;
+  const stChips = P92_ST.map(([k, t]) => chip("data-p92st", k, P92.st === k, t, it.filter(x => x.st === k).length, P92_COL[k])).join("");
+  const isChips = chip("data-p94f", "any", P94.f === "any", "ต้องติดตามทั้งหมด", it.filter(x => x.iss.length).length, "#111827") + P94_ISS.map(([k, t, c]) => chip("data-p94f", k, P94.f === k, t, it.filter(x => x.iss.includes(k)).length, c)).join("");
+  const M = v => fmt(v / 1e6, 2), act = (P92.st ? [p92Name(P92.st)] : []).concat(P94.f ? [P94.f === "any" ? "ต้องติดตามทั้งหมด" : P94_ISS.find(x => x[0] === P94.f)[1]] : []);
+  return `<style>.p92-flow{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.p92-chip{all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;background:var(--surface)}.p92-chip b{font-size:18px;font-weight:600}.p92-chip.on{background:var(--info-soft);outline:2px solid var(--info)}.p94-h{font-size:12px;color:var(--muted);margin:10px 0 6px;font-weight:600}.mt-prog-t tr.p94-flag td:first-child{box-shadow:inset 4px 0 0 #f59e0b}</style>
+    <section class="panel mt-prog"><header><h2>ความก้าวหน้ารายรายการ</h2><span class="sp"></span><span class="sub">${list.length} จาก ${it.length} รายการ${act.length ? ` · ${esc(act.join(" · "))} <button class="btn ghost" type="button" data-p94clear>ล้างตัวกรอง</button>` : ""}</span></header>
+    <div class="body"><div class="p94-h">สถานะตามลำดับการดำเนินงาน (เริ่มต้น → ปิดโครงการ)</div><div class="p92-flow">${stChips}</div><div class="p94-h">ประเด็นที่ต้องติดตาม</div><div class="p92-flow">${isChips}</div></div>
+    <div class="tbl-wrap"><table class="mt-prog-t"><thead><tr><th style="min-width:220px">รายการ</th><th class="n">งปม. (ลบ.)</th><th>สถานะ</th><th>ประเด็นที่ต้องติดตาม</th><th>ผลการดำเนินงาน</th><th class="n">เบิกจ่ายสะสม</th><th>ปัญหา/อุปสรรค</th><th></th></tr></thead><tbody>
+    ${list.map(x => { const w = sptNum(x.row[56]);
+      return `<tr class="${x.iss.length ? "p94-flag" : ""}"><td><b style="font-weight:600">${esc(x.r.name)}</b><div class="sub">${esc(x.r.unit)}</div></td><td class="n">${M(x.r.alloc)}</td><td><span class="pill" style="border-left:4px solid ${P92_COL[x.st]}">${esc(p92Name(x.st).replace(/^\d+\. /, ""))}</span></td><td>${x.iss.map(p94Tag).join("") || `<span class="sub">–</span>`}</td>
+        <td style="white-space:nowrap"><span style="display:inline-block;width:70px;height:8px;border-radius:4px;background:var(--line);vertical-align:middle;overflow:hidden;margin-right:6px"><b style="display:block;height:100%;width:${Math.min(100, w)}%;background:#16a34a"></b></span>${fmt(w, 0)}%</td>
+        <td class="n">${fmt(sptNum(x.row[57]), 2)} ลบ.<div class="sub">${fmt(sptNum(x.row[58]), 1)}%</div></td><td>${sptHas(x.row[60]) ? `<span style="color:var(--bad)">${esc(x.row[60])}</span>` : `<span class="sub">–</span>`}</td>
+        <td><button class="btn ghost" type="button" data-p92open="${esc(x.r.id)}">${P92.open === x.r.id ? "ปิด" : "ดูรายละเอียด"}</button></td></tr>${P92.open === x.r.id ? `<tr class="fn-rowform"><td colspan="8">${p92Detail(x)}</td></tr>` : ""}`; }).join("") || `<tr><td colspan="8" class="sub">ไม่มีรายการ</td></tr>`}</tbody></table></div>
+    <div class="body sub">ข้อมูลดึงจากจุดที่บันทึกไว้แล้ว (ขอจัดซื้อจัดจ้าง, e-GP, สัญญา, การเบิกจ่าย) · ประเด็นที่ต้องติดตาม: มีปัญหา/อุปสรรคที่บันทึกไว้, วงเงินอยู่ในกลุ่มสูงสุด 25% แต่ยังเตรียมการ, รอลงนามสัญญา, ลงนามแล้วแต่เบิกจ่ายต่ำกว่า 80% ของแผนเงินสะสม</div></section>`; };
+
+// ---------- คาดการณ์การเบิกจ่าย ----------
+const P94_RISK = { high: ["เสี่ยงสูง", "#dc2626"], mid: ["เสี่ยงปานกลาง", "#f59e0b"], low: ["ปกติ", "#16a34a"] };
+function p94Fc(x) { const r = x.r, st = x.st, mi = Math.min(11, prMonIdx(TODAY)), left12 = 11 - mi, B = r.alloc, P = r.act.reduce((a, b) => a + b, 0), L0 = Math.max(0, B - P), plan = r.plan.slice(0, mi + 1).reduce((a, b) => a + b, 0);
+  let exp, risk, why; // exp: expected to be paid from now to September
+  if (st === "sx") { exp = 0; risk = "high"; why = "ยกเลิก/ชะลอดำเนินการ"; }
+  else if (["s0", "s1", "s2"].includes(st)) { exp = L0 * (left12 >= 8 ? 0.6 : left12 >= 5 ? 0.35 : 0.1); risk = left12 >= 8 && st !== "s0" ? "mid" : "high"; why = st === "s0" ? "ยังไม่เริ่มดำเนินการ" : "ยังอยู่ขั้นเตรียมการ (TOR/ราคากลาง)"; }
+  else if (st === "s3") { exp = L0 * (left12 >= 6 ? 0.7 : 0.4); risk = left12 >= 6 ? "mid" : "high"; why = "อยู่ระหว่างประกาศ/เสนอราคา"; }
+  else if (st === "s4") { exp = L0 * (left12 >= 4 ? 0.8 : 0.5); risk = "mid"; why = "รอลงนามสัญญา"; }
+  else { const behind = plan > 0 && P < plan * 0.8; exp = L0 * (behind ? 0.75 : 0.95); risk = behind ? "mid" : "low"; why = behind ? "เบิกจ่ายต่ำกว่าแผนเงินสะสม" : st === "s7" ? "ปิดโครงการ" : "เป็นไปตามแผน"; }
+  if (sptHas(x.row[60]) && risk === "low") { risk = "mid"; why = "มีปัญหา/อุปสรรค: " + x.row[60]; }
+  return { B, P, L: L0, exp: Math.round(exp), atRisk: Math.max(0, Math.round(L0 - exp)), risk, why }; }
+MON_PANELS.forecast = () => { const fy = BI.fy, D = prDtRows(fy, false), book = prTrackBook(fy)[0].rows.slice(5), mine = ["div", "divhead"].includes(ROLE) ? unitName(me().unit) : null;
+  const it = D.map((r, i) => ({ r, row: book[i] || [] })).filter(x => !mine || x.r.unit === mine).map(x => { x.st = p92St(x.row); x.fc = p94Fc(x); x.prod = m88Prod(x.row); return x; });
+  const M = v => fmt(v / 1e6, 2), sum = (l, k) => l.reduce((a, x) => a + x.fc[k], 0), B = sum(it, "B"), P = sum(it, "P"), Lf = sum(it, "L"), E = sum(it, "exp"), R = sum(it, "atRisk");
+  const kpi = (l, v, d, c) => `<div class="kpi" style="border-top:3px solid ${c}"><span class="l">${l}</span><span class="v">${v}</span><span class="d sub">${d}</span></div>`;
+  const kp = `<div class="kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${kpi("งบประมาณ", M(B), `ลบ. · ${it.length} รายการ`, "#3b4fa8")}${kpi("เบิกจ่ายแล้ว", M(P), `ลบ. · ${fmt(B ? P / B * 100 : 0, 1)}%`, "#3b82f6")}${kpi("คงเหลือ", M(Lf), "ลบ. ยังไม่เบิกจ่าย", "#94a3b8")}${kpi("คาดว่าเบิกได้ถึงสิ้นปี", `${fmt(B ? (P + E) / B * 100 : 0, 1)}%`, `${M(P + E)} ลบ.`, "#16a34a")}${kpi("ยอดเสี่ยงเบิกไม่ทัน", M(R), `ลบ. · ${fmt(B ? R / B * 100 : 0, 1)}% ของงบ`, "#dc2626")}</div>`;
+  const lv = Object.entries(P94_RISK).map(([k, [t, c]]) => { const l = it.filter(x => x.fc.risk === k); return `<button type="button" class="p92-chip ${P94.risk === k ? "on" : ""}" data-p94risk="${P94.risk === k ? "" : k}" style="border-left:5px solid ${c}"><span>${t}<div class="sub">คงเหลือ ${M(sum(l, "L"))} · เสี่ยง ${M(sum(l, "atRisk"))} ลบ.</div></span><b>${l.length}</b></button>`; }).join("");
+  const grp = (key, title) => { const G = {}; it.forEach(x => { const k = key(x); (G[k] = G[k] || []).push(x); }); const rows = Object.entries(G).sort((a, b) => sum(b[1], "atRisk") - sum(a[1], "atRisk")), mx = Math.max(1, ...rows.map(([, l]) => sum(l, "B")));
+    return `<section class="panel"><header><h2>ตาม${title}</h2><span class="sp"></span><span class="sub">เรียงตามยอดเสี่ยง · คลิกเพื่อดูรายการ</span></header><div class="body" style="max-height:440px;overflow:auto"><div class="tbl-wrap"><table class="p94-g"><thead><tr><th>${title}</th><th class="n">งบประมาณ</th><th class="n">เบิกแล้ว</th><th class="n">คงเหลือ</th><th class="n">คาดเบิกได้</th><th class="n">ยอดเสี่ยง</th><th style="min-width:110px"></th></tr></thead><tbody>
+      ${rows.map(([k, l]) => { const b = sum(l, "B"), p = sum(l, "P"), e = sum(l, "exp"), r = sum(l, "atRisk"), on = P94.g.k === title && P94.g.v === k; return `<tr style="cursor:pointer;${on ? "background:var(--info-soft)" : ""}" data-p94g="${esc(title)}|${esc(k)}"><td>${esc(k === "—" ? "ไม่ระบุ" : k)} <span class="sub">(${l.length})</span></td><td class="n">${M(b)}</td><td class="n">${M(p)}</td><td class="n">${M(b - p)}</td><td class="n">${M(e)}</td><td class="n" style="color:${r ? "#dc2626" : "inherit"};font-weight:${r ? 600 : 400}">${M(r)}</td><td><span style="display:flex;height:10px;width:${Math.max(6, b / mx * 100)}%;border-radius:3px;overflow:hidden;background:var(--line)"><i style="flex:${p};background:#3b82f6"></i><i style="flex:${e};background:#86efac"></i><i style="flex:${r};background:#dc2626"></i></span></td></tr>`; }).join("")}</tbody></table></div></div></section>`; };
+  const items = it.filter(x => (!P94.risk || x.fc.risk === P94.risk) && (!P94.g.k || (P94.g.k === "หน่วยงาน" ? x.r.unit : x.prod) === P94.g.v)).filter(x => P94.risk || P94.g.k || x.fc.risk !== "low").sort((a, b) => b.fc.atRisk - a.fc.atRisk);
+  const flt = [P94.risk ? P94_RISK[P94.risk][0] : "", P94.g.k ? `${P94.g.k}: ${P94.g.v}` : ""].filter(Boolean);
+  return `<style>.p92-chip{all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;background:var(--surface)}.p92-chip b{font-size:20px;font-weight:600}.p92-chip.on{background:var(--info-soft);outline:2px solid var(--info)}.p94-g td,.p94-g th{padding:6px 8px}</style>
+    <div style="display:flex;flex-direction:column;gap:14px">${kp}
+    <section class="panel"><header><h2>ระดับความเสี่ยงการเบิกจ่าย</h2><span class="sp"></span><span class="sub">ณ ${fdate(TODAY)} · เหลือ ${11 - Math.min(11, prMonIdx(TODAY))} เดือนถึงสิ้นปีงบประมาณ · <i style="display:inline-block;width:10px;height:10px;background:#3b82f6"></i> เบิกแล้ว <i style="display:inline-block;width:10px;height:10px;background:#86efac"></i> คาดเบิกได้ <i style="display:inline-block;width:10px;height:10px;background:#dc2626"></i> เสี่ยงเบิกไม่ทัน</span></header><div class="body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">${lv}</div></section>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:14px">${grp(x => x.r.unit, "หน่วยงาน")}${grp(x => x.prod, "ผลผลิต/โครงการ")}</div>
+    <section class="panel"><header><h2>รายการงบประมาณที่มีความเสี่ยงการเบิกจ่าย</h2><span class="sp"></span><span class="sub">${items.length} รายการ${flt.length ? ` · ${esc(flt.join(" · "))} <button class="btn ghost" type="button" data-p94fclear>ล้างตัวกรอง</button>` : " · แสดงเฉพาะเสี่ยงสูงและปานกลาง"}</span></header>
+    <div class="tbl-wrap"><table><thead><tr><th style="min-width:220px">รายการ</th><th>ผลผลิต/โครงการ</th><th>สถานะ</th><th class="n">งบประมาณ</th><th class="n">เบิกแล้ว</th><th class="n">คงเหลือ</th><th class="n">คาดเบิกได้ถึงสิ้นปี</th><th class="n">ยอดเสี่ยง</th><th>ความเสี่ยง</th></tr></thead><tbody>
+    ${items.map(x => `<tr><td><b style="font-weight:600">${esc(x.r.name)}</b><div class="sub">${esc(x.r.unit)}</div></td><td class="sub">${esc(x.prod === "—" ? "ไม่ระบุ" : x.prod)}</td><td>${esc(p92Name(x.st).replace(/^\d+\. /, ""))}</td><td class="n">${M(x.fc.B)}</td><td class="n">${M(x.fc.P)}</td><td class="n">${M(x.fc.L)}</td><td class="n">${M(x.fc.exp)}</td><td class="n" style="color:#dc2626;font-weight:600">${M(x.fc.atRisk)}</td><td><span class="pill" style="border-left:4px solid ${P94_RISK[x.fc.risk][1]}">${P94_RISK[x.fc.risk][0]}</span><div class="sub">${esc(x.fc.why)}</div></td></tr>`).join("") || `<tr><td colspan="9" class="sub">ไม่มีรายการ</td></tr>`}</tbody></table></div>
+    <div class="body sub">หน่วย: ล้านบาท · การคาดการณ์ใช้กฎอย่างง่าย (ไม่ใช่แบบจำลองทางสถิติ): ดูจากขั้นตอนของรายการ จำนวนเดือนที่เหลือ และผลเบิกจ่ายเทียบแผนเงินสะสม</div></section></div>`; };
+M88_MT.forEach(t => { if (t[0] === "forecast") t[1] = "คาดการณ์การเบิกจ่าย"; });
+{ const base = monTabsBar; monTabsBar = function () { return base().replace(/(data-mtab="forecast"[^>]*>)[^<]*/, "$1คาดการณ์การเบิกจ่าย"); }; }
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return;
+  const f = t.closest("[data-p94f]"); if (f) { P94.f = f.dataset.p94f; route(); return; }
+  if (t.closest("[data-p94clear]")) { P94.f = ""; P92.st = ""; route(); return; }
+  const r = t.closest("[data-p94risk]"); if (r) { P94.risk = r.dataset.p94risk; route(); return; }
+  const g = t.closest("[data-p94g]"); if (g) { const [k, v] = g.dataset.p94g.split("|"); P94.g = P94.g.k === k && P94.g.v === v ? { k: "", v: "" } : { k, v }; route(); return; }
+  if (t.closest("[data-p94fclear]")) { P94.risk = ""; P94.g = { k: "", v: "" }; route(); } });
 
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
