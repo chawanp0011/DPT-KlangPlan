@@ -31208,6 +31208,54 @@ const s70Bi = id => ((S.bi && S.bi.rows) || []).find(x => x.id === id);
 document.addEventListener("click", e => { if (!(e.target && e.target.closest && e.target.closest("#s70-load"))) return; if (!biCanImport()) return; s70Load(S, BI.fy); audit(["โหลดข้อมูลตัวอย่างตามไฟล์ติดตามเร่งรัด (สมมติ)", "Loaded the sample shaped like the follow-up files"], String(BI.fy)); BI.view = "dash"; commit(); route(); toast(`โหลดข้อมูลตัวอย่าง ${S.bi.rows.filter(r => r.trk && biFy(r) === BI.fy).length} รายการแล้ว (ข้อมูลสมมติ)`); });
 { const base = route; route = function () { try { if (typeof S !== "undefined" && S && S.users && !window.KLANG_TEST && !S.s70 && !((S.bi && S.bi.rows) || []).some(r => biFy(r) === 2570)) { S.s70 = 1; s70Load(S, 2570); } } catch (e) {} return base.apply(this, arguments); }; }
 
+/* ---- 98zzzzw-klang-prog92.js ---- */
+// Fisko-KlangFinance, round P92 (25 Nov 2569): รายงานความก้าวหน้า (asked for: "รายการที่ต้องติดตาม ให้เอาไปรวมกับ รายงานความก้าวหน้า
+// ตัดรายงานออก ให้ใส่ในจุดต่างๆที่กำหนดไว้แล้วดึงข้อมูลมาแสดง ส่วนสถานะให้เรียงลำดับเริ่มต้นจนปิดโครงการ"):
+// - the list "รายการที่ต้องติดตาม" leaves the overview and opens this tab;
+// - no report form here any more: each value is entered where it already belongs (the unit's request, e-GP, the contract, the payment
+//   desks) and this tab only shows it, with where it comes from;
+// - the status of an item is one of nine, in the order of the work, from the start to the close of the project (also in the list filter).
+
+const P92_ST = [["s0", "1. ยังไม่เริ่มดำเนินการ"], ["s1", "2. จัดทำ TOR/ออกแบบ"], ["s2", "3. กำหนดราคากลาง"], ["s3", "4. ประกาศและเสนอราคา (e-GP)"], ["s4", "5. รอลงนามสัญญา"], ["s5", "6. ลงนามสัญญา อยู่ระหว่างดำเนินงาน"], ["s6", "7. ส่งมอบงานแล้ว"], ["s7", "8. ปิดโครงการแล้ว"], ["sx", "9. ยกเลิก/ชะลอดำเนินการ"]];
+const P92_COL = { s0: "#cbd5e1", s1: "#94a3b8", s2: "#a78bfa", s3: "#f59e0b", s4: "#3b82f6", s5: "#16a34a", s6: "#0d9488", s7: "#334155", sx: "#dc2626" };
+function p92St(r) { const s = ov89Stage(r), t = String(r[59] || ""); if (s === "cancel") return "sx"; if (/ปิดโครงการ/.test(t)) return "s7";
+  if (s === "signed") return /ส่งมอบ/.test(t) || sptNum(r[56]) >= 100 ? "s6" : "s5"; if (s === "wait") return "s4"; if (["draft", "invite", "bid"].includes(s)) return "s3"; if (["ref", "refok"].includes(s)) return "s2";
+  return [22, 23, 24, 25].some(c => sptHas(r[c])) ? "s1" : "s0"; }
+const p92Name = k => (P92_ST.find(x => x[0] === k) || [k, k])[1];
+sptF.st = ["สถานะ ณ ปัจจุบัน", r => p92Name(p92St(r))];
+const P92 = { st: "" };
+// the list of items to follow: from the overview to this tab
+{ const base = d90Dash; d90Dash = function (rows) { return base(rows).replace(/<section class="panel"><header><h2>รายการที่ต้องติดตาม<\/h2>[\s\S]*?<\/section>/, ""); }; }
+function p92Watch(rows) { const M = v => fmt(v, 2), top = (l, n) => l.slice().sort((a, b) => sptNum(b[11]) - sptNum(a[11])).slice(0, n), li = (r, x) => `<li>${esc(r[5])} <span class="sub">· ${esc(r[7])} · ${M(sptNum(r[11]))} ลบ.${x ? " · " + x : ""}</span></li>`;
+  const prob = rows.filter(r => sptHas(r[60])), prep = rows.filter(r => ["s0", "s1", "s2"].includes(p92St(r))), wait = rows.filter(r => p92St(r) === "s4"), late = rows.filter(r => p92St(r) === "s5" && sptNum(r[58]) < 10);
+  const box = (col, t, l, x) => `<div><b style="color:${col}">${t} (${l.length})</b><ul style="margin:4px 0 0;padding-left:18px">${top(l, 5).map(r => li(r, x ? x(r) : "")).join("") || `<li class="sub">ไม่มี</li>`}</ul></div>`;
+  return `<section class="panel p92-watch"><header><h2>รายการที่ต้องติดตาม</h2></header><div class="body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+    ${box("#dc2626", "มีปัญหา/อุปสรรค", prob, r => esc(r[60]))}${box("#64748b", "วงเงินสูงที่ยังเตรียมการ", prep, r => esc(p92Name(p92St(r)).replace(/^\d+\. /, "")))}${box("#3b82f6", "รอลงนามสัญญา", wait)}${box("#f59e0b", "ลงนามแล้ว เบิกจ่ายต่ำกว่า 10%", late, r => fmt(sptNum(r[58]), 1) + "%")}</div></section>`; }
+// the tab: values pulled from where they are entered
+MON_PANELS.progress = () => { const fy = BI.fy, D = prDtRows(fy, false), book = prTrackBook(fy)[0].rows.slice(5), B67 = m88Track67(fy)[0].rows.slice(5), mine = ["div", "divhead"].includes(ROLE) ? unitName(me().unit) : null;
+  const it = D.map((r, i) => ({ r, row: book[i] || [], r67: B67[i] || [] })).filter(x => !mine || x.r.unit === mine).map(x => Object.assign(x, { st: p92St(x.row) })), rows = it.map(x => x.row);
+  const ord = k => P92_ST.findIndex(s => s[0] === k), list = it.filter(x => !P92.st || x.st === P92.st).sort((a, b) => ord(a.st) - ord(b.st) || b.r.alloc - a.r.alloc);
+  const chips = P92_ST.map(([k, t]) => { const n = it.filter(x => x.st === k).length; return `<button type="button" class="p92-chip ${P92.st === k ? "on" : ""}" data-p92st="${P92.st === k ? "" : k}" style="border-left:5px solid ${P92_COL[k]}"><span class="sub">${esc(t.replace(/^(\d+)\. .*/, "$1"))}</span> ${esc(t.replace(/^\d+\. /, ""))}<b>${n}</b></button>`; }).join("");
+  return `<style>.p92-flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.p92-chip{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;background:var(--surface)}.p92-chip b{font-size:20px;font-weight:600}.p92-chip.on{background:var(--info-soft);outline:2px solid var(--info)}</style>
+    ${p92Watch(rows)}
+    <section class="panel"><header><h2>สถานะตามลำดับการดำเนินงาน</h2><span class="sp"></span><span class="sub">เริ่มต้น → ปิดโครงการ · คลิกเพื่อกรองตารางด้านล่าง</span></header><div class="body p92-flow">${chips}</div></section>
+    <section class="panel mt-prog"><header><h2>ความก้าวหน้ารายรายการ</h2><span class="sp"></span><span class="sub">${list.length} รายการ${P92.st ? ` · ${esc(p92Name(P92.st))} <button class="btn ghost" type="button" data-p92st="">ล้างตัวกรอง</button>` : ""}</span></header>
+    <div class="tbl-wrap"><table class="mt-prog-t"><thead><tr><th style="min-width:220px">รายการ</th><th class="n">งปม. (ลบ.)</th><th>สถานะ</th><th>ผลการดำเนินงาน<div class="sub" style="font-weight:400">จากแท็บสัญญา</div></th><th class="n">เบิกจ่ายสะสม<div class="sub" style="font-weight:400">จากการเบิกจ่าย</div></th><th>ปัญหา/อุปสรรค<div class="sub" style="font-weight:400">จากสัญญา/สำนัก/กอง</div></th><th>ขั้นตอนล่าสุด<div class="sub" style="font-weight:400">จาก e-GP</div></th><th></th></tr></thead><tbody>
+    ${list.map(x => { const w = sptNum(x.row[56]), lastStep = [[46, "ลงนามสัญญา"], [42, "ประกาศผู้ชนะ"], [41, "อนุมัติจ้าง"], [33, "เสนอราคา"], [32, "ประกาศเชิญชวน"], [31, "ประกาศร่าง TOR"], [29, "เห็นชอบราคากลาง"], [25, "TOR แล้วเสร็จ"], [23, "แบบแล้วเสร็จ"], [22, "สำรวจ/ออกแบบ"]].find(([c]) => sptHas(x.row[c]));
+      return `<tr><td><b style="font-weight:600">${esc(x.r.name)}</b><div class="sub">${esc(x.r.unit)}</div></td><td class="n">${fmt(x.r.alloc / 1e6, 2)}</td><td><span class="pill" style="border-left:4px solid ${P92_COL[x.st]}">${esc(p92Name(x.st))}</span></td>
+        <td style="white-space:nowrap"><span style="display:inline-block;width:80px;height:8px;border-radius:4px;background:var(--line);vertical-align:middle;overflow:hidden;margin-right:6px"><b style="display:block;height:100%;width:${Math.min(100, w)}%;background:#16a34a"></b></span>${fmt(w, 0)}%</td>
+        <td class="n">${fmt(sptNum(x.row[57]), 2)} ลบ.<div class="sub">${fmt(sptNum(x.row[58]), 1)}%</div></td><td>${sptHas(x.row[60]) ? `<span style="color:var(--bad)">${esc(x.row[60])}</span>` : `<span class="sub">–</span>`}</td><td>${lastStep ? `${esc(lastStep[1])}<div class="sub">${esc(String(x.row[lastStep[0]]).slice(0, 40))}</div>` : `<span class="sub">–</span>`}</td><td><button class="btn ghost" type="button" data-p92open="${esc(x.r.id)}" aria-expanded="${P92.open === x.r.id}">${P92.open === x.r.id ? "ปิด" : "ดูรายละเอียด"}</button></td></tr>${P92.open === x.r.id ? `<tr class="fn-rowform"><td colspan="8">${p92Detail(x)}</td></tr>` : ""}`; }).join("") || `<tr><td colspan="8" class="sub">ไม่มีรายการ</td></tr>`}</tbody></table></div>
+    <div class="body sub">ข้อมูลในแท็บนี้ดึงจากจุดที่บันทึกไว้แล้ว: รายละเอียดขอจัดซื้อจัดจ้าง (สำนัก/กอง), ขั้นตอน e-GP, สัญญาและสัญญาแก้ไข (ผลการดำเนินงาน ปัญหา/อุปสรรค), และการเบิกจ่าย (ผู้ตรวจสอบใบสำคัญ บัญชี การเงิน) · แก้ไขข้อมูลที่จุดนั้น</div></section>`; };
+document.addEventListener("click", e => { const b = e.target && e.target.closest && e.target.closest("[data-p92st]"); if (b) { P92.st = b.dataset.p92st; route(); } });
+
+// the details of one item: every column of the follow-up form, by who fills it (no report form: each value comes from where it is entered)
+const P92_SRC = { "รายการงบประมาณ (กองแผนงาน)": "กองแผนงาน · แผนจัดซื้อ", "สำนัก/กอง": "สำนัก/กอง · ขอจัดซื้อจัดจ้าง", "e-GP": "e-GP · บริหารงบประมาณ", "ทำสัญญา": "สัญญาและการเบิกจ่าย" };
+function p92Detail(x) { const H = PR_XL_TRACK67_H, W = PR_XL_TRACK67_W, v = x.r67, groups = {};
+  H.forEach((h, i) => { if (i === 0) return; (groups[W[i]] = groups[W[i]] || []).push([h.replace("{fy}", BI.fy).replace(/\s*\n\s*/g, " ").trim(), v[i]]); });
+  const val = y => (y === "" || y == null || y === 0 ? `<span class="sub">–</span>` : esc(typeof y === "number" ? (Number.isInteger(y) && y >= 2500 && y <= 2600 ? String(y) : fmt(y, Number.isInteger(y) ? 0 : 4)) : y));
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;padding:6px 0">${Object.entries(groups).map(([g, l]) => `<div style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><b>${esc(g)}</b><div class="sub" style="margin-bottom:4px">บันทึกที่: ${esc(P92_SRC[g] || g)}</div><dl style="display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,1fr);gap:3px 10px;margin:0;font-size:12.5px">${l.map(([h, y]) => `<dt class="sub">${esc(h)}</dt><dd style="margin:0">${val(y)}</dd>`).join("")}</dl></div>`).join("")}</div>`; }
+document.addEventListener("click", e => { const b = e.target && e.target.closest && e.target.closest("[data-p92open]"); if (b) { P92.open = P92.open === b.dataset.p92open ? null : b.dataset.p92open; route(); } });
+
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
 // With no signed-in session, the sign-in screen opens on top.
