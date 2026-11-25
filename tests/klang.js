@@ -22,6 +22,7 @@
     const act = (spec, rec, id) => (spec.acts(rec) || []).find(a => a.id === id);
     const oldErr = window.onerror; window.onerror = (m, s, l) => { errs.push(`window.onerror ${m} @${l}`); };
     const ORG0 = ORG;
+    const MENU0 = window.MENU_ALL; window.MENU_ALL = true; if (typeof m88ApplyApps === "function") m88ApplyApps(); // P88: the older checks run on the full menu
     try {
       const ms = fyMonths(CUR_FY);
       await grp("Requisition details and requests", async () => {
@@ -2366,7 +2367,7 @@
           const b = [...document.querySelectorAll(".bi-dash [data-stgo]")].find(x => /"unit"/.test(x.dataset.stgo)), un = JSON.parse(b.dataset.stgo).f.unit; b.click(); await tick(300);
           ok("P84: a row of the dashboard opens the items of the form filtered on it, with the columns of the form", MON_TAB === "tracklist" && document.querySelectorAll("table.st-list tbody tr").length === rows.filter(r => r[7] === un).length && /8 · หน่วยงาน/.test(document.querySelector("table.st-list thead").textContent) && !!document.querySelector('.pd-chip [data-stx="unit"]'));
           let dl = null; const x0 = xwDownload; xwDownload = (n, bk) => { dl = [n, bk[0].rows[4].length, bk[0].rows.length - 5]; }; document.querySelector("#fl-xl-spend").click(); xwDownload = x0;
-          ok("P84: the Excel of the form from the page: 72 columns, every item of the year", !!dl && dl[1] === 72 && dl[2] === rows.length && dl[0].includes(String(BI.fy)), JSON.stringify(dl)); SPT.f = {}; MON_TAB = "track"; route(); await tick(300);
+          ok("P84/P88: the Excel of the form from the page: 67 columns of the revised form, every item of the year", !!dl && dl[1] === 67 && dl[2] === rows.length && dl[0].includes(String(BI.fy)), JSON.stringify(dl)); SPT.f = {}; MON_TAB = "track"; route(); await tick(300);
           ok("P85: the year and the month are on top, in place of 'ข้อมูล ณ'", !!document.querySelector(".tf-top #pr-fy") && !!document.querySelector("#tf-mon") && !document.querySelector("#asof-sel"));
           { const D = prDtRows(BI.fy, false), cs = rows.filter((r, i) => { const d = D[i], p = d && (d.p || (d.k && famPlan(d.k.plan))), c = p && caseByPlan(p.id); return r[46] && c && !c.egp7; }); ok("P85: the sample rows of the year are filled: every signed row has the dates of the steps before it, the e-GP number, the winner; the older plan items with a case are rows", cs.length > 0 && cs.every(r => [22, 25, 27, 30, 32, 33, 41, 42].every(c => !!r[c]) && !!r[26] && !!r[36]) && rows.length === prDtRows(BI.fy, false).length && rows.some(r => !r[46] && r[27]) && rows.every(r => !!r[8])); }
           SPT.m = "1"; route(); await tick(300); { const R = tfRows(); ok("P85: a month shows the items that moved in it, the steps done in it", R.all.length > 0 && R.all.length < rows.length && R.ov.every(r => [22, 27, 32, 42].every(c => !r[c] || tfIn(r[c], BI.fy, 1))) && /ที่มีความเคลื่อนไหวในเดือน/.test(document.querySelector(".tf-top").textContent)); } SPT.m = "";
@@ -2381,7 +2382,7 @@
             const row = prTrackBook(BI.fy)[0].rows[5 + i]; ok("P90: the province and the quantities of the unit's details go into the follow-up form (columns 11, 51-54)", row[10] === (rq.detail.prov) || row[10] === "จังหวัดทดสอบ", JSON.stringify([row[10], row[50], row[52], row[53]])); ok("P90: the quantities (a value on the contract stays first)", row[50] === ((D[i].k && D[i].k.cx && D[i].k.cx.qLen) || 321) && row[52] === 45 && row[53] === 2, JSON.stringify([row[50], row[52], row[53]])); }
           MON_TAB = "drill"; route(); await tick(250); ok("P87: drill-down of the year in execution reads the allocation lines", !!document.querySelector(".mt-src"));
           MON_TAB = "live"; window.FISKO_ROUTE = "#procurement"; }
-        { const b = await xwBook(flSpendBook()).arrayBuffer(), s = new TextDecoder().decode(new Uint8Array(b)); ok("P61: the Excel of spending follows the follow-up form: 72 columns numbered 1-72, the headers of the form", flSpendBook()[0].rows[4].length === 72 && flSpendBook()[0].rows[3][71] === "72" && flSpendBook()[0].rows.slice(5).every(r => r.length === 72) && s.includes("รหัส e-bud") && s.includes("ปัญหา/อุปสรรค")); }
+        { const b = await xwBook(flSpendBook()).arrayBuffer(), s = new TextDecoder().decode(new Uint8Array(b)); ok("P61/P88: the Excel of spending follows the revised follow-up form: 67 columns numbered 1-67, who fills each, the headers of the form", flSpendBook()[0].rows[4].length === 67 && flSpendBook()[0].rows[3][66] === "67" && flSpendBook()[0].rows[1][22] === "e-GP" && flSpendBook()[0].rows.slice(5).every(r => r.length === 67) && s.includes("รหัส e-bud") && s.includes("ปัญหา/อุปสรรค") && s.includes("วันที่ครบอุทธรณ์")); }
         as("admin"); renderShell(); FIN_DESK = "book"; PROC_TAB = "contracts"; CON_OPEN = k.id; CON_TAB = "cxdl"; route(); await tick(300);
         { const h = kxManageView(k); ok("the admin picks a desk: the three desks, the closed project shown", (h.match(/data-fldesk=/g) || []).length === 3 && /ปิดโครงการแล้ว/.test(h)); } FIN_DESK = "chk";
         for (const r of ["vchk1", "vchk2", "acc", "fin"]) { as(r); renderShell(); route(); await tick(200); ok("P77: " + r + " sees the contract page and the payment follow-up, with no desk to pick", PROC_PAGE === "contracts" && !document.querySelector("[data-fldesk]") && prSees(prPage("disb"))); }
@@ -2431,10 +2432,74 @@
           ok("its money management is saved on the budget item and reaches the Excel of payments", mmCalc(mmRowOf(L0.id)).carry === 2500 && prPlanBook(BI.fy).flatMap(sh => sh.rows).some(x => x[5] === L0.name && x[36] === 2500)); BI_OPEN = null; }
         window.FISKO_ROUTE = ""; as("plan"); renderShell();
       });
+      await grp("P88: trimmed menus, Planning details, money plan, request AI and e-GP choice, contract advance/PO/deduction, follow-up form 67 columns", async () => {
+        window.MENU_ALL = false; m88ApplyApps(); const v = () => document.getElementById("view"), navIds = () => [...document.querySelectorAll("#nav a[data-v]")].map(a => a.dataset.tab || a.dataset.v), login = r => { const u = S.users.find(x => x.role === r); SESSION = { user: u.id }; ROLE = r; return u; };
+        login("plan"); APP = "budget"; renderShell();
+        ok("P88: the budget app shows only the menus asked (with the registers), the other apps are hidden", !APP_IDS.includes("finance") && !APP_IDS.includes("hr") && !APP_IDS.includes("assets") && navIds().includes("rmake") && navIds().includes("dashboard") && navIds().includes("od-dash") && navIds().includes("rg-out") && !navIds().includes("requests") && !navIds().includes("allocation") && !navIds().includes("flow") && tx(NAV.find(n => n.id === "dashboard").label) === "ติดตามความก้าวหน้า", navIds());
+        login("proc"); APP = "procurement"; renderShell();
+        ok("P88: procurement shows its menus in the order asked, the committee menus stay", JSON.stringify(navIds().filter(x => M88.proc.includes(x))) === JSON.stringify(M88.proc.filter(x => prSees(prPage(x)))) && !navIds().includes("today") && !navIds().includes("egp") && !navIds().includes("tor") && navIds().includes("cm-reg") && tx(prPage("cases").label) === "บริหารงบประมาณ", navIds());
+        window.MENU_ALL = true; m88ApplyApps(); renderShell(); ok("P88: MENU_ALL shows every menu again (nothing deleted)", APP_IDS.includes("finance") && navIds().includes("today") && tx(prPage("reqn").label) === "ขอซื้อขอจ้าง"); window.MENU_ALL = false; m88ApplyApps();
+        // Planning: the import, the details of its part, the unit and its amount
+        S.bi = null; login("plan"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("plan"); BI.view = "imp"; route(); await tick(300);
+        document.querySelector("#bi-sample").click(); for (let i = 0; i < 40 && !(S.bi && S.bi.rows && S.bi.rows.length); i++) await tick(300);
+        BI.fy = biFy(S.bi.rows[0]); BI.view = "list"; route(); await tick(200);
+        ok("P88: the item list has no money-plan columns and no money-plan filter", !!document.querySelector("table.bi88") && !/>ต\.ค\.</.test(document.querySelector("table.bi-table thead").innerHTML) && !document.querySelector('[data-pdf="mon"]'));
+        const r0 = S.bi.rows[0], u2 = S.units.find(u => !u.retired && u.id !== (biUnit(r0) || {}).id && S.users.some(x => x.role === "div" && x.unit === u.id));
+        document.querySelector(`[data-pl88e="${r0.id}"]`).click(); await tick(200); const f = document.querySelector(`form[data-pl88="${r0.id}"]`);
+        f.querySelector("[name=unit]").value = u2.id; f.querySelector("[name=prod]").value = "ผลผลิตทดสอบ (สมมติ)"; f.querySelector("[name=act]").value = "ตาม พ.ร.บ."; f.querySelector("[name=total]").value = "12.5"; f.querySelector("[name=y2573]").value = "3"; f.querySelector("[name=allot]").value = String(Math.round(r0.amount * 0.9));
+        f.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(200);
+        ok("P88: Planning saves its details and assigns the unit and its amount", r0.unit === u2.id && r0.pl.prod === "ผลผลิตทดสอบ (สมมติ)" && r0.pl.total === 12.5 && r0.pl.allot === Math.round(r0.amount * 0.9), JSON.stringify(r0.pl));
+        ok("P88: an amount above the item is refused; a unit can't write Planning's details", pl88Save(r0.id, { allot: String(r0.amount * 2) }) !== "" && (as("div"), pl88Save(r0.id, { prod: "x" }) !== "") && (as("plan"), true));
+        biSend([r0.id]); const pp = r0.sent && S.pplan.find(p => p.id === r0.sent.pp); ok("P88: the amount given to the unit becomes the plan estimate", !!pp && pp.est === r0.pl.allot);
+        { const B = flSpendBook()[0].rows, i0 = prDtRows(BI.fy, false).findIndex(x => x.id === r0.id), row = B[5 + i0];
+          ok("P88: the Excel of the follow-up form: 67 columns, who fills each, Planning's values in its columns", B[4].length === 67 && B[1][0] === "รายการงบประมาณ (กองแผนงาน)" && B[1][15] === "สำนัก/กอง" && B[1][22] === "e-GP" && B[1][45] === "ทำสัญญา" && B[4][13] === `ปี ${BI.fy}` && row[2] === "ตาม พ.ร.บ." && row[5] === "ผลผลิตทดสอบ (สมมติ)" && row[12] === 12.5 && row[66] === 3, JSON.stringify([B[4][13], row[2], row[5], row[12], row[66]])); }
+        // แผนเงิน
+        procSet("mplan"); route(); await tick(200); { const inp = document.querySelector(`[data-m88mp="${r0.id}|0"]`); inp.value = "12345"; inp.dispatchEvent(new Event("change", { bubbles: true })); await tick(200); }
+        ok("P88: แผนเงิน is its own page; Planning edits a month", r0.plan[0] === 12345 && /แผนเงิน ปีงบประมาณ/.test(v().innerText));
+        login("div"); renderShell(); procSet("mplan"); route(); await tick(200); ok("P88: a unit sees the money plan without inputs", !document.querySelector("[data-m88mp]") && !BAD.test(v().innerText));
+        // ติดตามความก้าวหน้า, ติดตามการเบิกจ่าย, คลังเอกสาร, แดชบอร์ดผู้บริหาร
+        login("plan"); renderShell(); procSet("progress88"); MON_TAB = "track"; route(); await tick(300);
+        ok("P88: ติดตามความก้าวหน้า in procurement: five tabs, the overview by ผลผลิต/โครงการ", document.querySelectorAll("[data-m88tab]").length === 5 && /ตามผลผลิต\/โครงการ/.test(v().innerText) && !BAD.test(v().innerText));
+        { const b = [...document.querySelectorAll("[data-stgo]")].find(x => /"prod"/.test(x.dataset.stgo)); if (b) { b.click(); await tick(300); } ok("P88: a row by ผลผลิต opens the list filtered on it, with a ผลผลิต filter", !!b && MON_TAB === "tracklist" && !!document.querySelector('[data-stf="prod"]') && PROC_PAGE === "progress88"); SPT.f = {}; }
+        window.FISKO_ROUTE = "#dashboard"; route(); await tick(300); ok("P88: the budget page ติดตามความก้าวหน้า has the same five tabs", document.querySelectorAll("[data-btab]").length === 5, document.querySelectorAll("[data-btab]").length);
+        login("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("disb"); route(); await tick(300); ok("P88: ติดตามการเบิกจ่าย: plan and result by month", document.querySelectorAll("table.m88-pa-t tbody tr").length === 12);
+        M88.dq = "q"; route(); await tick(200); ok("P88: ... and by quarter", document.querySelectorAll("table.m88-pa-t tbody tr").length === 4); M88.dq = "m";
+        procSet("library"); route(); await tick(200); ok("P88: คลังเอกสาร lists the budget items of the year", document.querySelectorAll("[data-m88lib]").length === prDtRows(BI.fy, false).length && !BAD.test(v().innerText));
+        login("exec"); renderShell(); window.FISKO_ROUTE = "#od-dash"; route(); await tick(300); ok("P88: แดชบอร์ดผู้บริหาร has the summary for decisions", !!document.querySelector(".m88-exec") && !BAD.test(document.querySelector(".m88-exec").innerText));
+        // ขอจัดซื้อจัดจ้าง: the AI, the unit's columns, who sends e-GP
+        { const cs = caseByPlan(pp.id); const du = S.users.find(x => x.role === "div" && x.unit === u2.id); SESSION = { user: du.id }; ROLE = "div"; renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = cs.id; CASE_MAIN[cs.id] = 2; route(); await tick(400);
+          ok("P88: the request form has the unit's columns of the form and the e-GP choice", !!document.querySelector("#pr-survey") && !!document.querySelector("#pr-tor") && document.querySelectorAll('input[name="rq-egpby"]').length === 2);
+          document.querySelector("#pr-obj").value = ""; RQ_FILES = []; document.querySelector(`[data-rq88ai="${cs.id}"]`).click(); await tick(100); const noFile = !document.querySelector("#pr-obj").value;
+          RQ_FILES = [{ name: "TOR ร่าง.pdf", size: 100, type: "application/pdf", kind: 0 }, { name: "ประมาณราคา BOQ.xlsx", size: 100, type: "", kind: 0 }]; document.querySelector(`[data-rq88ai="${cs.id}"]`).click(); await tick(100);
+          ok("P88: the AI fills the empty fields from the attached files only", noFile && !!document.querySelector("#pr-obj").value && !!document.querySelector("#pr-tor").value && !!document.querySelector("#pr-est").value && cs.rq88Ai.n > 0);
+          document.querySelector('input[name="rq-egpby"][value="self"]').checked = true; const vals = rqReadVals(); ok("P88: the form reads the dates and the choice", vals.egpBy === "self" && !!vals.torDone && !!vals.survey);
+          CASE_OPEN = null; RQ_FILES = []; }
+        { const rq = S.reqn.find(x => x.status === "pending"); if (rq) { const c = caseByPlan(rq.plan); rq.egpBy = "proc"; const n0 = S.notes.length; login("exec"); rqDecide(rq.id, true);
+            ok("P88: after the approval, when the Treasury sends e-GP, the procurement officers get a notice", rq.status !== "approved" || S.notes.slice(0, S.notes.length - n0).some(n => n.to.includes("proc") && /กองคลังดำเนินการส่ง e-GP/.test(n.text[0])));
+            if (c && rq.status === "approved") { c.egpBy = "self"; const un = famLine(famPlan(c.plan).line).unit, du = S.users.find(x => x.role === "div" && x.unit === un); if (du) { SESSION = { user: du.id }; ROLE = "div";
+                ok("P88: a unit that sends e-GP itself records the e-GP steps of its own item", egp7Save(c, 1, { date: "2026-11-01" }, {}) !== "เฉพาะเจ้าหน้าที่พัสดุบันทึกได้" && egp7Of(c).s1.date === "2026-11-01" && ROLE === "div");
+                c.egpBy = "proc"; ok("P88: ... and not an item the Treasury sends", /เฉพาะเจ้าหน้าที่พัสดุ/.test(egp7Save(c, 1, { date: "2026-11-02" }, {}))); } }
+            login("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("cases"); CASE_OPEN = null; route(); await tick(300); ok("P88: บริหารงบประมาณ lists the approved items the Treasury sends", !!document.querySelector(".rq88-list") && !BAD.test(document.querySelector(".rq88-list").innerText)); } }
+        // the contract: PO, how it is paid, the advance with its GF number, the deduction %, a payment made by the unit
+        { login("proc"); const k = S.contracts.find(c => S.cases.some(x => x.contract === c.id)), X = Object.assign(kxOf(k), { dl: [], lastAccept: "", amends: [] });
+          kxSave(k, { amount: "1000000", nPhases: "4", advHas: true, advPct: "15" }, {}); KX88_IN = { po: "PO-0001 (สมมติ)", payMode: "phase", dedPct: "20" }; const m1 = kxSave(k, {}, {});
+          ok("P88: the contract keeps the PO, the way of payment and the deduction %", m1 === "" && X.po === "PO-0001 (สมมติ)" && X.payMode === "phase" && X.adv.dedPct === 20, m1);
+          ok("P88: the advance paid needs a GF number and is at most 15%", kx88AdvPay(k, { amt: "150000", gf: "", date: "2026-11-01" }) !== "" && kx88AdvPay(k, { amt: "200000", gf: "GF1", date: "2026-11-01" }) !== "" && kx88AdvPay(k, { amt: "150000", gf: "GF-3600001 (สมมติ)", date: "2026-11-01" }) === "" && kxAdvAmt(X) === 150000 && kxAdvLeft(X) === 150000);
+          ok("P88: each payment deducts 20% of what is asked", kxDlAdd(k, { deliver: "2026-11-10", amount: "250000", deduct: "", note: "", phase: 1 }, {}) === "" && X.dl[0].deduct === 50000 && X.dl[0].pay === 200000 && X.dl[0].phase === 1);
+          kxDlAdd(k, { deliver: "2026-11-20", amount: "250000", deduct: "" }, {}); kxDlAdd(k, { deliver: "2026-11-25", amount: "300000", deduct: "" }, {});
+          ok("P88: when less is left than the %, everything left is deducted", X.dl[2].deduct === 50000 && kxAdvLeft(X) === 0 && (kxDlAdd(k, { deliver: "2026-11-26", amount: "100000", deduct: "" }, {}), X.dl[3].deduct === 0), JSON.stringify(X.dl.map(d => d.deduct)));
+          KX88_IN = { amPo: "PO-0002 (สมมติ)" }; ok("P88: the amendment keeps a PO", kxAmendAdd(k, { no: "แก้ไข 1", date: "2026-11-21", kind: "ext", days: "30" }, null) === "" && X.amends[0].po === "PO-0002 (สมมติ)" && /PO-0002/.test(kxContractView(k)));
+          const h = kxManageView(k); ok("P88: the payment tab shows the advance, what is left and the three statuses", /วงเงินเบิกล่วงหน้า/.test(h) && /เงินล่วงหน้าคงเหลือ/.test(h) && /GF-3600001/.test(h) && /<table class="m88-st">/.test(h) && /การเงินจ่ายจริงพร้อมเอกสาร/.test(h) && /งวด 1/.test(h));
+          const un = famLine(famPlan(k.plan).line).unit, du = S.users.find(x => x.role === "div" && x.unit === un);
+          if (du) { SESSION = { user: du.id }; ROLE = "div"; const n = X.dl.length; ok("P88: the unit responsible creates a payment", kxDlAdd(k, { deliver: "2026-11-27", amount: "50000", deduct: "" }, {}) === "" && X.dl.length === n + 1 && ROLE === "div" && /data-cxdl=/.test(kxManageView(k))); }
+          login("proc"); }
+        window.FISKO_ROUTE = ""; CASE_OPEN = null; window.MENU_ALL = true; m88ApplyApps(); as("plan"); renderShell();
+      });
       // every new page opens without a broken value, for every role
       const pages = ["pj-reg", "pj-row", "pj-imp", "pl-plan", "pl-act", "pl-res", "pl-dash", "pv-reg", "cx-reg", "cx-doc", "cx-grt", "cx-alert", "cw-reg", "cw-all", "fx-rev", "fx-k", "fx-res", "fx-wht", "fx-ta", "fx-ref", "fx-rcp", "cm-reg", "cm-mem", "cm-meet", "cm-type", "cm-slot", "lt-reg", "lt-tpl", "lt-in", "vh-reg", "vh-book", "vh-fuel", "rm-book", "fm-bldg", "fm-eq", "fm-wo", "fm-insp", "fm-alert", "hr-sal", "hr-ded", "od-imp", "od-dash", "rg-out", "rg-act", "bq-cfg", "bq-money", "bq-cat", "bq-geo", "bq-ref", "bq-obs", "bq-ocr", "bq-dash", "bq-rpt", "bq-cal"];
       reseed(); for (const role of Object.keys(ROLES)) { as(role); renderShell(); for (const id of pages) { n++; window.FISKO_ROUTE = "#" + id; try { route(); } catch (e) { errs.push(`page ${id} as ${role} THROW ${e && e.message}`); continue; } const v = document.getElementById("view"), s = v ? v.innerText : "", m = s.match(BAD); if (m) errs.push(`page ${id} as ${role}: …${s.slice(Math.max(0, m.index - 30), m.index + 20).replace(/\s+/g, " ")}`); } o.onProgress({ what: "pages " + role, n, errors: errs.length }); await tick(); }
     } catch (e) { errs.push("THROW " + (e && e.stack || e)); }
+    window.MENU_ALL = MENU0; if (typeof m88ApplyApps === "function") m88ApplyApps();
     window.onerror = oldErr; ORG = ORG0; try { store.del(key()); } catch (e) {}
     return { ok: !errs.length, checks: n, errors: errs, seconds: Math.round((performance.now() - t0) / 100) / 10 };
   }

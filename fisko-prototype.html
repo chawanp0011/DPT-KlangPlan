@@ -30236,6 +30236,387 @@ function mtLiveDash() { const A = S.allocs && S.allocs[B4_FY]; if (!A || B4_FY !
 { const base = BIND.dashboard; BIND.dashboard = function () { if (!["drill", "forecast"].includes(MON_TAB)) return base.apply(this, arguments); const L0 = mtLiveDash(); if (!L0) return base.apply(this, arguments);
     const keep = S.dash; S.dash = L0.dash; try { return base.apply(this, arguments); } finally { S.dash = keep; } }; }
 
+/* ---- 98zzzzp-klang-menu88.js ---- */
+// Fisko-KlangFinance, round P88 (25 Nov 2569): the menus keep only what is used now (asked for: "ปรับเมนูให้เหลือแค่ที่ต้องใช้ก่อน
+// โดยซ่อนเมนูที่ไม่จำเป็นออกไปก่อน"). Nothing is deleted: window.MENU_ALL = true (or m88All(true)) shows every menu again.
+//   1. ระบบสิทธิ์และผู้ดูแลระบบ: ผู้ดูแลระบบ and the organisation app (positions and approval limits);
+//   2. วางแผนและบริหารงบประมาณ: จัดเตรียมคำของบประมาณ, ทะเบียนโครงสร้างงบประมาณ, ติดตามความก้าวหน้า, แดชบอร์ดผู้บริหาร;
+//   3. จัดซื้อจัดจ้าง: แผนจัดซื้อ, แผนเงิน, ขอจัดซื้อจัดจ้าง, บริหารงบประมาณ, ติดตามความก้าวหน้า, สัญญางบประมาณ, ผู้รับจ้าง/ผู้ขาย,
+//      ติดตามการเบิกจ่าย, คลังเอกสาร, คณะกรรมการ;
+//   4. สัญญาและข้อตกลง: as it is.
+// Also in this file: ติดตามความก้าวหน้า (the tabs of the follow-up form, also inside procurement), the dashboard by ผลผลิต/โครงการ,
+// the plan and result of payments by month and by quarter (ติดตามการเบิกจ่าย), a summary for decisions on the executive dashboard,
+// the document library, and the Excel of the follow-up form in the layout of the revised form (แบบฟอร์มติดตามความก้าวหน้า
+// ก_แก้ไข25112569: 67 columns, a row naming who fills each column: กองแผนงาน, สำนัก/กอง, e-GP, ทำสัญญา).
+
+window.MENU_ALL = !!window.MENU_ALL;
+const m88On = () => !window.MENU_ALL;
+const M88 = { apps: ["org", "budget", "procurement", "contract"], bud: ["rmake", "dashboard", "od-dash"], budGroups: ["regg"],
+  proc: ["plan", "mplan", "reqn", "cases", "progress88", "contracts", "suppliers", "disb", "library"], procNav: ["procurement", "cm-reg", "cm-mem", "cm-meet", "cm-type", "cm-slot"],
+  dq: "m", lib: { item: "", q: "", prev: null } };
+const M88_APPS_ALL = APP_IDS.slice();
+function m88NavShown(n) {
+  if (!m88On() || !n) return true;
+  if (n.app === "all") return n.id !== "flow";
+  if (!M88.apps.includes(n.app)) return false;
+  if (n.app === "budget") return M88.bud.includes(n.id) || M88.budGroups.includes(n.group);
+  if (n.app === "procurement") return M88.procNav.includes(n.id);
+  return true;
+}
+function m88ApplyApps() { APP_IDS.splice(0, APP_IDS.length, ...(m88On() ? M88_APPS_ALL.filter(a => M88.apps.includes(a)) : M88_APPS_ALL)); }
+m88ApplyApps();
+function m88All(on) { window.MENU_ALL = !!on; m88ApplyApps(); if (typeof renderShell === "function" && typeof SESSION !== "undefined" && SESSION) { renderShell(); route(); } }
+{ const base = ensureApp; ensureApp = function () { base(); if (!APP_IDS.includes(APP)) { const a = APP_IDS.find(appAllowed); if (a) APP = a; } }; }
+{ const base = renderNav; renderNav = function () { m88ApplyApps(); base(); if (!m88On()) return; const nav = document.getElementById("nav"); if (!nav) return;
+    nav.querySelectorAll("a[data-v]").forEach(a => { if (a.dataset.tab) return; const n = NAV.find(x => x.id === a.dataset.v); if (n && !m88NavShown(n)) a.remove(); });
+    [...nav.children].reverse().forEach(el => { if (!el.classList.contains("nav-h")) return; const nx = el.nextElementSibling; if (!nx || nx.classList.contains("nav-h")) el.remove(); }); }; }
+
+// labels that change only while the menus are trimmed (the full menu keeps its old names)
+const m88Label = (o, th, en) => { const old = o.label; Object.defineProperty(o, "label", { configurable: true, get: () => (m88On() ? [th, en] : old), set: v => { Object.defineProperty(o, "label", { value: v, writable: true, configurable: true }); } }); };
+{ const d = NAV.find(n => n.id === "dashboard"); if (d) m88Label(d, "ติดตามความก้าวหน้า", "Progress"); const r = NAV.find(n => n.id === "rmake"); if (r) m88Label(r, "จัดเตรียมคำของบประมาณ", "Prepare the budget request"); }
+[["reqn", "ขอจัดซื้อจัดจ้าง", "Purchase requests"], ["cases", "บริหารงบประมาณ", "Budget management"], ["disb", "ติดตามการเบิกจ่าย", "Payment follow-up"], ["plan", "แผนจัดซื้อ (กองแผนงาน)", "Procurement plan"]].forEach(([id, th, en]) => { const p = prPage(id); if (p) m88Label(p, th, en); });
+
+// ---------- the procurement pages: three new ones ----------
+const M88_ROLES = ["proc", "prochead", "div", "divhead", "plan", "exec", "fin", "finhead", "audit", "admin", "vchk1", "vchk2", "acc"];
+{ const at = id => PROC_PAGES.findIndex(p => p.id === id) + 1;
+  PROC_PAGES.splice(at("plan"), 0, { id: "mplan", code: "P2M", group: "plan", label: ["แผนเงิน", "Money plan"], roles: M88_ROLES, sub: ["แผนการใช้จ่ายเงินรายเดือนของรายการงบประมาณ แยกจากรายการงบประมาณ", "The monthly money plan of the budget items, apart from the items"], tabs: [{ id: "main", key: "mplan", secs: ["mplan88"] }] });
+  PROC_PAGES.splice(at("cases"), 0, { id: "progress88", code: "P4P", group: "run", label: ["ติดตามความก้าวหน้า", "Progress"], roles: M88_ROLES, sub: ["ภาพรวม รายการงบประมาณ รายงานความก้าวหน้า ขั้นตอนจัดซื้อจัดจ้าง และคาดการณ์สิ้นปี ตามฟอร์มติดตาม", "Overview, items, progress reports, procurement steps and the year-end forecast, by the follow-up form"], tabs: [{ id: "main", key: "progress88", secs: ["mon88"] }] });
+  PROC_PAGES.splice(at("disb"), 0, { id: "library", code: "P7L", group: "con", label: ["คลังเอกสาร", "Document library"], roles: M88_ROLES, sub: ["เอกสารของแต่ละรายการงบประมาณ แยกโฟลเดอร์ตามประเภทเอกสาร เปิดดูและดาวน์โหลดได้", "The documents of each budget item, a folder per kind, to view and download"], tabs: [{ id: "main", key: "library", secs: ["lib88"] }] }); }
+Object.assign(NAV_ICON, { mplan: "coins", progress88: "chart", library: "folder" });
+const M88_G = { plan: ["วางแผนจัดซื้อ (กองแผนงาน)", "Planning"], run: ["จัดซื้อจัดจ้าง", "Procurement"], trk: ["ติดตาม", "Follow-up"], con: ["สัญญาและผู้ขาย", "Contracts and suppliers"], pay: ["เบิกจ่าย", "Payments"], doc: ["เอกสาร", "Documents"] };
+const M88_GRP = { plan: M88_G.plan, mplan: M88_G.plan, reqn: M88_G.run, cases: M88_G.run, progress88: M88_G.trk, contracts: M88_G.con, suppliers: M88_G.con, disb: M88_G.pay, library: M88_G.doc };
+{ const n = NAV.find(x => x.id === "procurement"), d = Object.getOwnPropertyDescriptor(n, "tabs"), g0 = d && d.get;
+  if (g0) Object.defineProperty(n, "tabs", { configurable: true, get: () => { const all = g0(); if (!m88On()) return all; return M88.proc.map(id => all.find(t => t[0] === id)).filter(Boolean).map(t => [t[0], t[1], t[2], M88_GRP[t[0]] || t[3], t[4]]); } }); }
+// the procurement app opens on the plan, not on "งานวันนี้" (hidden)
+{ const base = procSet; procSet = function (v, keep) { const r = base(v, keep); if (m88On() && PROC_PAGE === "today" && String(v).split(":")[0] !== "today") { PROC_PAGE = "plan"; const T = prTabs(prPage("plan")); if (T[0]) { PROC_ST.plan = T[0].id; PROC_TAB = T[0].key; } } return PROC_TAB; }; }
+if (m88On() && PROC_PAGE === "today") { const t = prPage("plan").tabs[0]; PROC_PAGE = "plan"; PROC_ST.plan = t.id; PROC_TAB = t.key; } // no procSet here: the data is not loaded yet
+
+// ---------- ติดตามความก้าวหน้า: five tabs, in the budget app (#dashboard) and in procurement ----------
+const M88_MT = [["track", "ภาพรวม"], ["tracklist", "รายการงบประมาณ"], ["progress", "รายงานความก้าวหน้า"], ["procure", "ขั้นตอนจัดซื้อจัดจ้าง"], ["forecast", "คาดการณ์สิ้นปี"]];
+{ const pg = BUD_PAGES.find(p => p.id === "dashboard"); if (pg) { let all = pg.tabs;
+    Object.defineProperty(pg, "tabs", { configurable: true, get: () => (m88On() ? M88_MT.map(([k, t]) => { const x = all.find(y => y.keys.includes(k)); return x ? Object.assign({}, x, { label: [t, t] }) : null; }).filter(Boolean) : all), set: v => (all = v) }); } }
+PROC.mon88 = () => { if (!M88_MT.some(t => t[0] === MON_TAB)) MON_TAB = "track"; let body = "";
+  try { body = MON_PANELS[MON_TAB](); } catch (e) { body = `<div class="sub">เปิดแท็บนี้ไม่ได้: ${esc(e && e.message)}</div>`; }
+  const top = ["track", "tracklist"].includes(MON_TAB) && typeof tfTop === "function" ? tfTop(tfRows().all.length) : prFySel();
+  return `<div class="tabs" role="tablist" style="margin:0 0 10px">${M88_MT.map(([k, t]) => `<button class="tab ${MON_TAB === k ? "on" : ""}" type="button" role="tab" aria-selected="${MON_TAB === k}" data-m88tab="${k}">${t}</button>`).join("")}</div>${top}${body}`; };
+{ const b = BIND.procurement; BIND.procurement = function () { if (b) b.apply(this, arguments); if (PROC_PAGE === "progress88" && MON_BIND[MON_TAB]) try { MON_BIND[MON_TAB](); } catch (e) {} }; }
+
+// the dashboard by ผลผลิต/โครงการ, and a filter on it in the list
+const m88BiRows = () => (S.bi && S.bi.rows) || [];
+const m88Prod = r => { if (r.prod) return r.prod; const b = m88BiRows().find(x => (r[4] && x.code === r[4]) || x.name === r[5]); return (b && ((b.pl && b.pl.prod) || b.prod)) || "—"; };
+sptF.prod = ["ผลผลิต/โครงการ", m88Prod];
+{ const base = sptOv; sptOv = function (rows) { const h = base(rows); return h.replace(/<\/div>\s*$/, `<section class="panel" style="grid-column:1/-1"><header><h2>ตามผลผลิต/โครงการ</h2><span class="sp"></span><span class="sub">คลิกเพื่อดูรายการ</span></header><div>${sptGroup(rows, "prod")}</div></section></div>`); }; }
+{ const base = prTrackBook; prTrackBook = function (fy) { const book = base(fy), D = prDtRows(fy, false);
+    book[0].rows.slice(5).forEach((row, i) => { const r = D[i]; if (!r) return; const b = m88BiRows().find(y => y.id === r.id); if (!b) return; const pl = b.pl || {};
+      row.prod = pl.prod || b.prod || ""; if (pl.startY) row[1] = Number(pl.startY); if (pl.act) { row[2] = pl.act === "ตาม พ.ร.บ." ? "ตาม พ.ร.บ." : ""; row[3] = pl.act === "โอนเปลี่ยนแปลง" ? "โอนเปลี่ยนแปลง" : ""; }
+      if (pl.years) row[9] = pl.years; if (pl.prov) row[10] = pl.prov; if (pl.total !== "" && pl.total != null) row[11] = Number(pl.total);
+      if (pl.yrs) Object.entries(pl.yrs).forEach(([y, v]) => { const c = 12 + (Number(y) - 2563); if (c >= 12 && c <= 21 && v !== "" && v != null) row[c] = Number(v); });
+      row[61] = row[11]; for (let j = 0; j < 10; j++) row[62 + j] = row[12 + j]; });
+    return book; }; }
+
+// ---------- ติดตามการเบิกจ่าย: plan and result by month and by quarter ----------
+function m88PlanAct(fy) { const R = prDtRows(fy, false), p = Array(12).fill(0), a = Array(12).fill(0); R.forEach(r => { r.plan.forEach((v, i) => (p[i] += Number(v) || 0)); r.act.forEach((v, i) => (a[i] += Number(v) || 0)); }); return { p, a, R }; }
+function m88PlanActPanel(fy) { const { p, a } = m88PlanAct(fy), q = M88.dq === "q", lab = q ? ["ไตรมาส 1 (ต.ค.-ธ.ค.)", "ไตรมาส 2 (ม.ค.-มี.ค.)", "ไตรมาส 3 (เม.ย.-มิ.ย.)", "ไตรมาส 4 (ก.ค.-ก.ย.)"] : BI_MON;
+  const grp = arr => (q ? [0, 1, 2, 3].map(k => arr.slice(k * 3, k * 3 + 3).reduce((s, v) => s + v, 0)) : arr), P = grp(p), A = grp(a), tot = p.reduce((s, v) => s + v, 0), mx = Math.max(1, ...P, ...A);
+  let cp = 0, ca = 0; const rows = lab.map((l, i) => { cp += P[i]; ca += A[i]; return `<tr><td>${l}</td><td class="n">${fmt(P[i])}</td><td class="n">${fmt(A[i])}</td><td class="n">${fmt(A[i] - P[i])}</td><td class="n">${fmt(cp)}</td><td class="n">${fmt(ca)}</td><td class="n">${cp ? fmt((ca / cp) * 100, 1) + "%" : "–"}</td><td class="n">${tot ? fmt((ca / tot) * 100, 1) + "%" : "–"}</td></tr>`; }).join("");
+  const bars = lab.map((l, i) => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="display:flex;gap:2px;align-items:flex-end;height:110px"><i title="แผน ${fmt(P[i])}" style="display:block;width:10px;height:${Math.round((P[i] / mx) * 105)}px;background:var(--muted);opacity:.55;border-radius:2px 2px 0 0"></i><i title="ผล ${fmt(A[i])}" style="display:block;width:10px;height:${Math.round((A[i] / mx) * 105)}px;background:var(--accent,#3b4fa8);border-radius:2px 2px 0 0"></i></div><span class="sub" style="font-size:11px">${q ? "Q" + (i + 1) : l}</span></div>`).join("");
+  return `<section class="panel m88-pa"><header><h2>แผน-ผลการเบิกจ่าย ปีงบประมาณ ${fy}</h2><span class="sp"></span><div class="tabs" role="tablist" style="margin:0"><button class="tab ${q ? "" : "on"}" type="button" data-m88dq="m">ตามเดือน</button><button class="tab ${q ? "on" : ""}" type="button" data-m88dq="q">ตามไตรมาส</button></div></header>
+    <div class="body"><div class="row sub" style="gap:14px"><span><i style="display:inline-block;width:10px;height:10px;background:var(--muted);opacity:.55"></i> แผน</span><span><i style="display:inline-block;width:10px;height:10px;background:var(--accent,#3b4fa8)"></i> ผล (จ่ายจริง)</span><span>งบประมาณตามแผนทั้งปี ${fmt(tot)} บาท</span></div>
+    <div style="display:flex;gap:6px;align-items:flex-end;margin:8px 0">${bars}</div>
+    <div class="tbl-wrap"><table class="m88-pa-t"><thead><tr><th>${q ? "ไตรมาส" : "เดือน"}</th><th class="n">แผน (บาท)</th><th class="n">ผล (บาท)</th><th class="n">ผลต่าง</th><th class="n">แผนสะสม</th><th class="n">ผลสะสม</th><th class="n">ผลสะสม/แผนสะสม</th><th class="n">ผลสะสม/แผนทั้งปี</th></tr></thead><tbody>${rows}</tbody></table></div></div></section>`; }
+{ const base = PROC.disbDash; PROC.disbDash = () => (m88On() ? m88PlanActPanel(BI.fy) : "") + base(); }
+
+// ---------- แดชบอร์ดผู้บริหาร: a summary for decisions on the budget ----------
+function m88Exec(fy) { const R = prDtRows(fy, false), mi = Math.min(11, prMonIdx(TODAY)), sum = (l, f) => l.reduce((s, r) => s + (Number(f(r)) || 0), 0);
+  const B = sum(R, r => r.alloc), C = sum(R.filter(r => r.k), r => kxAmount(kxOf(r.k))), A = sum(R, r => r.act.reduce((s, v) => s + v, 0)), P = sum(R, r => r.plan.slice(0, mi + 1).reduce((s, v) => s + v, 0));
+  const U = {}; R.forEach(r => { const u = (U[r.unit] = U[r.unit] || { b: 0, c: 0, a: 0, p: 0, n: 0, nk: 0 }); u.n++; u.b += r.alloc; if (r.k) u.c += kxAmount(kxOf(r.k)); else u.nk++; u.a += r.act.reduce((s, v) => s + v, 0); u.p += r.plan.slice(0, mi + 1).reduce((s, v) => s + v, 0); });
+  const noCon = R.filter(r => !r.k && r.plan.slice(0, mi + 1).some(v => v > 0)).sort((a, b) => b.alloc - a.alloc), left = R.filter(r => r.k && r.alloc - kxAmount(kxOf(r.k)) > 0).map(r => [r, r.alloc - kxAmount(kxOf(r.k))]).sort((a, b) => b[1] - a[1]);
+  const prob = R.filter(r => r.k && r.k.cx && r.k.cx.problem), pct = (a, b) => (b ? (a / b) * 100 : 0);
+  const sig = (a, p) => { const v = pct(a, p); return !p ? tag("ยังไม่มีแผนถึงเดือนนี้", "p-mute") : v < 70 ? tag(`${fmt(v, 1)}% ต่ำกว่าแผน`, "p-bad") : v < 90 ? tag(`${fmt(v, 1)}% ใกล้แผน`, "p-warn") : tag(`${fmt(v, 1)}% ตามแผน`, "p-ok"); };
+  const li = (r, extra) => `<li>${esc(r.name)} <span class="sub">· ${esc(r.unit)} · ${extra}</span></li>`;
+  return `<section class="panel m88-exec"><header><h2>สรุปเพื่อการตัดสินใจเรื่องงบประมาณ ปีงบประมาณ ${fy}</h2><span class="sp"></span><span class="sub">จากข้อมูลในระบบ ณ ${fdate(TODAY)} · แผนสะสมถึงเดือน ${BI_MON[mi]}</span></header><div class="body" style="display:flex;flex-direction:column;gap:12px">
+    <div class="kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+      <div class="kpi"><span class="l">งบประมาณ</span><span class="v">${fmt(B / 1e6, 2)}</span><span class="d sub">ลบ. · ${R.length} รายการ</span></div>
+      <div class="kpi"><span class="l">ก่อหนี้ผูกพันแล้ว</span><span class="v">${fmt(C / 1e6, 2)}</span><span class="d sub">ลบ. · ${fmt(pct(C, B), 1)}% ของงบ</span></div>
+      <div class="kpi"><span class="l">เบิกจ่ายแล้ว</span><span class="v">${fmt(A / 1e6, 2)}</span><span class="d sub">ลบ. · ${fmt(pct(A, B), 1)}% ของงบ</span></div>
+      <div class="kpi"><span class="l">ผลเทียบแผนสะสม</span><span class="v">${fmt(pct(A, P), 1)}%</span><span class="d sub">แผนสะสม ${fmt(P / 1e6, 2)} ลบ.</span></div>
+      <div class="kpi"><span class="l">ยังไม่ก่อหนี้ผูกพัน</span><span class="v">${fmt((B - C) / 1e6, 2)}</span><span class="d sub">ลบ. · ${R.filter(r => !r.k).length} รายการ</span></div></div>
+    <div class="tbl-wrap"><table class="m88-exec-u"><thead><tr><th>หน่วยงาน</th><th class="n">รายการ</th><th class="n">งบประมาณ (ลบ.)</th><th class="n">ผูกพัน (ลบ.)</th><th class="n">เบิกจ่าย (ลบ.)</th><th class="n">แผนสะสม (ลบ.)</th><th>ผลเทียบแผน</th><th class="n">ยังไม่ทำสัญญา</th></tr></thead><tbody>
+      ${Object.entries(U).sort((a, b) => b[1].b - a[1].b).map(([u, g]) => `<tr><td>${esc(u)}</td><td class="n">${g.n}</td><td class="n">${fmt(g.b / 1e6, 2)}</td><td class="n">${fmt(g.c / 1e6, 2)}</td><td class="n">${fmt(g.a / 1e6, 2)}</td><td class="n">${fmt(g.p / 1e6, 2)}</td><td>${sig(g.a, g.p)}</td><td class="n">${g.nk}</td></tr>`).join("") || `<tr><td colspan="8" class="sub">ยังไม่มีรายการงบประมาณของปีนี้</td></tr>`}</tbody></table></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px">
+      <div><b>เร่งรัดการก่อหนี้ผูกพัน</b> <span class="sub">(มีแผนเงินถึงเดือนนี้แต่ยังไม่มีสัญญา: ${noCon.length} รายการ ${fmt(sum(noCon, r => r.alloc) / 1e6, 2)} ลบ.)</span><ul style="margin:4px 0 0;padding-left:18px">${noCon.slice(0, 6).map(r => li(r, `${fmt(r.alloc / 1e6, 2)} ลบ.`)).join("") || `<li class="sub">ไม่มี</li>`}</ul></div>
+      <div><b>เงินเหลือจ่ายหลังทำสัญญา</b> <span class="sub">(พิจารณาโอนเปลี่ยนแปลง: ${fmt(left.reduce((s, x) => s + x[1], 0) / 1e6, 2)} ลบ.)</span><ul style="margin:4px 0 0;padding-left:18px">${left.slice(0, 6).map(([r, v]) => li(r, `เหลือ ${fmt(v / 1e6, 3)} ลบ.`)).join("") || `<li class="sub">ไม่มี</li>`}</ul></div>
+      <div><b>รายการที่มีปัญหา/อุปสรรค</b> <span class="sub">(${prob.length} รายการ)</span><ul style="margin:4px 0 0;padding-left:18px">${prob.slice(0, 6).map(r => li(r, esc(r.k.cx.problem))).join("") || `<li class="sub">ไม่มี</li>`}</ul></div></div></div></section>`; }
+if (VIEWS["od-dash"]) { const base = VIEWS["od-dash"]; VIEWS["od-dash"] = function () { const h = base.apply(this, arguments); if (!m88On()) return h; let s = ""; try { s = prFySel() + m88Exec(BI.fy); } catch (e) { s = `<div class="sub">สรุปไม่ได้: ${esc(e && e.message)}</div>`; }
+    return /<\/h1>[\s\S]*?<\/div>/.test(h) ? h.replace(/(<\/h1>[\s\S]*?<\/div>)/, "$1" + s) : s + h; }; }
+
+// ---------- แผนเงิน: the monthly money plan, apart from the budget items ----------
+const m88CanMoney = () => ["plan", "admin"].includes(ROLE);
+PROC.mplan88 = () => { const fy = BI.fy, mine = ["div", "divhead"].includes(ROLE) ? me().unit : null, all = m88BiRows().filter(r => biFy(r) === fy && (!mine || (biUnit(r) || {}).id === mine)), can = m88CanMoney();
+  const units = [...new Set(all.map(pdUnit))].sort((a, b) => a.localeCompare(b, "th")), f = M88.mu || "", rows = all.filter(r => !f || pdUnit(r) === f), mon = BI_MON.map((x, i) => rows.reduce((s, r) => s + (Number(r.plan[i]) || 0), 0));
+  return `${prFySel()}<section class="panel m88-mp"><header><h2>แผนเงิน ปีงบประมาณ ${fy}</h2><span class="sp"></span><span class="sub">${can ? "กองแผนงานแก้ไขแผนเงินรายเดือนได้ (บาท)" : "ดูได้อย่างเดียว"}</span></header><div class="body">
+    <div class="inline-form" style="margin:0 0 8px"><div class="f"><label>สำนัก/กอง</label><select data-m88mu><option value="">ทั้งหมด</option>${units.map(u => `<option ${f === u ? "selected" : ""}>${esc(u)}</option>`).join("")}</select></div><span class="sub" style="align-self:end">${rows.length} รายการ · งบประมาณ ${fmt(rows.reduce((s, r) => s + r.amount, 0))} บาท · แผนเงินรวม ${fmt(mon.reduce((s, v) => s + v, 0))} บาท</span></div>
+    ${rows.length ? `<div class="tbl-wrap"><table class="m88-mp-t"><thead><tr><th style="min-width:220px">รายการ</th><th>สำนัก/กอง</th><th class="n">วงเงิน (บาท)</th>${BI_MON.map(m => `<th class="n">${m}</th>`).join("")}<th class="n">รวมแผนเงิน</th><th class="n">ต่างจากวงเงิน</th></tr></thead><tbody>
+      ${rows.map(r => { const t = r.plan.reduce((s, v) => s + (Number(v) || 0), 0); return `<tr><td>${esc(r.name)}<div class="sub mono">${esc(r.code || r.id)}</div></td><td>${esc(pdUnit(r))}</td><td class="n">${fmt(r.amount)}</td>${r.plan.map((v, i) => `<td class="n">${can ? `<input type="number" min="0" step="any" style="width:92px;text-align:right" value="${Math.round(Number(v) || 0)}" data-m88mp="${esc(r.id)}|${i}" aria-label="${esc(r.name)} ${BI_MON[i]}">` : v ? fmt(Math.round(v)) : "–"}</td>`).join("")}<td class="n"><b>${fmt(Math.round(t))}</b></td><td class="n">${Math.round(t - r.amount) ? tag(fmt(Math.round(t - r.amount)), "p-warn") : "0"}</td></tr>`; }).join("")}
+      <tr><td colspan="3"><b>รวม</b></td>${mon.map(v => `<td class="n"><b>${fmt(Math.round(v))}</b></td>`).join("")}<td class="n"><b>${fmt(Math.round(mon.reduce((s, v) => s + v, 0)))}</b></td><td></td></tr></tbody></table></div>` : `<div class="sub">ยังไม่มีรายการงบประมาณของปี ${fy}</div>`}</div></section>`; };
+
+// ---------- คลังเอกสาร ----------
+const M88_EGPF = { req: "รายงานขอซื้อขอจ้าง", order: "คำสั่ง", comm: "คำสั่งแต่งตั้งคณะกรรมการ", result: "รายงานผลการพิจารณา", approve: "อนุมัติจ้าง", winner: "ประกาศผู้ชนะ", appeal: "อุทธรณ์", notice: "หนังสือแจ้งลงนามสัญญา", contract: "หนังสือสัญญา" };
+function m88Docs(r) { const out = [], add = (folder, f, src) => { if (f && f.name) out.push({ folder, name: f.name, size: f.size || 0, t: f.t || "", src }); };
+  const b = m88BiRows().find(x => x.id === r.id), p = b && b.sent ? S.pplan.find(x => x.id === b.sent.pp) : r.k ? famPlan(r.k.plan) : null, c = p ? caseByPlan(p.id) : null, rq = p ? (c && caseReq(c)) || S.reqn.find(q => q.plan === p.id) : null;
+  ((rq && rq.detail && rq.detail.files) || []).forEach(f => add(Array.isArray(f.kind) ? f.kind[0] : typeof f.kind === "string" && f.kind ? f.kind : "เอกสารขอซื้อขอจ้าง", f, "ขอจัดซื้อจัดจ้าง"));
+  if (c && c.egp7) for (let n = 1; n <= 7; n++) Object.entries((c.egp7["s" + n] || {}).files || {}).forEach(([k, f]) => add(M88_EGPF[k] || "เอกสาร e-GP", f, `e-GP ขั้นที่ ${n}`));
+  const x = r.k && r.k.cx; if (x) { add("หนังสือสัญญา", x.files.contract, "ทำสัญญา"); add("เอกสารคู่สัญญา", x.files.party, "ทำสัญญา"); add("BOQ งวดงาน", x.files.boq, "ทำสัญญา"); add("หลักประกันสัญญา", x.guar && x.guar.files && x.guar.files.letter, "ทำสัญญา");
+    (x.amends || []).forEach(a => add("สัญญาแก้ไข", a.file, `แก้ไขครั้งที่ ${a.i}`)); if (x.adv && x.adv.paid) add("เบิกเงินล่วงหน้า", x.adv.paid.file, `GF ${x.adv.paid.gf || ""}`);
+    (x.dl || []).forEach(d => { add("ส่งมอบและตรวจรับ", d.files.dl, `ครั้งที่ ${d.n}`); add("เอกสารเบิกจ่าย (บัญชี)", d.files.book, `ครั้งที่ ${d.n}`); add("หลักฐานการจ่ายเงิน (การเงิน)", d.files.pay, `ครั้งที่ ${d.n}`); add("ตรวจใบสำคัญ", d.files.chk, `ครั้งที่ ${d.n}`); }); }
+  return out; }
+function m88DocBlob(r, d) { const html = `<!doctype html><meta charset="utf-8"><title>${esc(d.name)}</title><body style="font-family:sans-serif;padding:24px"><h2>${esc(d.name)}</h2><p>เอกสารจำลองจากข้อมูลในระบบ (ไม่ใช่ไฟล์ต้นฉบับ)</p><p>รายการ: ${esc(r.name)}<br>หน่วยงาน: ${esc(r.unit)}<br>ประเภทเอกสาร: ${esc(d.folder)}<br>ที่มา: ${esc(d.src)}<br>ขนาดไฟล์เดิม: ${fmt(d.size)} ไบต์</p></body>`; return new Blob([html], { type: "text/html" }); }
+PROC.lib88 = () => { const fy = BI.fy, mine = ["div", "divhead"].includes(ROLE) ? unitName(me().unit) : null, q = (M88.lib.q || "").toLowerCase();
+  const R = prDtRows(fy, false).filter(r => (!mine || r.unit === mine) && (!q || `${r.name} ${r.code} ${r.unit}`.toLowerCase().includes(q))).map(r => ({ r, d: m88Docs(r) }));
+  const cur = R.find(x => x.r.id === M88.lib.item) || null, folders = {}; if (cur) cur.d.forEach((d, i) => (folders[d.folder] = folders[d.folder] || []).push([d, i]));
+  const pv = cur && M88.lib.prev != null ? cur.d[M88.lib.prev] : null;
+  return `${prFySel()}<section class="panel m88-lib"><header><h2>คลังเอกสาร ปีงบประมาณ ${fy}</h2><span class="sp"></span><span class="sub">เลือกรายการงบประมาณเพื่อดูเอกสาร แยกโฟลเดอร์ตามประเภท</span></header><div class="body" style="display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,2fr);gap:14px">
+    <div><input type="search" placeholder="ค้นหารายการ รหัส หน่วยงาน" value="${esc(M88.lib.q || "")}" data-m88libq style="width:100%;margin:0 0 6px"><div class="m88-lib-items" style="max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:8px">
+      ${R.map(({ r, d }) => `<button type="button" class="pd-go" data-m88lib="${esc(r.id)}" style="padding:7px 10px;border-bottom:1px solid var(--line);${cur && cur.r.id === r.id ? "background:var(--info-soft)" : ""}"><div>${esc(r.name)}</div><div class="sub">${esc(r.unit)} · ${d.length} เอกสาร</div></button>`).join("") || `<div class="sub" style="padding:8px">ไม่มีรายการ</div>`}</div></div>
+    <div>${cur ? `<h3 style="margin:0 0 6px">${esc(cur.r.name)}</h3><div class="sub" style="margin:0 0 8px">${esc(cur.r.unit)} · ${esc(cur.r.code || "")} · ${cur.d.length} เอกสาร ใน ${Object.keys(folders).length} โฟลเดอร์</div>
+      ${Object.keys(folders).length ? Object.entries(folders).map(([fo, list]) => `<details class="m88-folder" open style="border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:0 0 8px"><summary><b>📁 ${esc(fo)}</b> <span class="sub">(${list.length})</span></summary><ul style="margin:6px 0 0;padding-left:16px">${list.map(([d, i]) => `<li style="margin:2px 0">📄 ${esc(d.name)} <span class="sub">· ${esc(d.src)}${d.t ? " · " + fdate(String(d.t).slice(0, 10)) : ""}</span> <button class="btn ghost" type="button" data-m88view="${i}">ดู</button><button class="btn ghost" type="button" data-m88dl="${i}">ดาวน์โหลด</button></li>`).join("")}</ul></details>`).join("") : `<div class="sub">รายการนี้ยังไม่มีเอกสารแนบ</div>`}
+      ${pv ? `<div class="m88-prev" style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px"><div class="row"><b>ตัวอย่างเอกสาร: ${esc(pv.name)}</b><span class="sp" style="flex:1"></span><button class="btn ghost" type="button" data-m88view="">ปิด</button></div><div class="sub">เอกสารจำลองจากข้อมูลในระบบ (ระบบต้นแบบเก็บเฉพาะข้อมูลของไฟล์ ไม่เก็บไฟล์จริง)</div><dl class="kv" style="margin:6px 0 0"><dt>ประเภทเอกสาร</dt><dd>${esc(pv.folder)}</dd><dt>ที่มา</dt><dd>${esc(pv.src)}</dd><dt>ขนาด</dt><dd>${fmt(pv.size)} ไบต์</dd><dt>รายการ</dt><dd>${esc(cur.r.name)}</dd></dl></div>` : ""}`
+      : `<div class="sub">เลือกรายการงบประมาณทางซ้าย · รายการที่มีเอกสาร ${R.filter(x => x.d.length).length} จาก ${R.length} รายการ</div>`}</div></div></section>`; };
+
+// ---------- the Excel of the follow-up form, as the revised form (67 columns) ----------
+const PR_XL_TRACK67_H = ["ลำดับที่", "เริ่มตั้ง", "ตาม พ.ร.บ.", "โอนเปลี่ยนแปลง", "รหัสงบประมาณ GFMIS", "ผลผลิต/โครงการ", "รายการ", "รหัส e-bud", "หน่วยงาน", "ประเภท", "ลักษณะ\nงบประมาณ", "พื้นที่ดำเนินการ\n(จังหวัด)", "งปม.ทั้งสิ้น", "ปี {fy}", "สถานะ\nปัจจุบัน",
+  "ไร่", "ครัวเรือน", "แห่ง\n(รายการ)", "สำรวจ/ออกแบบ\n(ว/ด/ป)", "แบบแล้วเสร็จ \n(ว/ด/ป)", "ประมาณราคา \n(ว/ด/ป)", "จัดทำ TOR แล้วเสร็จ\n(ว/ด/ป)",
+  "เลขที่โครงการ\n(e-bidding)", "ประกาศเผยแพร่แผนการจัดซื้อจัดจ้าง\n(ว/ด/ป)", "ราคากลาง \n(ลบ.)", "เห็นชอบราคากลาง \n(ว/ด/ป)", "เห็นชอบรายงาน\nขอซื้อ ขอจ้าง \n(ว/ด/ป)", "ประกาศร่าง TOR\nระหว่าง\n (ว/ด/ป) ถึง (ว/ด/ป) ", "ประกาศขายแบบ/เชิญชวน \nระหว่าง (ว/ด/ป) ถึง (ว/ด/ป)", "เสนอราคา\n(ว/ด/ป)", "พิจารณาผล\nระหว่าง (ว/ด/ป) ถึง (ว/ด/ป)", "ครั้งที่ประกวดราคา\n(จำนวนครั้ง)", "ผู้เสนอราคาได้ต่ำสุด", "วงเงินที่เสนอ\n(ลบ.)", "ส่ง สงป.พิจารณาความเหมาะสม\nเลขที่หนังสือ/ว/ด/ป", "สงป.พิจารณา\nความเหมาะสมแล้ว\nเลขที่หนังสือ/ว/ด/ป", "วงเงินที่สงป.เห็นชอบ\n(ลบ.)", " ความยาว\n(เมตร)", "ขยายระยะเวลาก่อหนี้\nผูกพัน\nเลขที่หนังสือ /  ว/ด/ป", "อนุมัติจ้าง\nว/ด/ป", "จำนวนวันแล้วเสร็จ", "ประกาศผู้ชนะ\nว/ด/ป", "วันที่ครบอุทธรณ์ \nว/ด/ป", "แจ้งผู้รับจ้างลงนาม\n(ว/ด/ป)", "เสนอลงนามสัญญา\n(ว/ด/ป)",
+  "เลขที่สัญญา", "วันที่ลงนาม\n(ว/ด/ป)", "วงเงินสัญญา\n(ลบ.)", "วันเริ่มต้น - \nสิ้นสุดสัญญา\n(ว/ด/ป)", "ระบุ\nเลขที่ PO", "เบิกจ่ายเงิน Advance 15%\n(ลบ.)", "ผลการดำเนินงาน\nสะสม (ร้อยละ)", "ผลการเบิกจ่าย\nสะสม\n(ลบ.)", "ผลการเบิกจ่าย\n(ร้อยละ)", "ปัญหา/อุปสรรค\n(อธิบาย)",
+  "งปม.ทั้งสิ้น", "ปี 2563", "ปี 2564", "ปี 2565", "ปี 2566", "ปี 2567", "ปี 2568", "ปี 2569", "ปี 2570", "ปี 2571", "ปี 2572", "ปี 2573"];
+// who fills each column (row 2 of the form)
+const PR_XL_TRACK67_W = PR_XL_TRACK67_H.map((h, i) => (i <= 14 ? "รายการงบประมาณ (กองแผนงาน)" : i <= 21 ? "สำนัก/กอง" : i <= 44 ? "e-GP" : i === 51 || i === 54 ? "สำนัก/กอง" : i <= 53 ? "ทำสัญญา" : "รายการงบประมาณ (กองแผนงาน)"));
+// the new column <- the column of the older 72-column form (0-based); a function for the columns the older form did not have
+const PR_XL_67_FROM = [0, 1, 2, 3, 4, "prod", 5, 6, 7, 8, 9, 10, 11, "year", 59, 51, 52, 53, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, "bbAmount", 50, 40, 41, 49, 42, "appealEnd", 43, 44, 45, "signDate", 47, 48, 54, 55, 56, 57, 58, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, "y2573"];
+function m88Track67(fy) { const old = prTrackBook(fy)[0].rows.slice(5), D = prDtRows(fy, false), N = PR_XL_TRACK67_H.length;
+  const top = [Array(N).fill(""), PR_XL_TRACK67_W.slice(), Array(N).fill(""), Array.from({ length: N }, (x, i) => String(i + 1)), PR_XL_TRACK67_H.map(h => h.replace("{fy}", fy))];
+  top[0][0] = `รายงานสถานะการดำเนินงานตามแผนปฏิบัติราชการ ประจำปีงบประมาณ พ.ศ. ${fy}`; top[2][0] = "หน่วยงาน กรมตัวอย่าง (สมมติ)";
+  const data = old.map((o, i) => { const r = D[i], b = r && m88BiRows().find(y => y.id === r.id), p = b && b.sent ? S.pplan.find(q => q.id === b.sent.pp) : r && r.k ? famPlan(r.k.plan) : null, c = p ? caseByPlan(p.id) : null, E = c && c.egp7, x = r && r.k && r.k.cx;
+    return PR_XL_67_FROM.map(f => { if (typeof f === "number") return o[f] == null ? "" : o[f];
+      if (f === "prod") return o.prod || (b && ((b.pl && b.pl.prod) || b.prod)) || "";
+      if (f === "year") { const c0 = 12 + (fy - 2563); return c0 >= 12 && c0 <= 21 ? o[c0] : r ? prM(r.alloc) : ""; }
+      if (f === "bbAmount") return E && E.s4 && E.s4.bbAmount ? prM(E.s4.bbAmount) : "";
+      if (f === "appealEnd") return E && E.s5 ? prBE(E.s5.appealEnd || (E.s5.winnerDate && egp7AppealEnd(E.s5.winnerDate))) : "";
+      if (f === "signDate") return x && x.date ? prBE(x.date) : E && E.s7 && E.s7.date ? prBE(E.s7.date) : "";
+      if (f === "y2573") { const v = b && b.pl && b.pl.yrs && b.pl.yrs[2573]; return v !== "" && v != null ? Number(v) : 0; }
+      return ""; }); });
+  return [{ name: "แบบฟอร์ม", rows: top.concat(data) }]; }
+flSpendBook = () => m88Track67(BI.fy);
+// the Advance and the PO columns: the advance actually paid (with its GF number) first, in million baht; the PO of the contract or of its last amendment
+{ const base = prTrackBook; prTrackBook = function (fy) { const book = base(fy), D = prDtRows(fy, false);
+    book[0].rows.slice(5).forEach((row, i) => { const r = D[i], x = r && r.k && r.k.cx; if (!x) return; const am = (x.amends || []).filter(a => a.po).slice(-1)[0];
+      if (x.po || am) row[54] = (am && am.po) || x.po; if (x.adv && x.adv.paid && Number(x.adv.paid.amt) > 0) row[55] = prM(x.adv.paid.amt); else if (typeof row[55] === "number" && row[55] > 1000) row[55] = prM(row[55]); });
+    return book; }; }
+
+// ---------- handlers ----------
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return;
+  const mt = t.closest("[data-m88tab]"); if (mt) { MON_TAB = mt.dataset.m88tab; route(); return; }
+  const dq = t.closest("[data-m88dq]"); if (dq) { M88.dq = dq.dataset.m88dq; route(); return; }
+  const li = t.closest("[data-m88lib]"); if (li) { M88.lib.item = li.dataset.m88lib; M88.lib.prev = null; route(); return; }
+  const vw = t.closest("[data-m88view]"); if (vw) { M88.lib.prev = vw.dataset.m88view === "" ? null : Number(vw.dataset.m88view); route(); return; }
+  const dl = t.closest("[data-m88dl]"); if (dl) { const r = prDtRows(BI.fy, false).find(x => x.id === M88.lib.item), d = r && m88Docs(r)[Number(dl.dataset.m88dl)]; if (!d) return;
+    const a = document.createElement("a"), u = URL.createObjectURL(m88DocBlob(r, d)); a.href = u; a.download = d.name.replace(/\.[^.]+$/, "") + ".html"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); toast("ดาวน์โหลดเอกสารแล้ว"); } });
+document.addEventListener("change", e => { const t = e.target; if (!t || !t.matches) return;
+  if (t.matches("[data-m88mu]")) { M88.mu = t.value; route(); return; }
+  if (t.matches("[data-m88libq]")) { M88.lib.q = t.value; route(); return; }
+  if (t.matches("[data-m88mp]")) { if (!m88CanMoney()) return; const [id, i] = t.dataset.m88mp.split("|"), r = m88BiRows().find(x => x.id === id), v = Number(t.value); if (!r || !(v >= 0)) { toast("ใส่จำนวนเงินเป็นตัวเลขไม่ติดลบ"); return; }
+    r.plan[Number(i)] = v; audit(["แก้ไขแผนเงิน", "Changed the money plan"], `${id} ${BI_MON[Number(i)]}`); commit(); route(); } });
+
+/* ---- 98zzzzq-klang-plan88.js ---- */
+// Fisko-KlangFinance, round P88 (25 Nov 2569), the procurement plan and the request, as asked:
+// 3.1 แผนจัดซื้อ (กองแผนงาน): the import stays; the money plan has its own menu (แผนเงิน, see 98zzzzp) and is taken off the item list
+//     and the dashboard of the items. After the import Planning writes the details of its part of the follow-up form (columns 1-15 and
+//     56-67: เริ่มตั้ง, ตาม พ.ร.บ./โอนเปลี่ยนแปลง, ผลผลิต/โครงการ, ลักษณะงบประมาณ, จังหวัด, งปม.ทั้งสิ้น, the budget by year), assigns the
+//     bureau/division responsible and the amount given to it. Data: bi row .pl = { startY, act, prod, years, prov, total, yrs{}, allot }.
+// 3.2 ขอจัดซื้อจัดจ้าง: the unit attaches documents and lets the AI fill the details (simulated: it reads the names of the files and the
+//     item); the unit's columns of the form are added (สำรวจ/ออกแบบ, แบบแล้วเสร็จ, ประมาณราคา, TOR แล้วเสร็จ); the unit chooses who sends
+//     e-GP (the unit itself or กองคลัง, เจ้าหน้าที่พัสดุ), checks and sends to the approver. After the approval, when the Treasury does e-GP,
+//     the procurement officers get a notice. Data: req.detail.{survey, designDone, estDate, torDone}, req.egpBy and case.egpBy ("self" | "proc").
+// 3.3 บริหารงบประมาณ (the cases page): a list of the approved items, by who sends e-GP and by the role signed in. A unit that sends e-GP
+//     itself records the e-GP steps of its own items.
+
+// ---------- 3.1 Planning's details ----------
+const PL88_YRS = Array.from({ length: 11 }, (x, i) => 2563 + i);
+let PL88_EDIT = null;
+const pl88Of = r => (r.pl = r.pl || {});
+const pl88Done = r => { const p = r.pl || {}; return ["startY", "act", "prod", "years", "prov", "total"].filter(k => p[k] !== "" && p[k] != null).length; };
+function pl88Save(id, v) { if (!biCanImport()) return "เฉพาะกองแผนงานบันทึกรายละเอียด"; const r = biData().rows.find(x => x.id === id); if (!r) return "ไม่พบรายการ"; const p = pl88Of(r);
+  const num = x => (x === "" || x == null ? "" : Number(x));
+  if (v.total !== "" && v.total != null && !(Number(v.total) >= 0)) return "งปม.ทั้งสิ้นต้องเป็นตัวเลข"; if (v.allot !== "" && v.allot != null && !(Number(v.allot) > 0)) return "จำนวนงบประมาณให้หน่วยงานต้องมากกว่า 0";
+  if (v.allot !== "" && v.allot != null && Number(v.allot) > r.amount + 0.5) return `จำนวนงบประมาณให้หน่วยงานต้องไม่เกินวงเงินของรายการ (${fmt(r.amount)} บาท)`;
+  if (v.unit && r.sent && v.unit !== (biUnit(r) || {}).id) return "นำส่งสำนัก/กองแล้ว เปลี่ยนหน่วยงานที่รับผิดชอบไม่ได้";
+  if (v.unit) { const u = S.units.find(x => x.id === v.unit); if (!u) return "ไม่พบหน่วยงาน"; r.unit = u.id; r.unitName = tx(u.name); }
+  ["startY", "act", "prod", "years", "prov"].forEach(k => { if (k in v) p[k] = String(v[k] || "").trim(); }); if ("total" in v) p.total = num(v.total); if ("allot" in v) p.allot = num(v.allot);
+  p.yrs = p.yrs || {}; PL88_YRS.forEach(y => { if (("y" + y) in v) p.yrs[y] = num(v["y" + y]); });
+  if (r.sent && p.allot) { const pp = S.pplan.find(x => x.id === r.sent.pp); if (pp) pp.est = Number(p.allot); }
+  p.by = me().id; p.t = nowIso(); audit(["บันทึกรายละเอียดรายการงบประมาณ (กองแผนงาน)", "Planning wrote the details of a budget item"], id); return ""; }
+function pl88Form(r) { const p = r.pl || {}, u = biUnit(r), v = (k, d) => esc(p[k] == null || p[k] === "" ? (d == null ? "" : d) : p[k]), fy = biFy(r);
+  const units = S.units.filter(x => !x.retired).map(x => `<option value="${x.id}" ${u && u.id === x.id ? "selected" : ""}>${esc(tx(x.name))}</option>`).join("");
+  const provs = [...new Set((S.geo || []).filter(g => !g.retired).map(g => g.prov).filter(Boolean))].sort((a, b) => a.localeCompare(b, "th"));
+  return `<form data-pl88="${esc(r.id)}" class="inline-form" style="display:flex;flex-wrap:wrap;gap:10px;padding:8px 0">
+    <div class="sub" style="flex:1 1 100%">รายละเอียดส่วนของกองแผนงาน (ตามแบบฟอร์มติดตามความก้าวหน้า คอลัมน์ 1-15 และ 56-67) · ไม่บังคับทุกช่อง</div>
+    <div class="f"><label>สำนัก/กองที่รับผิดชอบ *</label><select name="unit" ${r.sent ? "disabled" : ""}><option value="">— เลือก —</option>${units}</select></div>
+    <div class="f"><label>จำนวนงบประมาณให้หน่วยงาน (บาท)</label><input type="number" name="allot" min="0" step="0.01" value="${v("allot", r.amount)}"></div>
+    <div class="f"><label>เริ่มตั้ง (ปี พ.ศ.)</label><input type="number" name="startY" min="2560" max="2580" step="1" value="${v("startY", fy)}" style="width:110px"></div>
+    <div class="f"><label>ที่มา</label><select name="act">${["", "ตาม พ.ร.บ.", "โอนเปลี่ยนแปลง"].map(x => `<option value="${x}" ${(p.act || "") === x ? "selected" : ""}>${x || "—"}</option>`).join("")}</select></div>
+    <div class="f" style="flex:1 1 240px"><label>ผลผลิต/โครงการ</label><input name="prod" value="${v("prod", r.prod)}"></div>
+    <div class="f"><label>ลักษณะงบประมาณ</label><select name="years">${["", "ปีเดียว", "ผูกพัน"].map(x => `<option value="${x}" ${(p.years || (/ผูกพัน/.test(r.years || "") ? "ผูกพัน" : "")) === x ? "selected" : ""}>${x || "—"}</option>`).join("")}</select></div>
+    <div class="f"><label>พื้นที่ดำเนินการ (จังหวัด)</label><select name="prov"><option value="">—</option>${provs.map(x => `<option ${p.prov === x ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></div>
+    <div class="f"><label>งปม.ทั้งสิ้น (ลบ.)</label><input type="number" name="total" min="0" step="0.0001" value="${v("total", Math.round(r.amount / 1e6 * 1e4) / 1e4)}" style="width:120px"></div>
+    <div style="flex:1 1 100%;display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end"><span class="sub" style="flex:1 1 100%">งบประมาณรายปี (ลบ.)</span>${PL88_YRS.map(y => `<div class="f"><label>ปี ${y}</label><input type="number" name="y${y}" min="0" step="0.0001" style="width:86px" value="${esc(p.yrs && p.yrs[y] != null && p.yrs[y] !== "" ? p.yrs[y] : y === fy ? Math.round(r.amount / 1e6 * 1e4) / 1e4 : "")}"></div>`).join("")}</div>
+    <div class="row" style="flex:1 1 100%;gap:8px"><button class="btn primary" type="submit">บันทึกรายละเอียด</button><button class="btn ghost" type="button" data-pl88x>ปิด</button></div></form>`; }
+{ const base = biTable; biTable = function (list, can) { if (!m88On()) return base(list, can); if (!list.length) return `<div class="sub">ไม่มีรายการ</div>`;
+    return `<div class="tbl-wrap"><table class="bi-table bi88"><thead><tr><th>รหัส</th><th>สำนัก/กองที่รับผิดชอบ</th><th>รหัสงบประมาณ</th><th style="min-width:220px">รายการ</th><th>งบรายจ่าย</th><th class="n">วงเงิน (บาท)</th><th class="n">ให้หน่วยงาน (บาท)</th><th>รายละเอียดกองแผน</th><th>สถานะ</th></tr></thead><tbody>
+      ${list.map(r => { const is = biIssues(r, biData().rows), p = r.pl || {}, d = pl88Done(r); return `<tr><td class="mono sub">${esc(r.id)}</td><td>${esc(pdUnit(r))}</td><td class="mono">${esc(r.code || "—")}</td><td>${esc(r.name)}<div class="sub">${r.type ? `<span class="pill p-info">${esc(r.type)}</span> ` : ""}${r.ebud ? `e-bud ${esc(r.ebud)} · ` : ""}${esc(p.prod || r.prod || "")}</div></td><td>${esc(r.kind)}</td><td class="n">${fmt(r.amount)}</td><td class="n">${p.allot ? fmt(p.allot) : `<span class="sub">${fmt(r.amount)}</span>`}</td>
+        <td>${tag(`${d}/6`, d >= 6 ? "p-ok" : d ? "p-warn" : "p-mute")}${can ? `<div><button class="btn ghost" type="button" data-pl88e="${esc(r.id)}" aria-expanded="${PL88_EDIT === r.id}">${PL88_EDIT === r.id ? "ปิด" : "ใส่รายละเอียด / มอบหมาย"}</button></div>` : ""}</td>
+        <td>${r.sent ? `${tag("นำส่งสำนัก/กองแล้ว", "p-ok")}<div class="sub">${esc(r.sent.pp)} · ${fdate(r.sent.t, true)}</div>` : `${tag("นำเข้ารายการ", "p-info")}${is.length ? `<div class="sub" style="color:var(--bad)">${esc(is.join(" · "))}</div>` : ""}${can ? `<div><button class="btn ghost" type="button" data-bisend="${esc(r.id)}">นำส่งสำนัก/กอง</button></div>` : ""}`}</td></tr>${can && PL88_EDIT === r.id ? `<tr class="fn-rowform"><td colspan="9">${pl88Form(r)}</td></tr>` : ""}`; }).join("")}</tbody></table></div>`; }; }
+// the money plan is on แผนเงิน: off the dashboard and the filters of the item list
+{ const base = biView; biView = function () { const h = base(); if (!m88On()) return h;
+    return h.replace(/<section class="panel"><header><h2>แผนเงินรายเดือน[\s\S]*?<\/section>/, "").replace(/<div class="f"><label>มีแผนเงินเดือน<\/label><select data-pdf="mon">[\s\S]*?<\/select><\/div>/, ""); }; }
+// the amount given to the unit becomes the estimate of the plan item
+{ const base = biSend; biSend = function (ids) { const r = base(ids); (r.sent || []).forEach(id => { const b = biData().rows.find(x => x.id === id), p = b && b.sent && S.pplan.find(x => x.id === b.sent.pp); if (p && b.pl && Number(b.pl.allot) > 0) p.est = Number(b.pl.allot); }); return r; }; }
+
+// ---------- 3.2 the request: AI, the unit's columns, who sends e-GP ----------
+const RQ88_F = [["pr-survey", "survey", "สำรวจ/ออกแบบ (ว/ด/ป)"], ["pr-design", "designDone", "แบบแล้วเสร็จ (ว/ด/ป)"], ["pr-est", "estDate", "ประมาณราคา (ว/ด/ป)"], ["pr-tor", "torDone", "จัดทำ TOR แล้วเสร็จ (ว/ด/ป)"]];
+const RQ88_BY = { proc: "กองคลัง (เจ้าหน้าที่พัสดุ) ดำเนินการให้", self: "สำนัก/กองดำเนินการส่ง e-GP เอง" };
+{ const base = rqReadVals; rqReadVals = function () { const v = base(), g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    RQ88_F.forEach(([id, k]) => (v[k] = g(id))); const by = document.querySelector('#rq-inline input[name="rq-egpby"]:checked'); v.egpBy = by ? by.value : ""; return v; }; }
+{ const base = rqFormHtml; rqFormHtml = function (c) { const h = base(c), d = c.rqDraft || {}, by = d.egpBy || c.egpBy || "proc", ai = c.rq88Ai;
+    const sec = `<section class="rq88"><h3>3 · ข้อมูลตามแบบฟอร์มติดตาม (ส่วนของสำนัก/กอง) และการส่ง e-GP</h3><div class="row" style="flex-wrap:wrap;gap:10px">
+      ${RQ88_F.map(([id, k, t]) => `<div class="f" style="flex:1 1 180px"><label for="${id}">${t}</label><input type="date" id="${id}" value="${esc(d[k] || "")}"></div>`).join("")}
+      <div class="f" style="flex:1 1 100%"><label>ผู้ดำเนินการส่ง e-GP *</label><div class="row" style="gap:16px">${Object.entries(RQ88_BY).map(([k, t]) => `<label style="font-weight:400"><input type="radio" name="rq-egpby" value="${k}" ${by === k ? "checked" : ""}> ${t}</label>`).join("")}</div><div class="sub">ถ้าให้กองคลังดำเนินการ ระบบแจ้งเตือนเจ้าหน้าที่พัสดุเมื่อผู้มีอำนาจอนุมัติแล้ว</div></div></div></section>`;
+    const aiBar = `<div class="rq88-ai" style="border:1px dashed var(--accent,#3b4fa8);border-radius:8px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><b>AI ช่วยกรอก</b><span class="sub" style="flex:1 1 260px">แนบเอกสาร (ร่าง TOR ใบเสนอราคา แบบรูป ประมาณราคา) ในแผงเอกสารแนบ แล้วให้ AI อ่านและกรอกช่องที่ยังว่าง (จำลอง) ตรวจสอบความถูกต้องก่อนส่งผู้อนุมัติ</span><button class="btn" type="button" data-rq88ai="${c.id}">ให้ AI ประมวลผลเอกสารแนบ</button>${ai ? `<div class="sub" style="flex:1 1 100%">AI กรอกแล้ว ${ai.n} ช่อง จาก ${ai.files} ไฟล์ เมื่อ ${fdate(ai.t.slice(0, 10))}: ${esc(ai.list.join(", ") || "ไม่มีช่องว่างให้กรอก")} · ตรวจสอบแล้วแก้ไขได้</div>` : ""}</div>`;
+    return h.replace(/(<form id="rq-inline"[^>]*>)/, "$1" + aiBar).replace(/<\/form>\s*$/, sec + "</form>"); }; }
+// the AI (simulated): what it "reads" comes from the file names, the item and the plan; it fills only empty fields
+function rq88Ai(c) { const p = famPlan(c.plan), n = tx(p.name), files = RQ_FILES.map(f => f.name), out = [];
+  if (!files.length) return { err: "แนบเอกสารก่อน แล้วให้ AI ประมวลผล" };
+  const set = (id, val, lab) => { const el = document.getElementById(id); if (!el || el.value.trim() || val === "" || val == null) return; el.value = val; out.push(lab); };
+  const day = k => { const t = new Date(Date.parse(TODAY + "T00:00:00Z") - k * 864e5); return t.toISOString().slice(0, 10); }, has = re => files.some(f => re.test(f));
+  set("pr-obj", `เพื่อดำเนินการ${n} ตามแผนปฏิบัติราชการ ให้เกิดประโยชน์ต่อประชาชนในพื้นที่`, "วัตถุประสงค์");
+  set("pr-scope", `ดำเนินการ${n} ตามแบบรูปรายการและข้อกำหนดในเอกสารแนบ (${files.slice(0, 3).join(", ")})`, "ขอบเขตงาน");
+  set("pr-deliv", /ก่อสร้าง|เขื่อน|อาคาร|ถนน|ระบาย/.test(n) ? "งานก่อสร้างแล้วเสร็จตามแบบ พร้อมส่งมอบ" : "ส่งมอบพัสดุ/งานครบตามรายการ พร้อมเอกสารประกอบ", "ผลงานที่ต้องส่งมอบ");
+  set("pr-place", "พื้นที่ดำเนินการตามรายการ", "สถานที่ส่งมอบ"); set("pr-phone", "0 2000 0000", "เบอร์ติดต่อ (ตัวอย่าง)");
+  set("pr-survey", day(40), "สำรวจ/ออกแบบ"); set("pr-design", has(/แบบ|drawing|dwg/i) ? day(25) : "", "แบบแล้วเสร็จ"); set("pr-est", has(/ประมาณ|ราคา|BOQ|boq/) ? day(15) : "", "ประมาณราคา"); set("pr-tor", has(/TOR|tor|ขอบเขต/) ? day(7) : "", "TOR แล้วเสร็จ");
+  const m = n.match(/ไม่น้อยกว่า\s*([\d,]+)\s*เมตร/); if (m) set("pr-qlen", m[1].replace(/,/g, ""), "ความยาว (เมตร)");
+  c.rq88Ai = { t: nowIso(), by: me().id, n: out.length, files: files.length, list: out }; return { n: out.length, list: out }; }
+{ const base = rqSubmit; rqSubmit = function (c) { const v = rqReadVals(), before = S.reqn.length; base(c); if (S.reqn.length === before) return; const r = S.reqn[S.reqn.length - 1];
+    RQ88_F.forEach(([, k]) => { if (v[k]) r.detail[k] = v[k]; }); r.egpBy = v.egpBy === "self" ? "self" : "proc"; c.egpBy = r.egpBy; commit(); }; }
+{ const base = rqDecide; rqDecide = function (id, ok) { const rq = famReq(id), was = rq && rq.status; base(id, ok); if (!rq || was !== "pending" || rq.status !== "approved") return; const c = caseByPlan(rq.plan); if (c && !c.egpBy) c.egpBy = rq.egpBy || "proc";
+    if ((rq.egpBy || "proc") === "proc") notify(["proc", "prochead"], [`ใบขอซื้อขอจ้าง ${rq.id} อนุมัติแล้ว: สำนัก/กองให้กองคลังดำเนินการส่ง e-GP (เจ้าหน้าที่พัสดุ)`, `Requisition ${rq.id} approved: the Treasury sends it to e-GP`], c ? "case:" + c.id : "prc-cases");
+    else notify(["div", "divhead"], [`ใบขอซื้อขอจ้าง ${rq.id} อนุมัติแล้ว: สำนัก/กองดำเนินการส่ง e-GP เอง`, `Requisition ${rq.id} approved: the unit sends it to e-GP itself`], c ? "case:" + c.id : "prc-cases");
+    commit(); renderShell(); }; }
+// a unit that sends e-GP itself records the steps of its own items (it works as the procurement officer for that case only)
+const rq88Self = c => !!c && c.egpBy === "self" && ["div", "divhead"].includes(ROLE) && famLine(famPlan(c.plan).line).unit === me().unit;
+const rq88As = (c, fn) => { if (!rq88Self(c)) return fn(); const r0 = ROLE; ROLE = "proc"; try { return fn(); } finally { ROLE = r0; } };
+{ const b1 = egpUpdatePanel; egpUpdatePanel = function (c) { return rq88As(c, () => b1(c)); }; const b2 = egp7Save; egp7Save = function (c, n, v, f) { return rq88As(c, () => b2(c, n, v, f)); }; const b3 = egp7SetStage; egp7SetStage = function (c, n) { return rq88As(c, () => b3(c, n)); }; }
+
+// ---------- 3.3 บริหารงบประมาณ: the approved items, by who sends e-GP ----------
+function rq88Approved() { const proc = isProcRole() || ["admin", "exec", "audit", "plan"].includes(ROLE), mine = ["div", "divhead"].includes(ROLE) ? me().unit : null;
+  return S.cases.filter(c => { if (c.cancelled) return false; const rq = caseReq(c); if (!rq || rq.status !== "approved") return false; const by = c.egpBy || rq.egpBy || "proc", u = famLine(famPlan(c.plan).line).unit;
+    if (mine) return u === mine; if (isProcRole()) return by === "proc"; return proc; }); }
+function rq88List() { const L0 = rq88Approved(), f = M88.cf || "", list = L0.filter(c => !f || (c.egpBy || (caseReq(c) || {}).egpBy || "proc") === f);
+  return `<section class="panel rq88-list"><header><h2>รายการที่ได้รับอนุมัติแล้ว</h2><span class="sp"></span><select data-m88cf aria-label="ผู้ดำเนินการส่ง e-GP"><option value="">ผู้ส่ง e-GP: ทั้งหมด</option>${Object.entries(RQ88_BY).map(([k, t]) => `<option value="${k}" ${f === k ? "selected" : ""}>${t}</option>`).join("")}</select></header><div class="body">
+    <div class="sub" style="margin:0 0 6px">${isProcRole() ? "เจ้าหน้าที่พัสดุเห็นรายการที่สำนัก/กองให้กองคลังส่ง e-GP" : ["div", "divhead"].includes(ROLE) ? "รายการของสำนัก/กองของคุณ: รายการที่ส่ง e-GP เองอัปเดตขั้นตอน e-GP ได้ที่หน้ารายการ" : "ทุกรายการที่อนุมัติแล้ว"} · ${list.length} รายการ</div>
+    ${list.length ? `<div class="tbl-wrap"><table class="rq88-t"><thead><tr><th>รายการจัดซื้อ</th><th>สำนัก/กอง</th><th class="n">วงเงินที่อนุมัติ (บาท)</th><th>ผู้ส่ง e-GP</th><th>ขั้น e-GP</th><th>สัญญา</th><th></th></tr></thead><tbody>
+      ${list.map(c => { const rq = caseReq(c), by = c.egpBy || rq.egpBy || "proc", E = c.egp7, k = caseCon(c); return `<tr><td>${esc(caseName(c))}<div class="sub mono">${esc(c.id)} · ${esc(rq.id)}</div></td><td>${esc(unitName(famLine(famPlan(c.plan).line).unit))}</td><td class="n">${fmt(rq.amount)}</td><td>${tag(by === "self" ? "สำนัก/กองส่งเอง" : "กองคลัง", by === "self" ? "p-info" : "p-mute")}</td><td>${E && E.stage ? `${E.stage}/7 ${esc(EGP7[E.stage - 1].t)}` : `<span class="sub">ยังไม่เริ่ม</span>`}</td><td>${k ? esc(k.no || "มีสัญญา") : "–"}</td><td><button class="btn ghost" type="button" data-jump="case:${c.id}">เปิด</button></td></tr>`; }).join("")}</tbody></table></div>` : `<div class="sub">ยังไม่มีรายการที่อนุมัติ</div>`}</div></section>`; }
+{ const base = PROC.cases; PROC.cases = () => (m88On() && !(CASE_OPEN && caseOf(CASE_OPEN)) ? rq88List() : "") + base(); }
+
+// ---------- handlers ----------
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return;
+  const ed = t.closest("[data-pl88e]"); if (ed) { PL88_EDIT = PL88_EDIT === ed.dataset.pl88e ? null : ed.dataset.pl88e; route(); return; }
+  if (t.closest("[data-pl88x]")) { PL88_EDIT = null; route(); return; }
+  const ai = t.closest("[data-rq88ai]"); if (ai) { const c = caseOf(ai.dataset.rq88ai); if (!c) return; const r = rq88Ai(c); if (r.err) { toast(r.err); return; } audit(["ให้ AI กรอกรายละเอียดขอซื้อขอจ้าง", "AI filled the request details"], c.id);
+    const box = ai.closest(".rq88-ai"); if (box) { let s = box.querySelector(".rq88-ai-res"); if (!s) { s = document.createElement("div"); s.className = "sub rq88-ai-res"; s.style.flex = "1 1 100%"; box.appendChild(s); } s.textContent = `AI กรอกแล้ว ${r.n} ช่อง: ${r.list.join(", ") || "ไม่มีช่องว่างให้กรอก"} · ตรวจสอบความถูกต้องก่อนส่ง`; }
+    toast(`AI กรอกแล้ว ${r.n} ช่อง ตรวจสอบก่อนส่งผู้อนุมัติ`); } });
+document.addEventListener("change", e => { const t = e.target; if (t && t.matches && t.matches("[data-m88cf]")) { M88.cf = t.value; route(); } });
+document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches || !f.matches("[data-pl88]")) return; e.preventDefault(); const d = new FormData(f), v = {};
+  for (const [k, x] of d.entries()) v[k] = String(x); const m = pl88Save(f.dataset.pl88, v); if (m) { toast(m); return; } PL88_EDIT = null; commit(); route(); toast("บันทึกรายละเอียดแล้ว"); });
+
+/* ---- 98zzzzr-klang-con88.js ---- */
+// Fisko-KlangFinance, round P88 (25 Nov 2569), the contract and its payments, as asked (บริหารงบประมาณ 3.2-3.6):
+// - the contract: the PO number, how it is paid (แบบงวดงาน: by the phases of the contract, or แบบเบิกเป็นครั้ง: any amount each time), and,
+//   when there is an advance, the share deducted from each payment (หักคืนล่วงหน้า ... %). When what is left of the advance is less than that
+//   share, everything left is deducted. Data: cx.po, cx.payMode ("phase" | "time"), cx.adv.dedPct.
+// - the payment tab: the advance actually paid (เบิกจ่ายเงิน Advance 15%, in baht, with its GF number, date and file); the payments after it
+//   deduct from it. The facts on top show the advance and what is left; a table shows the three statuses of each payment (ตรวจใบสำคัญ,
+//   บัญชีแนบเอกสาร, การเงินจ่ายจริงพร้อมเอกสาร). Data: cx.adv.paid = { amt, gf, date, file, by, t }.
+// - who creates a payment: the Treasury (as before) or the bureau/division responsible for the item; then the voucher checker -> accounting
+//   -> finance, as before (kxPay).
+// - the contract amendment gets a PO number too. Data: amend.po.
+// The Excel of the follow-up form takes the PO (column 50) and the advance paid (column 51, ลบ.), see 98zzzzp.
+
+const KX88_MODE = { phase: "แบบงวดงาน", time: "แบบเบิกเป็นครั้ง" };
+// the advance: when the amount paid is recorded, the % of the advance is set from it, so kxAdvAmt (a const of 98zzzv) gives what was paid
+// the share deducted: the % set on the contract, capped by what is left (kx88Deduct, used when the payment form leaves the deduction empty)
+const kx88Deduct = (x, amount) => { const p = Number(x.adv && x.adv.dedPct); return p > 0 && kxAdvAmt(x) ? Math.min(kxAdvLeft(x), Math.round(Number(amount) * p) / 100) : null; };
+const kx88UnitCan = k => ["div", "divhead"].includes(ROLE) && !!k && famLine(famPlan(k.plan).line).unit === me().unit;
+const kx88As = (k, fn) => { if (kxCanEdit() || !kx88UnitCan(k)) return fn(); const r0 = ROLE; ROLE = "proc"; try { return fn(); } finally { ROLE = r0; } };
+
+// ---------- save ----------
+let KX88_IN = null; // the new fields of the form being submitted (read before the older handler)
+{ const base = kxSave; kxSave = function (k, v, files) { const m = base(k, v, files); if (m || !KX88_IN) return m; const x = kxOf(k), n = KX88_IN; KX88_IN = null;
+    if ("po" in n) x.po = String(n.po || "").trim().slice(0, 40); if (n.payMode && KX88_MODE[n.payMode]) x.payMode = n.payMode;
+    if ("dedPct" in n) { const p = n.dedPct === "" ? "" : Number(n.dedPct); if (p !== "" && !(p > 0 && p <= 100)) return "% หักคืนเงินล่วงหน้าต้องมากกว่า 0 ไม่เกิน 100"; x.adv.dedPct = p; } return ""; }; }
+{ const base = kxAmendAdd; kxAmendAdd = function (k, v, file) { const po = KX88_IN && KX88_IN.amPo; KX88_IN = null; const m = base(k, v, file); if (!m && po) { const x = kxOf(k); x.amends[x.amends.length - 1].po = String(po).trim().slice(0, 40); } return m; }; }
+function kx88AdvPay(k, v, file) { if (!kxCanEdit() && !kxCanPay()) return "เฉพาะกองคลังหรือการเงินบันทึกเงินเบิกล่วงหน้า"; const x = kxOf(k), amt = Number(v.amt);
+  if (!x.adv.has) return "สัญญานี้ไม่มีเงินเบิกล่วงหน้า (กำหนดที่แท็บสัญญา)"; if (!(amt > 0)) return "ระบุจำนวนเงิน Advance"; if (amt > kxAmount(x) * 0.15 + 0.5) return `เงินเบิกล่วงหน้าต้องไม่เกิน 15% ของวงเงินสัญญา (${fmt(kxAmount(x) * 0.15)} บาท)`;
+  if (!String(v.gf || "").trim()) return "ระบุเลขที่เอกสาร GF"; if (!v.date) return "ระบุวันที่จ่าย"; if (x.dl.some(d => d.deduct > 0)) return "มีการหักคืนในงวดที่บันทึกแล้ว แก้ไขเงินล่วงหน้าไม่ได้";
+  x.adv.paid = { amt: Math.round(amt * 100) / 100, gf: String(v.gf).trim().slice(0, 40), date: v.date, file: file ? kxFile(file) : (x.adv.paid && x.adv.paid.file) || null, by: me().id, t: nowIso() };
+  if (Number(x.amount) > 0) { if (x.adv.pctSet == null) x.adv.pctSet = x.adv.pct; x.adv.pct = x.adv.paid.amt * 100 / Number(x.amount); }
+  audit(["บันทึกเบิกจ่ายเงินล่วงหน้า (Advance)", "Recorded the advance paid"], `${k.id} GF ${x.adv.paid.gf}`); return ""; }
+// a payment created by the unit responsible for the item
+{ const base = kxDlAdd; kxDlAdd = function (k, v, files) { return kx88As(k, () => base(k, v, files)); }; }
+// the phase of a payment in "แบบงวดงาน"
+{ const base = kxDlAdd; kxDlAdd = function (k, v, files) { const x = kxOf(k), m = base(k, v, files); if (!m && x.payMode === "phase" && v.phase) x.dl[x.dl.length - 1].phase = Number(v.phase); return m; }; }
+// the payments of the advance count in the month it was paid; the deductions are not cash
+{ const base = prDtRows; prDtRows = function (fy, onlyCon) { const rows = base(fy, onlyCon); rows.forEach(r => { const x = r.k && r.k.cx; if (!x || !x.adv || !x.adv.paid || !x.adv.paid.date) return;
+      x.dl.filter(d => d.status === "paid" && d.paidDate && d.deduct).forEach(d => (r.act[prMonIdx(d.paidDate)] -= Number(d.deduct) || 0)); if (prFyOfDate88(x.adv.paid.date) === fy) r.act[prMonIdx(x.adv.paid.date)] += Number(x.adv.paid.amt) || 0; }); return rows; }; }
+const prFyOfDate88 = d => { const y = Number(String(d).slice(0, 4)), m = Number(String(d).slice(5, 7)); return y + 543 + (m >= 10 ? 1 : 0); };
+
+// ---------- views ----------
+{ const base = kxContractView; kxContractView = function (k) { const h = base(k), x = kxOf(k), can = kxCanEdit(), dis = can ? "" : "disabled", mode = x.payMode || "";
+    const top = `${kxIn("po", "เลขที่ PO", x.po || "", "text", can, 'maxlength="40"')}<div class="f" style="flex:1 1 100%"><label>การเบิกจ่าย *</label><div class="row" style="gap:14px">${Object.entries(KX88_MODE).map(([kk, t]) => `<label style="font-weight:400"><input type="radio" name="payMode" value="${kk}" ${mode === kk ? "checked" : ""} ${dis}> ${t}</label>`).join("")}<span class="sub">แบบงวดงาน: เบิกตามงวดในสัญญา · แบบเบิกเป็นครั้ง: เบิกตามผลงานแต่ละครั้ง</span></div></div>`;
+    const ded = `<span class="cx-ded88" style="display:${x.adv.has ? "inline-flex" : "none"};gap:6px;align-items:center;margin-left:12px">หักคืนล่วงหน้า <input type="number" name="dedPct" value="${esc(x.adv.dedPct == null ? "" : x.adv.dedPct)}" min="0" max="100" step="0.01" style="width:80px" ${dis}> % ของเงินขอเบิกแต่ละครั้ง <span class="sub">(ถ้ายอดคงเหลือไม่ถึง หักที่เหลือทั้งหมด · ว่าง = หักตามสัดส่วนผลงาน)</span></span>`;
+    let out = h.replace('<div class="f" style="flex:1 1 100%"><label>เงินเบิกล่วงหน้า</label>', top + '<div class="f" style="flex:1 1 100%"><label>เงินเบิกล่วงหน้า</label>').replace(/(<b class="cx-adv">[\s\S]*?<\/b> บาท \(ระบบคำนวณ\)<\/span>)/, "$1" + ded);
+    // the amendments: a PO column and a PO field
+    out = out.replace("<th>เลขที่การแก้ไขสัญญา</th>", "<th>เลขที่การแก้ไขสัญญา</th><th>เลขที่ PO</th>");
+    let j = 0; out = out.replace(/(<table class="cx-amends">[\s\S]*?<\/table>)/, t => t.replace(/<tr><td>(\d+)<\/td><td class="mono">([^<]*)<\/td>/g, (m0, i, no) => { const a = x.amends[j++]; return `<tr><td>${i}</td><td class="mono">${no}</td><td class="mono">${esc((a && a.po) || "—")}</td>`; }).replace('<td colspan="9" class="sub">', '<td colspan="10" class="sub">'));
+    out = out.replace(/(<form data-cxam="[^"]*"[^>]*>[\s\S]*?<label>ลงวันที่<\/label><input type="date" name="date"[^>]*><\/div>)/, `$1${kxIn("amPo", "เลขที่ PO", "", "text", 1, 'maxlength="40"')}`);
+    return out; }; }
+{ const base = kxManageView; kxManageView = function (k) { const x = kxOf(k), unit = !kxCanEdit() && kx88UnitCan(k), h = unit ? kx88As(k, () => base(k)) : base(k), adv = kxAdvAmt(x), canAdv = (kxCanEdit() || kxCanPay()) && x.adv.has, P = x.adv.paid;
+    const mode = x.payMode || "time", phases = Number(x.nPhases) || 0, nxt = x.dl.length + 1, done = new Set(x.dl.map(d => d.phase).filter(Boolean));
+    const facts = `<div class="facts m88-cf">${`<span class="fact">การเบิกจ่าย <b>${KX88_MODE[mode]}</b></span>`}${x.po ? `<span class="fact">PO <b>${esc(x.po)}</b></span>` : ""}${x.adv.has ? `<span class="fact">วงเงินเบิกล่วงหน้า <b>${fmt(adv)}</b> บาท${P ? ` (GF ${esc(P.gf)} · ${fdate(P.date)})` : " (ยังไม่จ่าย)"}</span><span class="fact">เงินล่วงหน้าคงเหลือ <b>${fmt(kxAdvLeft(x))}</b> บาท</span>${Number(x.adv.dedPct) > 0 ? `<span class="fact">หักคืน <b>${x.adv.dedPct}%</b> ต่อครั้ง</span>` : ""}` : ""}</div>`;
+    const advForm = x.adv.has ? `<div class="m88-adv" style="border:1px solid var(--line);border-radius:8px;padding:8px 10px"><b>เบิกจ่ายเงิน Advance (เงินเบิกล่วงหน้า)</b>${P ? `<div class="sub">จ่ายแล้ว ${fmt(P.amt)} บาท (${fmt(P.amt / 1e6, 4)} ลบ.) · เลขที่ GF ${esc(P.gf)} · ${fdate(P.date)}${P.file ? ` · 📎 ${esc(P.file.name)}` : ""} · หักคืนแล้ว ${fmt(adv - kxAdvLeft(x))} บาท</div>` : `<div class="sub">ยังไม่บันทึกการจ่ายเงินล่วงหน้า</div>`}
+      ${canAdv && !x.dl.some(d => d.deduct > 0) ? `<form data-kx88adv="${k.id}" class="inline-form" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">${kxIn("amt", "จำนวนเงิน Advance (บาท, ไม่เกิน 15%)", P ? P.amt : Math.round(kxAmount(x) * Math.min(15, Number(x.adv.pct) || 15)) / 100, "number", 1, 'min="0" step="0.01"')}${kxIn("gf", "เลขที่เอกสาร GF *", P ? P.gf : "", "text", 1, 'maxlength="40"')}${kxIn("date", "วันที่จ่าย *", P ? P.date : "", "date", 1)}<div class="f"><label>เอกสารการจ่าย</label><input type="file" name="file"></div><div class="f" style="align-self:end"><button class="btn" type="submit">${P ? "แก้ไข" : "บันทึกเบิกจ่ายเงินล่วงหน้า"}</button></div></form>` : ""}</div>` : "";
+    const st = (o, okT, wait) => (o ? tag(okT, "p-ok") : tag(wait, "p-mute"));
+    const stat = x.dl.length ? `<div class="tbl-wrap"><table class="m88-st"><thead><tr><th>${mode === "phase" ? "งวดที่" : "ครั้งที่"}</th><th class="n">ขอเบิก (บาท)</th><th class="n">หักคืนล่วงหน้า</th><th class="n">จ่ายจริง</th><th>ตรวจใบสำคัญ</th><th>บัญชีแนบเอกสาร</th><th>การเงินจ่ายจริงพร้อมเอกสาร</th></tr></thead><tbody>${x.dl.map(d => `<tr><td>${mode === "phase" && d.phase ? `งวด ${d.phase}` : `ครั้งที่ ${d.n}`}</td><td class="n">${fmt(d.amount)}</td><td class="n">${d.deduct ? fmt(d.deduct) : "–"}</td><td class="n">${fmt(d.pay)}</td>
+      <td>${d.chk ? (d.chk.st === "ok" ? tag("ผ่าน", "p-ok") : tag("ส่งกลับ", "p-bad")) : d.accept ? tag("รอตรวจ", "p-warn") : tag("รอตรวจรับ", "p-mute")}</td><td>${st(d.book, `แนบแล้ว${d.files.book ? " 📎" : ""}`, "รอ")}</td><td>${d.status === "paid" ? tag(`จ่ายแล้ว ${fdate(d.paidDate)}${d.files.pay ? " 📎" : ""}`, "p-ok") : tag("รอ", "p-mute")}</td></tr>`).join("")}</tbody></table></div>` : "";
+    let out = h.replace(/(<div class="body cx-manage"[^>]*>)/, "$1" + facts + advForm + stat);
+    // the form of a new payment: by phase or by time; the deduction follows the % set
+    out = out.replace(/(<form data-cxdl="[^"]*"[^>]*>)<div class="f"><label>ครั้งที่<\/label><div><b>\d+<\/b><\/div><\/div>/, (m0, f) => `${f}${mode === "phase" && phases ? `<div class="f"><label>งวดที่ *</label><select name="phase">${Array.from({ length: phases }, (z, i) => i + 1).map(i => `<option value="${i}" ${done.has(i) ? "disabled" : ""} ${!done.has(i) && i === Math.min(...Array.from({ length: phases }, (z, q) => q + 1).filter(q => !done.has(q)).concat(phases + 1)) ? "selected" : ""}>งวดที่ ${i}${done.has(i) ? " (เบิกแล้ว)" : ""}</option>`).join("")}</select></div>` : `<div class="f"><label>ครั้งที่</label><div><b>${nxt}</b></div></div>`}`);
+    if (mode === "phase" && phases) out = out.replace("จำนวนเงินตามงวดงาน (บาท) *</label><input", `จำนวนเงินตามงวดงาน (บาท) *</label><input placeholder="${fmt(Math.round(kxAmount(x) / phases * 100) / 100)}"`);
+    if (Number(x.adv.dedPct) > 0) out = out.replace(/หักคืนเบิกล่วงหน้า \(ว่าง = ระบบคำนวณตามสัดส่วน, คงเหลือ/, `หักคืนเบิกล่วงหน้า (ว่าง = ${x.adv.dedPct}% ของเงินขอเบิก ไม่เกินคงเหลือ`);
+    if (unit) out = out.replace(/(<div class="body cx-manage"[^>]*>)/, `$1<div class="sub">สำนัก/กองที่รับผิดชอบรายการสร้างรายการเบิกจ่ายได้ แล้วผู้ตรวจสอบใบสำคัญ → การบัญชี → การเงิน ดำเนินการต่อ</div>`);
+    return out; }; }
+
+// ---------- handlers: read the new fields before the older handlers ----------
+window.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches) return;
+  if (f.matches("form[data-cx]")) { const d = new FormData(f), n = {}; if (d.has("po")) n.po = String(d.get("po")); if (d.get("payMode")) n.payMode = String(d.get("payMode")); if (d.has("dedPct")) n.dedPct = String(d.get("dedPct")).trim(); KX88_IN = n; }
+  if (f.matches("form[data-cxam]")) { const d = new FormData(f); KX88_IN = { amPo: String(d.get("amPo") || "") }; }
+  if (f.matches("form[data-cxdl]")) { const d = new FormData(f); KX88_DLPH = d.get("phase") ? Number(d.get("phase")) : null; } }, true);
+let KX88_DLPH = null;
+{ const base = kxDlAdd; kxDlAdd = function (k, v, files) { if (KX88_DLPH && !v.phase) v = Object.assign({}, v, { phase: KX88_DLPH }); KX88_DLPH = null;
+    if ((v.deduct === "" || v.deduct == null) && Number(v.amount) > 0) { const dd = kx88Deduct(kxOf(k), Number(v.amount)); if (dd != null) v = Object.assign({}, v, { deduct: String(dd) }); }
+    return base(k, v, files); }; }
+document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches || !f.matches("[data-kx88adv]")) return; e.preventDefault(); const d = new FormData(f), fl = d.get("file");
+  const m = kx88AdvPay(famCon(f.dataset.kx88adv), { amt: d.get("amt"), gf: d.get("gf"), date: d.get("date") }, fl && fl.name ? fl : null); m ? toast(m) : kxDone("บันทึกเบิกจ่ายเงินล่วงหน้าแล้ว"); });
+document.addEventListener("change", e => { const t = e.target; if (!t || !t.matches || !t.matches("[data-cxadv]")) return; const f = t.closest("form[data-cx]"), b = f && f.querySelector(".cx-ded88"); if (b) b.style.display = t.value === "1" ? "inline-flex" : "none"; });
+
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
 // With no signed-in session, the sign-in screen opens on top.
