@@ -31484,23 +31484,23 @@ function d98Table(fy, it) { const { rows, tot } = d98Rows(fy, it), mi = Math.min
 .d98 header{flex-wrap:wrap;gap:8px}
 .d98-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .d98-seg button{border:0;background:transparent;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer;color:inherit;border-right:1px solid var(--line)}
-.d98-seg button:last-child{border-right:0}.d98-seg button.on{background:#1f2937;color:#fff}
+.d98-seg button:last-child{border-right:0}.d98-seg button.on{background:#3b4fa8;color:#fff}
 .d98-wrap{overflow:auto;max-height:620px}
 .d98-t{border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap}
 .d98-t th,.d98-t td{padding:6px 9px;border-bottom:1px solid var(--line)}
 .d98-t thead th{position:sticky;z-index:2;text-align:center;font-weight:600}
 .d98-t thead tr:nth-child(1) th{top:0}.d98-t thead tr:nth-child(2) th{top:31px}.d98-t thead tr:nth-child(3) th{top:62px}
-.d98-h{background:#111827;color:#fff;border-bottom:0!important}
-.d98-y{color:#facc15!important}
+.d98-h{background:#e0e7ff;color:#1e3a8a;border-bottom:0!important}
+.d98-y{color:#b45309!important}
 .d98-mh,.d98-mh2{background:#dcfce7;color:#14532d;border-left:1px solid #bbf7d0}
 .d98-mh.now,.d98-t td.now{background:#fef9c3}
 .d98-t .d98-k{position:sticky;left:0;z-index:1;background:var(--panel,#fff);text-align:left;min-width:200px;max-width:260px;white-space:normal;border-right:2px solid var(--line)}
-.d98-t thead .d98-k{z-index:3;background:#111827;color:#fff}
+.d98-t thead .d98-k{z-index:3;background:#c7d2fe;color:#1e3a8a}
 .d98-t tbody tr{cursor:pointer}.d98-t tbody tr:hover td{background:var(--hover,#f8fafc)}.d98-t tbody tr.on td{background:var(--info-soft,#eff6ff)}
 .d98-t td.d98-mp{border-left:1px solid var(--line)}.d98-t td.d98-ma{color:#2563eb}.d98-t td.d98-ma.low{color:#dc2626;font-weight:600}
 .d98-t td.d98-pc{font-weight:600}.d98-t td.d98-lp.bad{color:#dc2626;font-weight:700}
-.d98-t td:nth-child(12){border-right:2px solid #111827}
-.d98-t tfoot td{position:sticky;bottom:0;background:#f1f5f9;font-weight:700;border-top:2px solid #111827}
+.d98-t td:nth-child(12){border-right:2px solid #a5b4fc}
+.d98-t tfoot td{position:sticky;bottom:0;background:#f1f5f9;font-weight:700;border-top:2px solid #a5b4fc}
 .d98-t tfoot .d98-k{background:#f1f5f9;z-index:2}
 .d98-note{line-height:1.7}.d98-t td.d98-qc{border-left:1px solid var(--line);vertical-align:top}.d99-dt>td{background:var(--surface-2,#f8fafc);white-space:normal}.d99-mb{padding:1px 8px;font-size:11.5px;margin-top:3px}.mp98-r{display:flex;justify-content:space-between;gap:8px;font-size:12px}.mp98-bar{height:5px;background:var(--line,#e5e7eb);border-radius:99px;overflow:hidden;margin-top:4px}.mp98-bar i{display:block;height:100%}.mp98-pc{font-size:11px;text-align:right;font-weight:600}.mp98-m td,.mp98-m th{padding:4px 7px;white-space:nowrap}.mp98-m .now{background:#fefce8}
 `; document.head.appendChild(s); })();
@@ -31868,8 +31868,8 @@ document.addEventListener("click", e => { const t = e.target && e.target.closest
       pick("s3", "inviteDate", "ประกาศขายแบบ/เชิญชวน ตั้งแต่ (ว/ด/ป)", 1), ["inviteEnd", "ประกาศขายแบบ/เชิญชวน ถึง (ว/ด/ป)", "date", 0], pick("s3", "bidDate", "เสนอราคา (ว/ด/ป)", 1)],
     s4: [pick("s4", "start", "พิจารณาผล ตั้งแต่ (ว/ด/ป)", 1), pick("s4", "end", "พิจารณาผล ถึง (ว/ด/ป)", 1), pick("s4", "round", "ครั้งที่ประกวดราคา (จำนวนครั้ง)", 0), pick("s4", "winner", "ผู้เสนอราคาได้ต่ำสุด", 1), pick("s4", "price", "วงเงินที่เสนอ (บาท)", 1),
       pick("s4", "f:result", "ไฟล์รายงานผลการพิจารณา", 1),
-      pick("s4", "bbLetter", "ส่ง สงป. พิจารณาความเหมาะสม เลขที่หนังสือ/ว/ด/ป", 0, "multi"), pick("s4", "bbOkLetter", "สงป. พิจารณาความเหมาะสมแล้ว เลขที่หนังสือ/ว/ด/ป", 0, "multi"), pick("s4", "bbAmount", "วงเงินที่ สงป. เห็นชอบ (บาท)", 1, "multi"),
-      pick("s4", "cab", "ขยายระยะเวลาก่อหนี้ผูกพัน (ครม. อนุมัติ)", 1, "multi"), pick("s4", "cabLetter", "ขยายระยะเวลาก่อหนี้ผูกพัน เลขที่หนังสือ/ว/ด/ป", 0, "cabyes"), pick("s4", "cabFrom", "เดิม ปี (เช่น 70-71)", 1, "cabyes"), pick("s4", "cabTo", "เป็น ปี (เช่น 70-72)", 1, "cabyes")],
+      pick("s4", "bbLetter", "ส่ง สงป. พิจารณาความเหมาะสม เลขที่หนังสือ/ว/ด/ป", 0, ""), pick("s4", "bbOkLetter", "สงป. พิจารณาความเหมาะสมแล้ว เลขที่หนังสือ/ว/ด/ป", 0, ""), pick("s4", "bbAmount", "วงเงินที่ สงป. เห็นชอบ (บาท)", 0, ""), ["qLen", "ความยาว (เมตร)", "number", 0],
+      pick("s4", "cabLetter", "ขยายระยะเวลาก่อหนี้ผูกพัน เลขที่หนังสือ/ว/ด/ป", 0, ""), pick("s4", "cab", "ครม. อนุมัติขยายเวลาก่อหนี้ (งบผูกพัน)", 0, "multi"), pick("s4", "cabFrom", "เดิม ปี (เช่น 70-71)", 1, "cabyes"), pick("s4", "cabTo", "เป็น ปี (เช่น 70-72)", 1, "cabyes")],
     s5: [pick("s5", "approve", "อนุมัติจ้าง (ว/ด/ป)", 1), ["days", "จำนวนวันแล้วเสร็จ", "number", 0], pick("s5", "winnerDate", "ประกาศผู้ชนะ (ว/ด/ป)", 1), pick("s5", "appeal", "มีอุทธรณ์", 0),
       pick("s5", "f:approve", "ไฟล์อนุมัติจ้าง", 1), pick("s5", "f:winner", "ไฟล์ประกาศผู้ชนะ", 1), pick("s5", "f:appeal", "ไฟล์เอกสารอุทธรณ์", 1, "appeal")],
     s6: [pick("s6", "callDate", "แจ้งผู้รับจ้างลงนาม (ว/ด/ป)", 1), pick("s6", "signBy", "ทำสัญญาภายในวันที่", 0), pick("s6", "f:notice", "ไฟล์หนังสือแจ้งลงนามสัญญา", 1)],
@@ -31880,9 +31880,11 @@ EGP7[1].t = "รายงานขอซื้อขอจ้าง ราคา
 // the reports: the invitation is a period, the days come from อนุมัติจ้าง when the contract has none
 { const base = prTrackBook; prTrackBook = function (fy) { const book = base(fy), rows = prDtRows(fy, false);
     book[0].rows.slice(5).forEach((row, i) => { const r = rows[i]; if (!r) return; const bi = ((S.bi && S.bi.rows) || []).find(y => y.id === r.id), p = bi && bi.sent && bi.sent.pp ? S.pplan.find(q => q.id === bi.sent.pp) : r.k ? famPlan(r.k.plan) : null, E = prE7(p); if (!E) return;
-      if (E.s3.inviteDate) row[32] = prRange(E.s3.inviteDate, E.s3.inviteEnd); if (!row[49] && E.s5.days) row[49] = Number(E.s5.days); }); return book; }; }
+      if (E.s3.inviteDate) row[32] = prRange(E.s3.inviteDate, E.s3.inviteEnd); if (!row[50] && E.s4.qLen) row[50] = Number(E.s4.qLen); if (!row[40] && E.s4.cabLetter) row[40] = E.s4.cabLetter; if (!row[49] && E.s5.days) row[49] = Number(E.s5.days); }); return book; }; }
 // the days: a number above 0
 { const base = egp7Save; egp7Save = function (c, n, v, files) { if (n === 5 && "days" in v) { const d = v.days; if (d !== "" && !(Number(d) > 0)) return "จำนวนวันแล้วเสร็จต้องมากกว่า 0"; } return base(c, n, v, files); }; }
+// P99 (26 Nov 2569, asked): the five columns of the form ส่ง สงป. พิจารณา, สงป. พิจารณาแล้ว, วงเงินที่ สงป. เห็นชอบ, ความยาว (เมตร),
+// ขยายระยะเวลาก่อหนี้ผูกพัน are boxes of step 4 shown always (no condition, not required); ความยาว moved here from จัดทำข้อมูล.
 
 /* ---- 98zzzzzp-klang-step5.js ---- */
 // ---------- P99: step 5 บริหารสัญญาและเบิกจ่าย without the older panels ----------
@@ -31931,13 +31933,15 @@ function p99BiPanel(c) { const r = p99BiOf(c); if (!r) return `<div class="sub">
 if (VIEWS["bq-geo"]) { const base = VIEWS["bq-geo"]; VIEWS["bq-geo"] = function () { const h = base.apply(this, arguments); return m88On() ? h.replace("ตารางพื้นที่และพิกัด", "พื้นที่") : h; }; }
 // P99: e-GP step 4 has its own heading "สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน": the งบผูกพัน switch and the Budget Bureau and debt-extension
 // fields are grouped under it, after the fields of the evaluation.
-const P99_BB = ["bbLetter", "bbOkLetter", "bbAmount", "cab", "cabLetter", "cabFrom", "cabTo"];
+const P99_BB = ["bbLetter", "bbOkLetter", "bbAmount", "qLen", "cabLetter", "cab", "cabFrom", "cabTo"];
 function p99BbGroup() { if (!m88On()) return; document.querySelectorAll('form[data-e7$="|4"]').forEach(f => { if (f.dataset.p99bb) return; f.dataset.p99bb = "1";
   const box = f.querySelector('input[name="multi"]'), sw = box && box.closest(".f"); if (!sw) return; const lab = sw.querySelector("label"); if (lab) lab.lastChild.textContent = " งบผูกพัน (ต้องส่ง สงป. พิจารณาความเหมาะสม และขยายระยะเวลาก่อหนี้ผูกพัน)";
-  const h = document.createElement("div"); h.className = "f"; h.style.cssText = "flex:1 1 100%;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)"; h.innerHTML = `<b style="font-weight:600">สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน</b>${box.checked ? "" : `<div class="sub">ติ๊กงบผูกพันเพื่อกรอก ส่ง สงป. พิจารณา, สงป. พิจารณาแล้ว, วงเงินที่ สงป. เห็นชอบ และการขยายระยะเวลาก่อหนี้ผูกพัน</div>`}`;
-  const last = f.querySelector('button[type="submit"]') ? f.querySelector('button[type="submit"]').closest("div") : null; f.insertBefore(h, last); f.insertBefore(sw, last);
-  P99_BB.forEach(n => { const el = f.querySelector(`[name="${n}"]`), fd = el && el.closest(".f"); if (fd) f.insertBefore(fd, last); }); }); }
+  const h = document.createElement("div"); h.className = "f"; h.style.cssText = "flex:1 1 100%;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)"; h.innerHTML = `<b style="font-weight:600">สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน</b><div class="sub">ตามคอลัมน์ของแบบฟอร์มติดตาม กรอกเมื่อมีข้อมูล</div>`;
+  const last = f.querySelector('button[type="submit"]') ? f.querySelector('button[type="submit"]').closest("div") : null; f.insertBefore(h, last);
+  P99_BB.forEach(n => { const el = f.querySelector(`[name="${n}"]`), fd = el && el.closest(".f"); if (fd) f.insertBefore(fd, last); }); f.insertBefore(sw, last); }); }
 (function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(p99BbGroup, 50); }).observe(document.body, { childList: true, subtree: true }); })();
+// ความยาว (เมตร) is asked at e-GP step 4 now: hidden in the request form of the unit (data kept)
+(function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => { if (!m88On()) return; const i = document.getElementById("pr-qlen"); const fd = i && i.closest(".f"); if (fd && fd.style.display !== "none") fd.style.display = "none"; }, 50); }).observe(document.body, { childList: true, subtree: true }); })();
 
 /* ---- 98zzzzzr-klang-conamend99.js ---- */
 // ---------- P99: one place for contract amendments ----------
@@ -32022,7 +32026,7 @@ async function t99Import(c, step, file, rowsIn) { const rows = rowsIn || await x
   if (step === 3) { if (!egpUpCan(c)) return "เฉพาะเจ้าหน้าที่พัสดุนำเข้าข้อมูล e-GP"; set(E.s2, "projNo", String(v(22)).trim()); set(E.s1, "date", t99Date(v(23))); set(E.s2, "refPrice", t99Baht(v(24))); set(E.s2, "refDate", t99Date(v(25))); set(E.s2, "reqDate", t99Date(v(26)));
     const [d0, d1] = t99Range(v(27)); if (d0) { set(E.s3, "draft", true); set(E.s3, "draftDate", d0); set(E.s3, "draftEnd", d1); } const [i0, i1] = t99Range(v(28)); set(E.s3, "inviteDate", i0); set(E.s3, "inviteEnd", i1); set(E.s3, "bidDate", t99Date(v(29)));
     const [p0, p1] = t99Range(v(30)); set(E.s4, "start", p0); set(E.s4, "end", p1); set(E.s4, "round", t99Num(v(31))); set(E.s4, "winner", String(v(32)).trim()); set(E.s4, "price", t99Baht(v(33)));
-    set(E.s4, "bbLetter", String(v(34)).trim()); set(E.s4, "bbOkLetter", String(v(35)).trim()); set(E.s4, "bbAmount", t99Baht(v(36))); if (String(v(38)).trim()) { set(E.s4, "cab", "yes"); set(E.s4, "cabLetter", String(v(38)).trim()); }
+    set(E.s4, "bbLetter", String(v(34)).trim()); set(E.s4, "bbOkLetter", String(v(35)).trim()); set(E.s4, "bbAmount", t99Baht(v(36))); set(E.s4, "qLen", t99Num(v(37))); set(E.s4, "cabLetter", String(v(38)).trim());
     set(E.s5, "approve", t99Date(v(39))); set(E.s5, "days", t99Num(v(40))); set(E.s5, "winnerDate", t99Date(v(41))); if (E.s5.winnerDate) E.s5.appealEnd = egp7AppealEnd(E.s5.winnerDate); set(E.s6, "callDate", t99Date(v(43))); set(E.s7, "offerDate", t99Date(v(44)));
     for (let s = 7; s >= 1; s--) { if (!egp7Missing(c, s).filter(m => !/ไฟล์/.test(m)).length && Object.keys(E["s" + s]).length) { if ((E.stage || 0) < s) E.stage = s; break; } } }
   if (step === 4) { const k = caseCon(c); if (!k) return "ยังไม่มีสัญญา: กดสร้างสัญญาก่อน แล้วนำเข้าอีกครั้ง"; if (!kxCanEdit()) return "เฉพาะเจ้าหน้าที่พัสดุนำเข้าข้อมูลสัญญา"; const x = kxOf(k);
@@ -32113,6 +32117,32 @@ function x99Page(fy) { const it = d96Items(fy), D = prDtRows(fy, false), B = prT
      <div class="sub" style="margin-top:8px">${late.length} รายการเบิกจ่ายต่ำกว่าแผนสะสมเกิน 30% · ดูรายการที่ ติดตามการเบิกจ่าย</div></div></div></div>`; }
 if (VIEWS["od-dash"]) { const base = VIEWS["od-dash"]; VIEWS["od-dash"] = function () { if (!m88On()) return base.apply(this, arguments); let s = ""; try { s = x99Page(BI.fy); } catch (e) { s = `<div class="sub">สรุปไม่ได้: ${esc(e && e.message)}</div>`; }
   const h = base.apply(this, arguments), t = document.createElement("template"); t.innerHTML = h; const hd = t.content.querySelector(".head"); if (hd) [...hd.children].forEach(ch => { if (!ch.matches(".headico") && !ch.querySelector("h1")) ch.remove(); }); return (hd ? hd.outerHTML : "") + prFySel() + s; }; }
+
+/* ---- 98zzzzzv-klang-step6.js ---- */
+// ---------- P99: step 6 ปิดการจัดซื้อและส่งมอบ ----------
+// Asked for: take out ประเมินผู้ค้า; show a summary of the deliveries; ปิดโครงการ becomes ปิดการจัดซื้อ with the details and the date of
+// delivery; "ส่งมอบต่อให้ อปท. / เจ้าของโครงการ (ทั้งโครงการ หลังปิดการจัดซื้อ)" is named รายการส่งมอบ.
+// Data: the close of the purchase is cs.close99 = { note, date, by, t } (cs.close is set too when it was not, so the case reads as closed).
+// The old panels are hidden, not deleted (MENU_ALL or window.CASE_OLD shows them).
+P99_CASE_OLD.push("ประเมินผู้ค้า", "ปิดโครงการ");
+function s6Summary(cs) { const k = caseCon(cs); if (!k) return `<div class="sub">ยังไม่มีสัญญา</div>`; const x = kxOf(k), dl = x.dl || [], A = kxAmount(x), paid = dl.filter(d => d.status === "paid").reduce((s, d) => s + (Number(d.pay) || 0), 0) + (x.adv && x.adv.paid ? Number(x.adv.paid.amt) || 0 : 0);
+  const acc = dl.filter(d => d.accept), h = k.handover, c9 = cs.close99, kv = (l, v) => `<div class="s6-k"><span class="sub">${l}</span><b>${v}</b></div>`;
+  return `<div class="s6-ks">${kv("สัญญา", `${esc(x.no || k.no || "")}`)}${kv("ผู้รับจ้าง", esc(tx(k.vendor)))}${kv("วงเงินสัญญา", fmt(A) + " บาท")}${kv("ส่งมอบ / ตรวจรับ", `${dl.length} / ${acc.length} ครั้ง`)}${kv("ตรวจรับครั้งสุดท้าย", acc.length ? fdate(acc[acc.length - 1].accept) : "–")}${kv("จ่ายแล้ว", `${fmt(paid)} บาท (${A ? fmt(paid / A * 100, 1) : 0}%)`)}
+    ${kv("ประกันความชำรุดบกพร่อง", x.lastAccept ? `ถึง ${fdate(kxWarrEnd(x))}` : `${Number(x.warrY) > 0 ? x.warrY : 2} ปี หลังตรวจรับงวดสุดท้าย`)}${kv("ส่งมอบต่อ", h ? `${esc(h.party || h.to || "")} · ${fdate(h.date)}` : "ยังไม่ส่งมอบ")}${kv("ปิดการจัดซื้อ", c9 ? `${fdate(c9.date)}` : cs.close ? fdate(String(cs.close.t).slice(0, 10)) : "ยังไม่ปิด")}</div>
+    ${dl.length ? `<div class="tbl-wrap" style="margin-top:8px"><table><thead><tr><th>ครั้งที่</th><th>วันที่ส่งมอบ</th><th>วันที่ตรวจรับ</th><th class="n">จำนวนเงิน (บาท)</th><th class="n">จ่ายจริง</th><th>สถานะ</th></tr></thead><tbody>${dl.map(d => `<tr><td>${d.phase ? "งวด " + d.phase : "ครั้งที่ " + d.n}</td><td>${fdate(d.deliver)}</td><td>${d.accept ? fdate(d.accept) : "–"}</td><td class="n">${fmt(d.amount)}</td><td class="n">${fmt(d.pay)}</td><td>${d.status === "paid" ? tag(`จ่ายแล้ว ${fdate(d.paidDate)}`, "p-ok") : d.accept ? tag("ตรวจรับแล้ว รอจ่าย", "p-warn") : tag("รอตรวจรับ", "p-mute")}</td></tr>`).join("")}</tbody></table></div>` : `<div class="sub" style="margin-top:6px">ยังไม่มีการส่งมอบ</div>`}`; }
+function s6Close(cs) { const c9 = cs.close99, can = isProcRole() || ROLE === "admin";
+  if (c9) return `<div>${tag("ปิดการจัดซื้อแล้ว", "p-ok")} วันที่ส่งมอบ <b>${fdate(c9.date)}</b> · ${esc(userName(c9.by))} · ${fdate(String(c9.t).slice(0, 10))}</div>${c9.note ? `<div style="margin-top:6px;white-space:pre-wrap">${esc(c9.note)}</div>` : ""}`;
+  if (!can) return `<span class="sub">ยังไม่ปิดการจัดซื้อ (เจ้าหน้าที่พัสดุปิด)</span>`;
+  return `<form data-s6close="${esc(cs.id)}" class="inline-form" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end"><div class="f" style="flex:0 1 180px"><label>วันที่ส่งมอบ *</label><input type="date" name="date" value="${TODAY}" max="${TODAY}" required></div>
+    <div class="f" style="flex:1 1 360px"><label>รายละเอียดการปิดการจัดซื้อ *</label><textarea name="note" rows="2" maxlength="1000" required placeholder="เช่น ส่งมอบงานครบทุกงวด ตรวจรับเรียบร้อย คืนหลักประกันตามกำหนด"></textarea></div><button class="btn primary" type="submit">ปิดการจัดซื้อ</button></form>`; }
+{ const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On() || window.CASE_OLD) return out; out.push(cmPanel(7, 0, "สรุปรายละเอียดการส่งมอบ", s6Summary(c)), cmPanel(7, 9, "ปิดการจัดซื้อ", s6Close(c))); return out; }; }
+document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches || !f.matches("[data-s6close]")) return; e.preventDefault(); const cs = S.cases.find(x => x.id === f.dataset.s6close); if (!cs) return;
+  const d = new FormData(f), date = String(d.get("date") || ""), note = String(d.get("note") || "").trim(); if (!date || date > TODAY) { toast("ระบุวันที่ส่งมอบ (ไม่เกินวันนี้)"); return; } if (!note) { toast("ระบุรายละเอียดการปิดการจัดซื้อ"); return; }
+  cs.close99 = { date, note: note.slice(0, 1000), by: me().id, t: nowIso() }; if (!cs.close) cs.close = { t: nowIso(), by: me().id, via: "p99" }; (cs.events = cs.events || []).push({ t: nowIso(), by: me().id, ev: "close", note: `ปิดการจัดซื้อ ส่งมอบ ${date}` });
+  audit(["ปิดการจัดซื้อ", "Closed the purchase"], cs.id); commit(); route(); toast("ปิดการจัดซื้อแล้ว"); });
+// the hand-over panel is named รายการส่งมอบ
+(function () { const st = document.createElement("style"); st.textContent = ".s6-ks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.s6-k{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}"; document.head.appendChild(st);
+  let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => { if (!m88On()) return; document.querySelectorAll("section.panel > header h2").forEach(h => { if (/^ส่งมอบต่อให้ อปท\. \/ เจ้าของโครงการ/.test(h.textContent.trim())) h.textContent = "รายการส่งมอบ"; }); }, 40); }).observe(document.body, { childList: true, subtree: true }); })();
 
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.

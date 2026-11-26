@@ -35,10 +35,12 @@ function p99BiPanel(c) { const r = p99BiOf(c); if (!r) return `<div class="sub">
 if (VIEWS["bq-geo"]) { const base = VIEWS["bq-geo"]; VIEWS["bq-geo"] = function () { const h = base.apply(this, arguments); return m88On() ? h.replace("ตารางพื้นที่และพิกัด", "พื้นที่") : h; }; }
 // P99: e-GP step 4 has its own heading "สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน": the งบผูกพัน switch and the Budget Bureau and debt-extension
 // fields are grouped under it, after the fields of the evaluation.
-const P99_BB = ["bbLetter", "bbOkLetter", "bbAmount", "cab", "cabLetter", "cabFrom", "cabTo"];
+const P99_BB = ["bbLetter", "bbOkLetter", "bbAmount", "qLen", "cabLetter", "cab", "cabFrom", "cabTo"];
 function p99BbGroup() { if (!m88On()) return; document.querySelectorAll('form[data-e7$="|4"]').forEach(f => { if (f.dataset.p99bb) return; f.dataset.p99bb = "1";
   const box = f.querySelector('input[name="multi"]'), sw = box && box.closest(".f"); if (!sw) return; const lab = sw.querySelector("label"); if (lab) lab.lastChild.textContent = " งบผูกพัน (ต้องส่ง สงป. พิจารณาความเหมาะสม และขยายระยะเวลาก่อหนี้ผูกพัน)";
-  const h = document.createElement("div"); h.className = "f"; h.style.cssText = "flex:1 1 100%;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)"; h.innerHTML = `<b style="font-weight:600">สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน</b>${box.checked ? "" : `<div class="sub">ติ๊กงบผูกพันเพื่อกรอก ส่ง สงป. พิจารณา, สงป. พิจารณาแล้ว, วงเงินที่ สงป. เห็นชอบ และการขยายระยะเวลาก่อหนี้ผูกพัน</div>`}`;
-  const last = f.querySelector('button[type="submit"]') ? f.querySelector('button[type="submit"]').closest("div") : null; f.insertBefore(h, last); f.insertBefore(sw, last);
-  P99_BB.forEach(n => { const el = f.querySelector(`[name="${n}"]`), fd = el && el.closest(".f"); if (fd) f.insertBefore(fd, last); }); }); }
+  const h = document.createElement("div"); h.className = "f"; h.style.cssText = "flex:1 1 100%;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)"; h.innerHTML = `<b style="font-weight:600">สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน</b><div class="sub">ตามคอลัมน์ของแบบฟอร์มติดตาม กรอกเมื่อมีข้อมูล</div>`;
+  const last = f.querySelector('button[type="submit"]') ? f.querySelector('button[type="submit"]').closest("div") : null; f.insertBefore(h, last);
+  P99_BB.forEach(n => { const el = f.querySelector(`[name="${n}"]`), fd = el && el.closest(".f"); if (fd) f.insertBefore(fd, last); }); f.insertBefore(sw, last); }); }
 (function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(p99BbGroup, 50); }).observe(document.body, { childList: true, subtree: true }); })();
+// ความยาว (เมตร) is asked at e-GP step 4 now: hidden in the request form of the unit (data kept)
+(function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => { if (!m88On()) return; const i = document.getElementById("pr-qlen"); const fd = i && i.closest(".f"); if (fd && fd.style.display !== "none") fd.style.display = "none"; }, 50); }).observe(document.body, { childList: true, subtree: true }); })();

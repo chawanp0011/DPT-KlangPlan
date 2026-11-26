@@ -48,23 +48,23 @@ function d98Table(fy, it) { const { rows, tot } = d98Rows(fy, it), mi = Math.min
 .d98 header{flex-wrap:wrap;gap:8px}
 .d98-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .d98-seg button{border:0;background:transparent;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer;color:inherit;border-right:1px solid var(--line)}
-.d98-seg button:last-child{border-right:0}.d98-seg button.on{background:#1f2937;color:#fff}
+.d98-seg button:last-child{border-right:0}.d98-seg button.on{background:#3b4fa8;color:#fff}
 .d98-wrap{overflow:auto;max-height:620px}
 .d98-t{border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap}
 .d98-t th,.d98-t td{padding:6px 9px;border-bottom:1px solid var(--line)}
 .d98-t thead th{position:sticky;z-index:2;text-align:center;font-weight:600}
 .d98-t thead tr:nth-child(1) th{top:0}.d98-t thead tr:nth-child(2) th{top:31px}.d98-t thead tr:nth-child(3) th{top:62px}
-.d98-h{background:#111827;color:#fff;border-bottom:0!important}
-.d98-y{color:#facc15!important}
+.d98-h{background:#e0e7ff;color:#1e3a8a;border-bottom:0!important}
+.d98-y{color:#b45309!important}
 .d98-mh,.d98-mh2{background:#dcfce7;color:#14532d;border-left:1px solid #bbf7d0}
 .d98-mh.now,.d98-t td.now{background:#fef9c3}
 .d98-t .d98-k{position:sticky;left:0;z-index:1;background:var(--panel,#fff);text-align:left;min-width:200px;max-width:260px;white-space:normal;border-right:2px solid var(--line)}
-.d98-t thead .d98-k{z-index:3;background:#111827;color:#fff}
+.d98-t thead .d98-k{z-index:3;background:#c7d2fe;color:#1e3a8a}
 .d98-t tbody tr{cursor:pointer}.d98-t tbody tr:hover td{background:var(--hover,#f8fafc)}.d98-t tbody tr.on td{background:var(--info-soft,#eff6ff)}
 .d98-t td.d98-mp{border-left:1px solid var(--line)}.d98-t td.d98-ma{color:#2563eb}.d98-t td.d98-ma.low{color:#dc2626;font-weight:600}
 .d98-t td.d98-pc{font-weight:600}.d98-t td.d98-lp.bad{color:#dc2626;font-weight:700}
-.d98-t td:nth-child(12){border-right:2px solid #111827}
-.d98-t tfoot td{position:sticky;bottom:0;background:#f1f5f9;font-weight:700;border-top:2px solid #111827}
+.d98-t td:nth-child(12){border-right:2px solid #a5b4fc}
+.d98-t tfoot td{position:sticky;bottom:0;background:#f1f5f9;font-weight:700;border-top:2px solid #a5b4fc}
 .d98-t tfoot .d98-k{background:#f1f5f9;z-index:2}
 .d98-note{line-height:1.7}.d98-t td.d98-qc{border-left:1px solid var(--line);vertical-align:top}.d99-dt>td{background:var(--surface-2,#f8fafc);white-space:normal}.d99-mb{padding:1px 8px;font-size:11.5px;margin-top:3px}.mp98-r{display:flex;justify-content:space-between;gap:8px;font-size:12px}.mp98-bar{height:5px;background:var(--line,#e5e7eb);border-radius:99px;overflow:hidden;margin-top:4px}.mp98-bar i{display:block;height:100%}.mp98-pc{font-size:11px;text-align:right;font-weight:600}.mp98-m td,.mp98-m th{padding:4px 7px;white-space:nowrap}.mp98-m .now{background:#fefce8}
 `; document.head.appendChild(s); })();
