@@ -32,3 +32,9 @@ EGP7[1].t = "รายงานขอซื้อขอจ้าง ราคา
 { const base = egp7Save; egp7Save = function (c, n, v, files) { if (n === 5 && "days" in v) { const d = v.days; if (d !== "" && !(Number(d) > 0)) return "จำนวนวันแล้วเสร็จต้องมากกว่า 0"; } return base(c, n, v, files); }; }
 // P99 (26 Nov 2569, asked): the five columns of the form ส่ง สงป. พิจารณา, สงป. พิจารณาแล้ว, วงเงินที่ สงป. เห็นชอบ, ความยาว (เมตร),
 // ขยายระยะเวลาก่อหนี้ผูกพัน are boxes of step 4 shown always (no condition, not required); ความยาว moved here from จัดทำข้อมูล.
+// P99 (audit of the form, 26 Nov 2569): the unit writes สำรวจ/ออกแบบ, แบบแล้วเสร็จ, ประมาณราคา, จัดทำ TOR แล้วเสร็จ on the request (req.detail);
+// the report read them from e-GP only, so what the unit wrote never reached the form. Now the request fills them (over the sample values) when e-GP has none.
+{ const base = prTrackBook; prTrackBook = function (fy) { const book = base(fy), rows = prDtRows(fy, false);
+    book[0].rows.slice(5).forEach((row, i) => { const r = rows[i]; if (!r) return; const bi = ((S.bi && S.bi.rows) || []).find(y => y.id === r.id), p = bi && bi.sent && bi.sent.pp ? S.pplan.find(q => q.id === bi.sent.pp) : r.k ? famPlan(r.k.plan) : null, c = p ? caseByPlan(p.id) : null;
+      const rq = c ? caseReq(c) || S.reqn.find(q => q.plan === c.plan && q.status !== "superseded") : null, d = rq && rq.detail; if (!d) return;
+      const E = c && c.egp7; [[22, "survey"], [23, "designDone"], [24, "estDate"], [25, "torDone"]].forEach(([col, k]) => { if (d[k] && !(E && E.s2 && E.s2[k])) row[col] = prBE(d[k]); }); }); return book; }; }
