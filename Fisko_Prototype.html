@@ -31591,6 +31591,247 @@ function demo70LogHtml() { if (!DEMO70.log.length) return ""; const bad = DEMO70
 { const base = pdImp; pdImp = function (fy) { const h = base(fy); return biCanImport() ? h.replace(/(<button class="btn" type="button" id="s70-load">)/, `<button class="btn" type="button" id="demo70-run">รันตัวอย่างครบ flow ปี 2570</button>$1`) + demo70LogHtml() : h; }; }
 document.addEventListener("click", async e => { if (!(e.target && e.target.closest && e.target.closest("#demo70-run"))) return; toast("กำลังรันตัวอย่าง…"); await demo70Run(); commit(); renderShell(); BI.view = "imp"; route(); const bad = DEMO70.log.filter(x => !x.ok).length; toast(bad ? `รันแล้ว มีขั้นที่ไม่ผ่าน ${bad}` : "รันตัวอย่างครบ flow แล้ว ผ่านทุกขั้น"); });
 
+/* ---- 98zzzzzd-klang-lib98.js ---- */
+// ---------- P98: document library redesign (item list on the left, folder tiles and file table on the right) ----------
+// The folders in work order, from the purchase request to the payment; each shows even when empty so the gaps are visible.
+const L98_FOLDERS = [
+  ["เอกสารขอซื้อขอจ้าง", "ขอซื้อขอจ้าง", "#6366f1"], ["รายงานขอซื้อขอจ้าง", "e-GP", "#0ea5e9"], ["คำสั่งแต่งตั้งคณะกรรมการ", "e-GP", "#0ea5e9"],
+  ["รายงานผลการพิจารณา", "e-GP", "#0ea5e9"], ["อนุมัติจ้าง", "e-GP", "#0ea5e9"], ["ประกาศผู้ชนะ", "e-GP", "#0ea5e9"], ["หนังสือแจ้งลงนามสัญญา", "e-GP", "#0ea5e9"],
+  ["หนังสือสัญญา", "สัญญา", "#10b981"], ["เอกสารคู่สัญญา", "สัญญา", "#10b981"], ["BOQ งวดงาน", "สัญญา", "#10b981"], ["หลักประกันสัญญา", "สัญญา", "#10b981"], ["สัญญาแก้ไข", "สัญญา", "#10b981"],
+  ["เบิกเงินล่วงหน้า", "เบิกจ่าย", "#f59e0b"], ["ส่งมอบและตรวจรับ", "เบิกจ่าย", "#f59e0b"], ["ตรวจใบสำคัญ", "เบิกจ่าย", "#f59e0b"], ["เอกสารเบิกจ่าย (บัญชี)", "เบิกจ่าย", "#f59e0b"], ["หลักฐานการจ่ายเงิน (การเงิน)", "เบิกจ่าย", "#f59e0b"]];
+const l98Ext = n => { const e = (String(n).split(".").pop() || "").toLowerCase(); return ["pdf", "xlsx", "xls", "docx", "doc", "jpg", "png", "zip"].includes(e) ? e : "file"; };
+const l98Size = b => !b ? "-" : b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+(function () { if (document.getElementById("l98-css")) return; const s = document.createElement("style"); s.id = "l98-css"; s.textContent = `
+.l98{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.l98{grid-template-columns:1fr}}
+.l98-side{background:var(--panel,#fff);border:1px solid var(--line);border-radius:12px;overflow:hidden;position:sticky;top:8px}
+.l98-side .hd{padding:12px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.l98-side input[type=search]{width:100%;margin:0;padding:8px 10px;border-radius:8px}
+.l98-chips{display:flex;gap:6px;flex-wrap:wrap}
+.l98-chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;color:inherit}
+.l98-chip.on{background:var(--accent,#2563eb);border-color:var(--accent,#2563eb);color:#fff}
+.l98-list{max-height:620px;overflow:auto}
+.l98-it{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid var(--line);border-left:3px solid transparent;background:transparent;cursor:pointer;color:inherit;font:inherit}
+.l98-it:hover{background:var(--hover,rgba(37,99,235,.05))}
+.l98-it.on{background:var(--info-soft,#eff6ff);border-left-color:var(--accent,#2563eb)}
+.l98-it .nm{font-size:13.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.l98-it .un{grid-column:1;font-size:12px;color:var(--muted,#64748b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l98-n{grid-row:1/3;grid-column:2;align-self:center;min-width:26px;text-align:center;font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--line,#e5e7eb);color:var(--muted,#64748b)}
+.l98-n.has{background:#dcfce7;color:#15803d}
+.l98-main{display:grid;gap:14px}
+.l98-card{background:var(--panel,#fff);border:1px solid var(--line);border-radius:12px;padding:16px}
+.l98-head h3{margin:0 0 6px;font-size:18px}
+.l98-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.l98-tag{font-size:12px;padding:2px 9px;border-radius:6px;background:var(--line,#f1f5f9);color:var(--muted,#475569)}
+.l98-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.l98-stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.l98-stat b{display:block;font-size:20px}
+.l98-stat span{font-size:12px;color:var(--muted,#64748b)}
+.l98-bar{height:6px;border-radius:999px;background:var(--line,#e5e7eb);overflow:hidden;margin-top:6px}
+.l98-bar i{display:block;height:100%;background:#10b981}
+.l98-sec{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.l98-sec h4{margin:0;font-size:14px}
+.l98-folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.l98-fo{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:10px;padding:10px;background:transparent;cursor:pointer;color:inherit;font:inherit;transition:border-color .15s,box-shadow .15s}
+.l98-fo:hover{border-color:var(--accent,#2563eb)}
+.l98-fo.on{border-color:var(--accent,#2563eb);box-shadow:0 0 0 2px rgba(37,99,235,.15)}
+.l98-fo.empty{opacity:.5}
+.l98-fo .ic{flex:none;width:34px;height:28px;border-radius:5px;position:relative}
+.l98-fo .ic:before{content:"";position:absolute;left:0;top:-4px;width:14px;height:6px;border-radius:3px 3px 0 0;background:inherit}
+.l98-fo .t{font-size:12.5px;line-height:1.3}
+.l98-fo .c{font-size:11.5px;color:var(--muted,#64748b)}
+.l98-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.l98-tbl th{text-align:left;font-weight:600;font-size:12px;color:var(--muted,#64748b);padding:8px;border-bottom:1px solid var(--line)}
+.l98-tbl td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.l98-tbl tr:hover td{background:var(--hover,rgba(37,99,235,.04))}
+.l98-ext{display:inline-block;min-width:38px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;color:#fff;border-radius:4px;padding:3px 4px;margin-right:8px}
+.l98-ext.pdf{background:#dc2626}.l98-ext.xlsx,.l98-ext.xls{background:#16a34a}.l98-ext.docx,.l98-ext.doc{background:#2563eb}.l98-ext.jpg,.l98-ext.png{background:#9333ea}.l98-ext.zip,.l98-ext.file{background:#64748b}
+.l98-act{display:flex;gap:4px;justify-content:flex-end}
+.l98-empty{text-align:center;padding:36px 16px;color:var(--muted,#64748b)}
+.l98-empty .big{font-size:40px;line-height:1;margin-bottom:8px}
+`; document.head.appendChild(s); })();
+
+// Sample items (FY 2570 seed) have no attached files; give each one fictional files that match its work stage, marked as sample.
+const L98_STAGE_DOCS = [["s1", "เอกสารขอซื้อขอจ้าง", ["แบบรูปรายการ.pdf", "ประมาณราคา.xlsx", "TOR.docx"]], ["s2", "รายงานขอซื้อขอจ้าง", ["รายงานขอซื้อขอจ้าง.pdf"]], ["s2", "คำสั่งแต่งตั้งคณะกรรมการ", ["คำสั่งแต่งตั้งคณะกรรมการ.pdf"]],
+  ["s3", "รายงานผลการพิจารณา", ["รายงานผลการพิจารณา.pdf"]], ["s4", "อนุมัติจ้าง", ["อนุมัติจ้าง.pdf"]], ["s4", "ประกาศผู้ชนะ", ["ประกาศผู้ชนะการเสนอราคา.pdf"]], ["s5", "หนังสือแจ้งลงนามสัญญา", ["หนังสือแจ้งลงนามสัญญา.pdf"]],
+  ["s5", "หนังสือสัญญา", ["หนังสือสัญญาจ้าง.pdf"]], ["s5", "เอกสารคู่สัญญา", ["หนังสือรับรองนิติบุคคล.pdf"]], ["s5", "BOQ งวดงาน", ["BOQ.xlsx"]], ["s5", "หลักประกันสัญญา", ["หนังสือค้ำประกันสัญญา.pdf"]],
+  ["s6", "ส่งมอบและตรวจรับ", ["ใบส่งมอบงาน งวดที่ 1.pdf", "ใบตรวจรับ งวดที่ 1.pdf"]], ["s6", "ตรวจใบสำคัญ", ["ผลตรวจใบสำคัญ งวดที่ 1.pdf"]], ["s6", "เอกสารเบิกจ่าย (บัญชี)", ["ฎีกาเบิกจ่าย งวดที่ 1.pdf"]], ["s6", "หลักฐานการจ่ายเงิน (การเงิน)", ["หลักฐานการโอนเงิน งวดที่ 1.pdf"]]];
+const L98_ORD = ["s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7"];
+function l98Docs(r, st) { const real = m88Docs(r); if (real.length || !st || st === "sx") return real; const n = L98_ORD.indexOf(st), out = []; let h = [...String(r.id)].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+  L98_STAGE_DOCS.forEach(([s, folder, names]) => { if (L98_ORD.indexOf(s) <= n) names.forEach(nm => { h = (h * 1103515245 + 12345) >>> 0; out.push({ folder, name: nm, size: 60000 + h % 2400000, t: "", src: "ข้อมูลตัวอย่าง (สมมติ)" }); }); }); return out; }
+PROC.lib88 = () => { const fy = BI.fy, L = M88.lib, mine = ["div", "divhead"].includes(ROLE) ? unitName(me().unit) : null, q = (L.q || "").toLowerCase();
+  const D = prDtRows(fy, false), B = prTrackBook(fy)[0].rows.slice(5), ST = {}; D.forEach((r, i) => { if (B[i]) ST[r.id] = p92St(B[i]); });
+  const all = D.filter(r => !mine || r.unit === mine).map(r => ({ r, d: l98Docs(r, ST[r.id]) }));
+  const R = all.filter(x => (!q || `${x.r.name} ${x.r.code} ${x.r.unit}`.toLowerCase().includes(q)) && (!L.has || x.d.length)).sort((a, b) => (b.d.length > 0) - (a.d.length > 0));
+  const withDocs = all.filter(x => x.d.length).length, nDocs = all.reduce((s, x) => s + x.d.length, 0);
+  const cur = R.find(x => x.r.id === L.item) || all.find(x => x.r.id === L.item) || null;
+  const side = `<aside class="l98-side"><div class="hd"><input type="search" placeholder="ค้นหารายการ รหัส หน่วยงาน" value="${esc(L.q || "")}" data-m88libq>
+    <div class="l98-chips"><button type="button" class="l98-chip ${L.has ? "" : "on"}" data-l98has="">ทั้งหมด ${all.length}</button><button type="button" class="l98-chip ${L.has ? "on" : ""}" data-l98has="1">มีเอกสาร ${withDocs}</button></div></div>
+    <div class="l98-list">${R.map(({ r, d }) => `<button type="button" class="l98-it ${cur && cur.r.id === r.id ? "on" : ""}" data-m88lib="${esc(r.id)}"><span class="nm">${esc(r.name)}</span><span class="l98-n ${d.length ? "has" : ""}">${d.length}</span><span class="un">${esc(r.unit)}</span></button>`).join("") || `<div class="l98-empty">ไม่พบรายการ</div>`}</div></aside>`;
+  let main;
+  if (!cur) main = `<div class="l98-card l98-empty"><div class="big">🗂️</div><b>เลือกรายการงบประมาณทางซ้ายเพื่อดูเอกสาร</b><div style="margin-top:6px">มีเอกสารแล้ว ${withDocs} จาก ${all.length} รายการ · รวม ${fmt(nDocs)} ไฟล์</div></div>`;
+  else { const folders = {}; cur.d.forEach((d, i) => (folders[d.folder] = folders[d.folder] || []).push([d, i]));
+    const known = L98_FOLDERS.map(f => f[0]), extra = Object.keys(folders).filter(f => !known.includes(f)).map(f => [f, "อื่น ๆ", "#64748b"]), FO = [...L98_FOLDERS, ...extra];
+    const filled = FO.filter(f => folders[f[0]]).length, pct = Math.round(filled / FO.length * 100), fo = L.fo && folders[L.fo] ? L.fo : "";
+    M88.lib.docs = cur.d; const files = fo ? folders[fo] : cur.d.map((d, i) => [d, i]), pv = L.prev != null ? cur.d[L.prev] : null;
+    main = `<div class="l98-card l98-head"><h3>${esc(cur.r.name)}</h3><div class="l98-meta"><span class="l98-tag">${esc(cur.r.unit)}</span>${cur.r.code ? `<span class="l98-tag">${esc(cur.r.code)}</span>` : ""}<span class="l98-tag">ปีงบประมาณ ${fy}</span></div>
+      <div class="l98-stats"><div class="l98-stat"><b>${cur.d.length}</b><span>ไฟล์ทั้งหมด</span></div><div class="l98-stat"><b>${filled} / ${FO.length}</b><span>โฟลเดอร์ที่มีเอกสาร</span></div><div class="l98-stat"><b>${pct}%</b><span>ความครบถ้วนของเอกสาร</span><div class="l98-bar"><i style="width:${pct}%"></i></div></div></div></div>
+    <div class="l98-card"><div class="l98-sec"><h4>โฟลเดอร์ตามขั้นตอนงาน</h4><span class="sp" style="flex:1"></span>${fo ? `<button type="button" class="btn ghost" data-l98fo="">แสดงทุกโฟลเดอร์</button>` : ""}</div>
+      <div class="l98-folders">${FO.map(([n, st, col]) => { const k = (folders[n] || []).length; return `<button type="button" class="l98-fo ${k ? "" : "empty"} ${fo === n ? "on" : ""}" data-l98fo="${k ? esc(n) : ""}" ${k ? "" : "disabled"}><span class="ic" style="background:${col}"></span><span><div class="t">${esc(n)}</div><div class="c">${esc(st)} · ${k ? k + " ไฟล์" : "ยังไม่มี"}</div></span></button>`; }).join("")}</div></div>
+    <div class="l98-card"><div class="l98-sec"><h4>${fo ? "📁 " + esc(fo) : "ไฟล์ทั้งหมด"}</h4><span class="sub">${files.length} ไฟล์</span></div>
+      ${files.length ? `<table class="l98-tbl"><thead><tr><th>ชื่อไฟล์</th><th>โฟลเดอร์</th><th>ที่มา</th><th>วันที่</th><th>ขนาด</th><th></th></tr></thead><tbody>${files.map(([d, i]) => `<tr><td><span class="l98-ext ${l98Ext(d.name)}">${l98Ext(d.name)}</span>${esc(d.name)}</td><td>${esc(d.folder)}</td><td class="sub">${esc(d.src)}</td><td class="sub">${d.t ? fdate(String(d.t).slice(0, 10)) : "-"}</td><td class="sub">${l98Size(d.size)}</td><td><div class="l98-act"><button class="btn ghost" type="button" data-m88view="${i}">ดู</button><button class="btn ghost" type="button" data-m88dl="${i}">ดาวน์โหลด</button></div></td></tr>`).join("")}</tbody></table>`
+        : `<div class="l98-empty"><div class="big">📭</div><b>รายการนี้ยังไม่มีเอกสารแนบ</b><div style="margin-top:6px">เอกสารจะเข้ามาเองเมื่อแนบในขั้นขอซื้อขอจ้าง e-GP ทำสัญญา หรือเบิกจ่าย</div></div>`}</div>
+    ${pv ? `<div class="l98-card"><div class="l98-sec"><h4>ตัวอย่างเอกสาร: ${esc(pv.name)}</h4><span class="sp" style="flex:1"></span><button class="btn ghost" type="button" data-m88view="">ปิด</button></div><div class="sub">เอกสารจำลองจากข้อมูลในระบบ (ระบบต้นแบบเก็บเฉพาะข้อมูลของไฟล์ ไม่เก็บไฟล์จริง)</div><dl class="kv" style="margin:8px 0 0"><dt>ประเภทเอกสาร</dt><dd>${esc(pv.folder)}</dd><dt>ที่มา</dt><dd>${esc(pv.src)}</dd><dt>ขนาด</dt><dd>${l98Size(pv.size)}</dd><dt>รายการ</dt><dd>${esc(cur.r.name)}</dd></dl></div>` : ""}`; }
+  return `${prFySel()}<div class="l98">${side}<div class="l98-main">${main}</div></div>`; };
+
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return;
+  const h = t.closest("[data-l98has]"); if (h) { M88.lib.has = !!h.dataset.l98has; route(); return; }
+  const f = t.closest("[data-l98fo]"); if (f && !f.disabled) { M88.lib.fo = f.dataset.l98fo; M88.lib.prev = null; route(); return; }
+  if (t.closest("[data-m88lib]")) M88.lib.fo = "";
+  const dl = t.closest("[data-m88dl]"); if (dl && M88.lib.docs) { e.stopPropagation(); const r = prDtRows(BI.fy, false).find(x => x.id === M88.lib.item), d = r && M88.lib.docs[Number(dl.dataset.m88dl)]; if (!d) return;
+    const a = document.createElement("a"), u = URL.createObjectURL(m88DocBlob(r, d)); a.href = u; a.download = d.name.replace(/\.[^.]+$/, "") + ".html"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); toast("ดาวน์โหลดเอกสารแล้ว"); } }, true);
+
+/* ---- 98zzzzzf-klang-disb98.js ---- */
+// ---------- P98: ติดตามการเบิกจ่าย as the department's disbursement form (สรุปเงิน) ----------
+// The form has, per unit: จำนวนรายการ, วงเงิน, วางแผนสะสม, ผลการเบิกจ่ายสะสม, ส่งคืนเงินเหลือจ่าย, % เบิกจ่าย, คงเหลือจากการวางแผน,
+// ยกเลิกสัญญา, โอนเงิน (งานช้า / งานเร็ว), ยังไม่วางแผน (ตกพับ), then แผน / ผล for every month. The system has no fields for the
+// last five, so they come from the data it has (the rule is printed under the table):
+//   ส่งคืนเงินเหลือจ่าย = วงเงิน − วงเงินสัญญา, when the contract is signed (savings from the price)
+//   คงเหลือจากการวางแผน = วงเงิน − เหลือจ่าย − แผนทั้งปี
+//   ยกเลิกสัญญา = the rest of a cancelled item
+//   โอนเงิน งานช้า = the rest of an item that is under way (procurement or contract) but not planned for this year
+//   โอนเงิน งานเร็ว = paid beyond the plan of the year (money that has to come from elsewhere)
+//   ยังไม่วางแผน (ตกพับ) = คงเหลือ − ยกเลิก − งานช้า + งานเร็ว; red when not zero, as in the form
+// The four group cards give way to this table; a switch picks the grouping (หน่วยงาน, ผลผลิต/โครงการ, ประเภท, ลักษณะงบประมาณ).
+
+const D98 = { by: "unit", mon: "all" };
+const D98_ORD = ["s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7"];
+function d98Facts(fy) { const D = prDtRows(fy, false), B = prTrackBook(fy)[0].rows.slice(5), F = {};
+  D.forEach((r, i) => { const row = B[i], st = row ? p92St(row) : "s0", n = D98_ORD.indexOf(st), con = row ? (Number(String(row[47]).replace(/,/g, "")) || 0) * 1e6 : 0, x = r.k && r.k.cx;
+    const conAmt = con || (x && (x.amount || x.value)) || 0, ptot = r.plan.reduce((a, v) => a + v, 0), paid = r.act.reduce((a, v) => a + v, 0), left = n >= 5 && conAmt && conAmt < r.alloc ? r.alloc - conAmt : 0, rem = Math.max(0, r.alloc - left - ptot);
+    const cancel = st === "sx" ? rem : 0, slow = st !== "sx" && n >= 2 ? Math.max(0, rem - cancel) : 0, fast = Math.max(0, paid - ptot), lapse = rem - cancel - slow + fast;
+    F[r.id] = { st, ptot, rem, left, cancel, slow, fast, lapse }; }); return F; }
+function d98Rows(fy, it) { const F = d98Facts(fy), G = {}; it.forEach(x => (G[x[D98.by]] = G[x[D98.by]] || []).push(x));
+  const sum = l => { const o = { n: l.length, B: 0, P: 0, A: 0, left: 0, rem: 0, cancel: 0, slow: 0, fast: 0, lapse: 0, plan: Array(12).fill(0), act: Array(12).fill(0) };
+    l.forEach(x => { const f = F[x.r.id] || {}; o.B += x.B; o.P += f.ptot || 0; o.A += x.A; ["left", "rem", "cancel", "slow", "fast", "lapse"].forEach(k => (o[k] += f[k] || 0)); x.r.plan.forEach((v, i) => (o.plan[i] += v)); x.r.act.forEach((v, i) => (o.act[i] += v)); }); return o; };
+  const rows = Object.entries(G).sort((a, b) => a[0].localeCompare(b[0], "th")).map(([k, l]) => [k, sum(l)]); return { rows, tot: sum(it) }; }
+const d98M = v => (Math.abs(v) < 50 ? "-" : fmt(v / 1e6, 4));
+const d98MonLbl = (fy, i) => `${BI_MON[i]} ${String((i < 3 ? fy - 1 : fy) % 100).padStart(2, "0")}`;
+function d98Table(fy, it) { const { rows, tot } = d98Rows(fy, it), mi = Math.min(11, prMonIdx(TODAY)), by = D96_G.find(g => g[0] === D98.by);
+  const MS = D98.mon === "all" ? [...Array(12).keys()] : D98.mon === "q" ? [] : [...Array(mi + 1).keys()];
+  const Q = D98.mon === "q" ? [0, 1, 2, 3] : [];
+  const pct = o => (o.B ? `${fmt(o.A / o.B * 100, 2)}%` : `<span class="sub">-</span>`);
+  const cells = (o, k) => { const on = D96.g.k === D98.by && D96.g.v === k;
+    return `<td class="n">${o.n}</td><td class="n">${d98M(o.B)}</td><td class="n">${d98M(o.P)}</td><td class="n">${d98M(o.A)}</td><td class="n">${d98M(o.left)}</td><td class="n d98-pc">${pct(o)}</td><td class="n">${d98M(o.rem)}</td><td class="n">${d98M(o.cancel)}</td><td class="n">${d98M(o.slow)}</td><td class="n">${d98M(o.fast)}</td><td class="n d98-lp ${Math.abs(o.lapse) >= 50 ? "bad" : ""}">${d98M(o.lapse)}</td>`
+      + MS.map(i => `<td class="n d98-mp ${i === mi ? "now" : ""}">${d98M(o.plan[i])}</td><td class="n d98-ma ${i === mi ? "now" : ""} ${o.plan[i] && o.act[i] < o.plan[i] * 0.8 && i <= mi ? "low" : ""}">${i <= mi || o.act[i] ? d98M(o.act[i]) : ""}</td>`).join("")
+      + Q.map(q => { const p = o.plan.slice(q * 3, q * 3 + 3).reduce((a, v) => a + v, 0), a = o.act.slice(q * 3, q * 3 + 3).reduce((a, v) => a + v, 0); return `<td class="n d98-mp">${d98M(p)}</td><td class="n d98-ma">${d98M(a)}</td>`; }).join(""); };
+  const mh = MS.map(i => `<th colspan="2" class="d98-mh ${i === mi ? "now" : ""}">${d98MonLbl(fy, i)}</th>`).join("") + Q.map(q => `<th colspan="2" class="d98-mh">ไตรมาส ${q + 1}</th>`).join("");
+  const ms = [...MS, ...Q].map(() => `<th class="d98-mh2">แผน</th><th class="d98-mh2">ผล</th>`).join("");
+  return `<section class="panel d98"><header><h2>สรุปการเบิกจ่ายตามแบบฟอร์ม ปีงบประมาณ พ.ศ. ${fy}</h2><span class="sp"></span>
+    <div class="d98-seg">${D96_G.map(([k, t]) => `<button type="button" class="${D98.by === k ? "on" : ""}" data-d98by="${k}">${t}</button>`).join("")}</div>
+    <div class="d98-seg">${[["all", "ทั้งปี"], ["todate", "ถึงเดือนปัจจุบัน"], ["q", "รายไตรมาส"]].map(([k, t]) => `<button type="button" class="${D98.mon === k ? "on" : ""}" data-d98mon="${k}">${t}</button>`).join("")}</div></header>
+  <div class="d98-wrap"><table class="d98-t"><thead>
+    <tr><th rowspan="3" class="d98-k">${esc(by[1])}</th><th colspan="11" class="d98-h">รวมทั้งสิ้น</th>${MS.length || Q.length ? `<th colspan="${(MS.length + Q.length) * 2}" class="d98-mh d98-top">แผน / ผล การเบิกจ่ายรายเดือน</th>` : ""}</tr>
+    <tr><th class="d98-h">จำนวน</th><th class="d98-h">วงเงิน</th><th class="d98-h">วางแผน</th><th class="d98-h">ผลการเบิกจ่าย</th><th class="d98-h">ส่งคืนเงิน</th><th class="d98-h">%</th><th class="d98-h">คงเหลือ</th><th class="d98-h">ยกเลิก</th><th colspan="2" class="d98-h">โอนเงิน</th><th class="d98-h d98-y">ยังไม่วางแผน</th>${mh}</tr>
+    <tr><th class="d98-h">รายการ</th><th class="d98-h">(ล้านบาท)</th><th class="d98-h">สะสม</th><th class="d98-h">สะสม</th><th class="d98-h">เหลือจ่าย</th><th class="d98-h">เบิกจ่าย</th><th class="d98-h">จากการวางแผน</th><th class="d98-h">สัญญา</th><th class="d98-h">งานช้า</th><th class="d98-h">งานเร็ว</th><th class="d98-h d98-y">(ตกพับ)</th>${ms}</tr></thead>
+  <tbody>${rows.map(([k, o]) => `<tr data-d96g="${D98.by}|${esc(k)}" class="${D96.g.k === D98.by && D96.g.v === k ? "on" : ""}"><td class="d98-k">${esc(k)}</td>${cells(o, k)}</tr>`).join("")}</tbody>
+  <tfoot><tr><td class="d98-k">รวมทั้งสิ้น</td>${cells(tot, "")}</tr></tfoot></table></div>
+  <div class="body sub d98-note">หน่วย: ล้านบาท · ผล = เงินที่จ่ายจริงตามวันที่จ่าย · คลิกแถวเพื่อกรองรายการด้านล่าง · เดือนปัจจุบันไฮไลต์ ผลต่ำกว่า 80% ของแผนเป็นตัวแดง<br>
+  ส่งคืนเงินเหลือจ่าย = วงเงิน − วงเงินสัญญา (เมื่อลงนามสัญญาแล้ว) · คงเหลือจากการวางแผน = วงเงิน − เหลือจ่าย − แผนทั้งปี · ยกเลิกสัญญา = ยอดคงเหลือของรายการที่ยกเลิก · โอนเงินงานช้า = ยอดคงเหลือของรายการที่อยู่ระหว่างจัดซื้อหรือดำเนินงานแต่ไม่ได้วางแผนในปีนี้ · โอนเงินงานเร็ว = ผลที่เบิกเกินแผนทั้งปี · ยังไม่วางแผน (ตกพับ) = ส่วนที่เหลือ ต้องเป็น 0 (ตัวแดงเมื่อยังไม่เป็น 0)</div></section>`; }
+(function () { if (document.getElementById("d98-css")) return; const s = document.createElement("style"); s.id = "d98-css"; s.textContent = `
+.d98 header{flex-wrap:wrap;gap:8px}
+.d98-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.d98-seg button{border:0;background:transparent;padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer;color:inherit;border-right:1px solid var(--line)}
+.d98-seg button:last-child{border-right:0}.d98-seg button.on{background:#1f2937;color:#fff}
+.d98-wrap{overflow:auto;max-height:620px}
+.d98-t{border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap}
+.d98-t th,.d98-t td{padding:6px 9px;border-bottom:1px solid var(--line)}
+.d98-t thead th{position:sticky;z-index:2;text-align:center;font-weight:600}
+.d98-t thead tr:nth-child(1) th{top:0}.d98-t thead tr:nth-child(2) th{top:31px}.d98-t thead tr:nth-child(3) th{top:62px}
+.d98-h{background:#111827;color:#fff;border-bottom:0!important}
+.d98-y{color:#facc15!important}
+.d98-mh,.d98-mh2{background:#dcfce7;color:#14532d;border-left:1px solid #bbf7d0}
+.d98-mh.now,.d98-t td.now{background:#fef9c3}
+.d98-t .d98-k{position:sticky;left:0;z-index:1;background:var(--panel,#fff);text-align:left;min-width:200px;max-width:260px;white-space:normal;border-right:2px solid var(--line)}
+.d98-t thead .d98-k{z-index:3;background:#111827;color:#fff}
+.d98-t tbody tr{cursor:pointer}.d98-t tbody tr:hover td{background:var(--hover,#f8fafc)}.d98-t tbody tr.on td{background:var(--info-soft,#eff6ff)}
+.d98-t td.d98-mp{border-left:1px solid var(--line)}.d98-t td.d98-ma{color:#2563eb}.d98-t td.d98-ma.low{color:#dc2626;font-weight:600}
+.d98-t td.d98-pc{font-weight:600}.d98-t td.d98-lp.bad{color:#dc2626;font-weight:700}
+.d98-t td:nth-child(12){border-right:2px solid #111827}
+.d98-t tfoot td{position:sticky;bottom:0;background:#f1f5f9;font-weight:700;border-top:2px solid #111827}
+.d98-t tfoot .d98-k{background:#f1f5f9;z-index:2}
+.d98-note{line-height:1.7}
+`; document.head.appendChild(s); })();
+
+// The page: the form table in place of the four group cards.
+{ const base = d96Page; d96Page = function () { const html = base(), a = html.indexOf('<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px)'), b = html.indexOf('<section class="panel"><header><h2>รายการงบประมาณ');
+  if (a < 0 || b < a) return html; return html.slice(0, a) + `<div style="margin:14px 0">${d98Table(BI.fy, d96Items(BI.fy))}</div>` + html.slice(b); }; }
+// Excel: the form as the first sheet of "Excel รายการและกลุ่ม".
+function d98Sheet(fy) { const it = d96Items(fy), m = v => Math.round(v / 1e6 * 1e4) / 1e4, keep = D98.by, out = [];
+  D96_G.forEach(([k, t]) => { D98.by = k; const { rows, tot } = d98Rows(fy, it), line = (n, o) => [n, o.n, m(o.B), m(o.P), m(o.A), m(o.left), o.B ? Math.round(o.A / o.B * 10000) / 100 : 0, m(o.rem), m(o.cancel), m(o.slow), m(o.fast), m(o.lapse), ...o.plan.flatMap((v, i) => [m(v), m(o.act[i])])];
+    out.push({ name: "สรุปเงิน " + t, rows: [[`สรุปการเบิกจ่ายตาม${t} ปีงบประมาณ พ.ศ. ${fy}`], ["หน่วย: ล้านบาท · ผลตามวันที่จ่าย"],
+      [t, "จำนวนรายการ", "วงเงิน (ล้านบาท)", "วางแผนสะสม", "ผลการเบิกจ่ายสะสม", "ส่งคืนเงินเหลือจ่าย", "% เบิกจ่าย", "คงเหลือจากการวางแผน", "ยกเลิกสัญญา", "โอนเงิน งานช้า", "โอนเงิน งานเร็ว", "ยังไม่วางแผน (ตกพับ)", ...BI_MON.flatMap((x, i) => ["แผน " + d98MonLbl(fy, i), "ผล " + d98MonLbl(fy, i)])]]
+      .concat(rows.map(([k, o]) => line(k, o)), [line("รวมทั้งสิ้น", tot)]) }); });
+  D98.by = keep; return out; }
+{ const base = d96Book; d96Book = function (fy) { return d98Sheet(fy).concat(base(fy)); }; }
+
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return;
+  const b = t.closest("[data-d98by]"); if (b) { D98.by = b.dataset.d98by; route(); return; }
+  const m = t.closest("[data-d98mon]"); if (m) { D98.mon = m.dataset.d98mon; route(); return; } });
+
+/* ---- 98zzzzzg-klang-ctnew98.js ---- */
+// ---------- P98: "สร้างสัญญา" (สัญญางบประมาณ) uses the same contract form as the ทำสัญญา step ----------
+// The dialog had a short form (no PO, pay mode, guarantee details, files, quantities). Now it keeps only what picks the case
+// (รายการจัดซื้อ, คู่สัญญา, คณะกรรมการตรวจรับ) and shows the full form of kxContractView below it, for a draft contract.
+// On submit the older create runs first (fed from the full form), then the full form is saved to the new contract with kxSave,
+// so both places give the same contract.
+let CT98 = null; // the draft contract of the dialog: { id: "__new", cs, ... }
+function ct98Draft(cs) { if (CT98 && CT98.cs === cs.id) return CT98; const rq = famReq(cs.reqn), days = rq && rq.detail && rq.detail.days > 0 ? rq.detail.days : 120;
+  CT98 = { id: "__new", cs: cs.id, plan: cs.plan, vendor: cs.award.winner, no: `CT-70/${String(S.contracts.length + 1).padStart(3, "0")}`, signed: TODAY, amount: cs.award.price, egp7Proj: cs.egp7Proj || "", phases: [] };
+  const x = kxOf(CT98); Object.assign(x, { days, start: TODAY, fine: Math.max(100, Math.round(cs.award.price * 0.001)), nPhases: 1 }); return CT98; }
+{ const base = PROC.conCreate; PROC.conCreate = function () { let h = base(); if (!m88On() || !h.includes('id="ct-dlg"')) return h;
+  const id = (h.match(/<select id="ct-req">[\s\S]*?<option value="([^"]+)" selected/) || h.match(/<select id="ct-req"><option value="([^"]+)"/) || [])[1], cs = id && caseOf(id); if (!cs) return h;
+  const v = kxContractView(ct98Draft(cs)), a = v.indexOf('<form data-cx="__new"'), b = v.indexOf("</form>", a); if (a < 0 || b < 0) return h;
+  let form = v.slice(a, b + 7).replace(/<button class="btn primary" type="submit">บันทึกสัญญา<\/button>/, `<button class="btn primary" type="submit">สร้างสัญญา</button><button class="btn ghost" type="button" data-ct98x>ยกเลิก (ยังไม่ทำสัญญา)</button>`).replace(/<span class="sub">ยังขาด:[^<]*<\/span>/, "");
+  form = form.replace('<form data-cx="__new"', '<form data-cx="__new" id="ct98-form"');
+  // hide the short form's own fields and buttons; keep the case, the supplier and the committee
+  h = h.replace('<div class="inline-form">', '<div class="inline-form ct98-short">').replace(/<div class="row"><button class="btn primary" type="submit">สร้างสัญญา<\/button>/, '<div class="row" style="display:none"><button class="btn primary" type="submit">สร้างสัญญา</button>');
+  h = h.replace("</form></dialog>", `</form><div style="padding:0 20px 18px"><h3 style="margin:4px 0 8px;font-size:15px">รายละเอียดสัญญา</h3><div class="sub" style="margin:0 0 8px">ชุดเดียวกับขั้นทำสัญญา · กรอกต่อหรือแก้ภายหลังได้ที่แท็บสัญญาและสัญญาแก้ไข</div>${form}</div></dialog>`);
+  return `<style>.ct98-short>.f:not(:has(#ct-req)):not(:has(#ct-vendor)){display:none}#ct-dlg{max-width:min(1100px,96vw)}#ct98-form{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px;align-items:end}#ct98-form>[style*="100%"],#ct98-form>.cx-g{grid-column:1/-1}#ct98-form .f input,#ct98-form .f select{width:100%}#ct98-form>.row{grid-column:1/-1}@media(max-width:800px){#ct98-form{grid-template-columns:1fr 1fr}}</style>` + h; }; }
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-ct98x]") : null; if (t) { const c = document.getElementById("ct-cancel"); if (c) c.click(); } });
+document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches || !f.matches('form[data-cx="__new"]')) return; e.preventDefault(); e.stopImmediatePropagation();
+  const d = new FormData(f), g = n => String(d.get(n) == null ? "" : d.get(n)).trim(), set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  set("ct-amt", g("amount")); set("ct-no", g("no")); set("ct-date", g("date")); set("ct-days", g("days")); set("ct-start", g("start")); set("ct-fine", g("fine")); set("ct-ph", g("nPhases") || "1"); set("ct-proj", g("projNo")); set("ct-ctl", g("ctlNo"));
+  set("ct-adv", d.get("advHas") === "1" ? g("advPct") || "0" : "0"); const gk = d.get("gkind"); if (gk) { const r = document.querySelector(`input[name="ct-gk"][value="${gk}"]`); if (r) r.checked = true; }
+  const v = {}; KX_F.forEach(n => { if (d.has(n)) v[n] = g(n); }); if (d.has("advHas")) v.advHas = d.get("advHas") === "1"; if (d.has("advPct")) v.advPct = g("advPct");
+  if (gk) { v.gkind = gk; const box = f.querySelector(`.cx-g[data-gk="${gk}"]`); if (box) box.querySelectorAll("[name]").forEach(el => { if (el.type !== "file") v[el.name] = el.value.trim(); }); }
+  const files = kxFiles(d, ["contract", "party", "boq"]); { const gf = f.querySelector(`.cx-g[data-gk="bg"] input[type=file]`); if (gk === "bg" && gf && gf.files[0]) files.guar = gf.files[0]; }
+  const n88 = {}; if (d.has("po")) n88.po = g("po"); if (d.get("payMode")) n88.payMode = g("payMode"); if (d.has("dedPct")) n88.dedPct = g("dedPct");
+  const before = S.contracts.length, cf = document.getElementById("ct-form"); if (!cf || !cf.onsubmit) return; cf.onsubmit({ preventDefault() {} }); if (S.contracts.length === before) return;
+  const c = S.contracts[S.contracts.length - 1]; KX88_IN = n88; const m = kxSave(c, v, files); KX88_IN = null; CT98 = null; commit(); route(); if (m) toast("สร้างสัญญาแล้ว แต่รายละเอียดบางส่วนยังไม่ถูกบันทึก: " + m); }, true);
+
+/* ---- 98zzzzzh-klang-search98.js ---- */
+// ---------- P98: a search box on every list ----------
+// Every panel whose table lists 5 rows or more and has no search box of its own gets one in its header. Typing hides the rows
+// that do not contain the text (Thai or English, any column). The text is kept per page and panel, so it stays after a re-render.
+const SR98 = {};
+function sr98Key(p) { const h = p.querySelector("header h2, header h3, h2, h3"); return (location.hash || "") + "|" + (h ? h.textContent.trim() : ""); }
+function sr98Apply(p, q) { const t = String(q || "").trim().toLowerCase(); let n = 0, all = 0;
+  p.querySelectorAll("table").forEach(tb => tb.querySelectorAll(":scope > tbody > tr").forEach(tr => { if (tr.classList.contains("fn-rowform")) return; all++;
+    const hit = !t || tr.textContent.toLowerCase().includes(t); tr.style.display = hit ? "" : "none"; if (hit) n++; const nx = tr.nextElementSibling; if (nx && nx.classList.contains("fn-rowform")) nx.style.display = hit ? "" : "none"; }));
+  const c = p.querySelector(".sr98-n"); if (c) c.textContent = t ? `${n} จาก ${all}` : ""; }
+function sr98Scan(root) { (root || document).querySelectorAll("section.panel").forEach(p => {
+  if (p.querySelector(".sr98") || p.closest("dialog")) return; const rows = p.querySelectorAll("table > tbody > tr").length; if (rows < 5) return;
+  if (p.querySelector('input[type="search"]')) return; // the panel has its own search
+  const k = sr98Key(p), box = document.createElement("span"); box.className = "sr98";
+  box.innerHTML = `<input type="search" placeholder="ค้นหาในตารางนี้" aria-label="ค้นหาในตารางนี้"><span class="sr98-n sub"></span>`;
+  const inp = box.querySelector("input"); inp.value = SR98[k] || ""; inp.addEventListener("input", () => { SR98[k] = inp.value; sr98Apply(p, inp.value); });
+  const hd = p.querySelector(":scope > header"); if (hd) hd.appendChild(box); else { box.style.margin = "8px 12px"; p.insertBefore(box, p.firstChild); }
+  if (inp.value) sr98Apply(p, inp.value); }); }
+(function () { if (document.getElementById("sr98-css")) return; const s = document.createElement("style"); s.id = "sr98-css";
+  s.textContent = `.sr98{display:inline-flex;align-items:center;gap:6px;margin-left:auto}.sr98 input{width:220px;max-width:46vw;padding:5px 10px;border-radius:8px;margin:0}.sr98-n{font-size:12px;white-space:nowrap}`; document.head.appendChild(s);
+  let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => sr98Scan(document), 60); }).observe(document.body, { childList: true, subtree: true }); })();
+
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
 // With no signed-in session, the sign-in screen opens on top.
