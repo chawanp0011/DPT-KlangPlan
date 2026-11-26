@@ -31879,6 +31879,128 @@ PROC.mplan88 = () => { const fy = BI.fy, mine = ["div", "divhead"].includes(ROLE
 document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-mp98]") : null; if (t) { MP98.open = MP98.open === t.dataset.mp98 ? null : t.dataset.mp98; route(); } });
 document.addEventListener("input", e => { const t = e.target; if (t && t.matches && t.matches("[data-mp98q]")) { MP98.q = t.value; clearTimeout(MP98.tm); MP98.tm = setTimeout(() => { route(); const i = document.querySelector("[data-mp98q]"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
 
+/* ---- 98zzzzzj-klang-plan99.js ---- */
+// ---------- P99: the Planning dialog of a budget item (รายละเอียด / มอบหมาย) ----------
+// Asked for: each field says clearly what it is; ผลผลิต/โครงการ from the file is matched to the register by name, and a name the register
+// lacks is added to it (marked as from the import, editable in the register); every imported value can be checked and edited by
+// Planning until the item is sent to the units; the fields of the file are all there (GFMIS, e-bud, แผนงาน/ภารกิจ, ประเภท, งบรายจ่าย,
+// จำนวน/หน่วยนับ, วงเงิน, หน่วยงานในไฟล์); the toggle buttons are only as wide as their text.
+
+// 1. ผลผลิต/โครงการ: match the imported name to the register; add what is missing
+const p99Norm = s => String(s || "").replace(/\s+/g, "").replace(/[()（）]/g, "").toLowerCase();
+function p99MapProds(rows) { if (!S.structure) return 0; let added = 0;
+  rows.forEach(r => { const p = (r.pl = r.pl || {}); if (p.prodId || p.prodMapped || !r.prod) return; const fy = biFy(r), st = S.structure[fy] || S.structure[FORM_FY]; if (!st) return;
+    let o = st.find(n => n.lvl === "output" && !n.retired && p99Norm(tx(n.name)) === p99Norm(r.prod));
+    if (!o) { const par = st.find(n => n.lvl === "output") || {}, k = st.filter(n => n.imp99).length + 1; o = { id: `IMP-${fy}-${k}`, lvl: "output", code: `IMP.${k}`, parent: par.parent || "", name: [r.prod, r.prod], imp99: true }; st.push(o); added++; }
+    p.prodId = o.id; p.prod = tx(o.name); p.prodMapped = true; });
+  return added; }
+{ const base = biView; biView = function () { try { const rows = biData().rows || []; if (p99MapProds(rows)) commit(); } catch (e) { /* the register may not be loaded yet */ } return base(); }; }
+
+// 2. the dialog: the imported values, editable until sent; clearer labels and hints
+const P99_KIND = ["งบลงทุน", "งบดำเนินงาน", "งบรายจ่ายอื่น", "งบเงินอุดหนุน"];
+function p99Imported(r) { const ro = r.sent ? "disabled" : "", f = (name, label, val, hint, extra) => `<div class="f ${extra || ""}"><label>${label}</label><input type="text" name="${name}" value="${esc(val == null ? "" : val)}" ${ro}>${hint ? `<div class="p99-h">${hint}</div>` : ""}</div>`;
+  const types = Object.keys(BI_TYPES), kinds = [...new Set(P99_KIND.concat(r.kind ? [r.kind] : []))];
+  return `<section><h3>ข้อมูลรายการที่นำเข้าจากไฟล์</h3><div class="sub">${r.sent ? "นำส่งสำนัก/กองแล้ว ข้อมูลส่วนนี้แก้ไม่ได้" : "ตรวจและแก้ให้ถูกต้องก่อนนำส่งสำนัก/กอง"}</div><div class="p95-grid p99-g3">
+    ${f("name", "ชื่อรายการ *", r.name, "ชื่อรายการตามเอกสารงบประมาณ", "p95-wide")}
+    ${f("code", "รหัสงบประมาณ (GFMIS)", r.code, "รหัส 15 หลักในระบบ GFMIS")}
+    ${f("ebud", "รหัส e-bud", r.ebud, "รหัสรายการในระบบ e-Budgeting ของสำนักงบประมาณ")}
+    <div class="f"><label>หน่วยงานที่ระบุในไฟล์</label><input type="text" name="unitName" value="${esc(r.unitName || "")}" ${ro}><div class="p99-h">ใช้จับคู่เป็นหน่วยงานรับผิดชอบเมื่อยังไม่มอบหมาย</div></div>
+    <div class="f"><label>ประเภทรายการ *</label><select name="type" ${ro}>${types.map(t => `<option ${r.type === t ? "selected" : ""}>${t}</option>`).join("")}${r.type && !types.includes(r.type) ? `<option selected>${esc(r.type)}</option>` : ""}</select><div class="p99-h">ใช้แยกแผ่นงานในแบบฟอร์มติดตาม</div></div>
+    <div class="f"><label>งบรายจ่าย *</label><select name="kind" ${ro}>${kinds.map(t => `<option ${r.kind === t ? "selected" : ""}>${t}</option>`).join("")}</select><div class="p99-h">ระบบเลือกให้ตามประเภท แก้ได้</div></div>
+    <div class="f"><label>วงเงิน (บาท) *</label><input type="number" name="amount" min="1" step="0.01" value="${esc(r.amount)}" ${ro}><div class="p99-h">งบประมาณของรายการในปี ${biFy(r)}</div></div>
+    <div class="f"><label>จำนวน / หน่วยนับ</label><div class="p99-qu"><input type="number" name="qty" min="0" step="any" value="${esc(r.qty || "")}" placeholder="จำนวน" ${ro}><input type="text" name="uname" value="${esc(r.uname || "")}" placeholder="เช่น เครื่อง แห่ง" ${ro}></div><div class="p99-h">ปริมาณตามรายการ (ถ้ามี)</div></div>
+        ${f("prog", "แผนงาน / ภารกิจ", r.prog, "ตามคอลัมน์ภารกิจในไฟล์", "p99-span2")}
+</div></section>`; }
+{ const base = p95Dialog; p95Dialog = function (r) { let h = base(r);
+  // the header: what the two codes are
+  h = h.replace(`<div class="sub mono">${esc(r.id)} · ${esc(r.code || "")}</div>`, `<div class="p99-ids"><span>เลขที่รายการในระบบ <b class="mono">${esc(r.id)}</b></span><span>รหัส GFMIS <b class="mono">${esc(r.code || "—")}</b></span><span>รหัส e-bud <b class="mono">${esc(r.ebud || "—")}</b></span></div>`);
+  h = h.replace('<div class="p95-body">', '<div class="p95-body">' + p99Imported(r));
+  // hints for the Planning fields
+  h = h.replace('<label>ที่มา</label>', '<label>ที่มาของงบประมาณ</label>').replace(/(<label>ที่มาของงบประมาณ<\/label><div class="p95-seg">[\s\S]*?<\/div>)/, '$1<div class="p99-h">ตาม พ.ร.บ. = ได้รับตาม พ.ร.บ.งบประมาณ · โอนเปลี่ยนแปลง = โอน/เปลี่ยนแปลงระหว่างปี</div>');
+  h = h.replace(/(<label>ลักษณะงบประมาณ<\/label><div class="p95-seg">[\s\S]*?<\/div>)/, '$1<div class="p99-h">ปีเดียว = ใช้ในปีงบประมาณนี้ · ผูกพัน = ผูกพันงบหลายปี</div>');
+  h = h.replace('<label>ผลผลิต/โครงการ <span class="sub">(จากทะเบียน)</span></label>', '<label>ผลผลิต/โครงการ <span class="sub">(จากทะเบียนผลผลิต/โครงการ)</span></label>');
+  h = h.replace(/(<select name="prodId">[\s\S]*?<\/select>)/, `$1<div class="p99-h">ระบบจับคู่จากชื่อในไฟล์${r.prod ? ` ("${esc(r.prod)}")` : ""} · ชื่อที่ทะเบียนยังไม่มีถูกเพิ่มเป็นรายการใหม่ (ทำเครื่องหมาย "นำเข้า") แก้ชื่อหรือรหัสได้ที่ทะเบียน RG1</div>`);
+  h = h.replace(/(<option value="[^"]*"[^>]*>)([^<]*)(<\/option>)/g, (m, a, b, c) => { const id = (a.match(/value="([^"]*)"/) || [])[1]; return id && /^IMP-/.test(id) ? `${a}${b} (นำเข้า)${c}` : m; });
+  // the province: guessed from the name when empty, with a hint
+  const guess = !(r.pl && r.pl.prov) && (String(r.name).match(/จังหวัด\s*([^\s(]+)/) || [])[1];
+  if (guess) h = h.replace(new RegExp(`<option>${guess.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</option>`), `<option selected>${guess}</option>`);
+  h = h.replace(/(<select name="prov">[\s\S]*?<\/select>)/, `$1<div class="p99-h">จังหวัดที่ดำเนินงาน${guess ? ` · ระบบเลือกจากชื่อรายการ (${esc(guess)})` : ""}</div>`);
+  h = h.replace('<label>ปีเริ่มต้น (พ.ศ.)</label>', '<label>ปีงบประมาณที่เริ่ม (พ.ศ.)</label>').replace('<label>จำนวนปี</label>', '<label>จำนวนปีที่ผูกพัน</label>');
+  h = h.replace('<h3>มอบหมายสำนัก/กองและงบประมาณ</h3><div class="sub">', '<h3>มอบหมายสำนัก/กองและงบประมาณ</h3><div class="sub">เลือกหน่วยงานและวงเงิน (บาท) ที่แต่ละหน่วยรับไปดำเนินการ · ');
+  h = h.replace('<h3>ข้อมูลตามแบบฟอร์มติดตาม (ส่วนของกองแผนงาน)</h3>', '<h3>ข้อมูลตามแบบฟอร์มติดตาม (ส่วนของกองแผนงาน)</h3><div class="sub">ค่าเหล่านี้ไปอยู่ในคอลัมน์ของกองแผนงานในไฟล์ติดตามความก้าวหน้า</div>');
+  return P99_CSS + h; }; }
+const P99_CSS = `<style>.p99-h{font-size:11.5px;color:var(--muted,#64748b);margin-top:3px;line-height:1.4}.p95-grid .f{display:flex;flex-direction:column;align-items:flex-start}.p95-grid .f>input,.p95-grid .f>select{width:100%}
+.p95-seg{width:max-content!important;max-width:100%}.p95-seg span{padding:6px 12px!important;white-space:nowrap}.p99-ids{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted,#64748b)}.p99-ids b{color:var(--ink,#0f172a);font-weight:600}
+.p99-g3{grid-template-columns:repeat(3,minmax(0,1fr))!important}.p99-span2{grid-column:span 2}@media(max-width:700px){.p99-g3{grid-template-columns:1fr!important}.p99-span2{grid-column:auto}}.p99-qu{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%}.p95-dlg footer .btn{min-width:0;padding-left:16px;padding-right:16px}.p95-u .btn.ghost{width:36px;padding:0}</style>`;
+
+// 3. save: the imported values first (only before sending), then the Planning values (p95Save)
+{ const base = p95Save; p95Save = function (id, v) { const r = biData().rows.find(x => x.id === id); if (!r) return base(id, v);
+  if (!r.sent && "name" in v) { const name = String(v.name || "").trim(), amt = Number(v.amount); if (!name) return "ระบุชื่อรายการ"; if (!(amt > 0)) return "วงเงินต้องมากกว่า 0";
+    const keep = { name: r.name, code: r.code, ebud: r.ebud, type: r.type, kind: r.kind, prog: r.prog, amount: r.amount, qty: r.qty, uname: r.uname, unitName: r.unitName };
+    Object.assign(r, { name, code: String(v.code || "").trim(), ebud: String(v.ebud || "").trim(), type: v.type || r.type, kind: v.kind || BI_TYPES[v.type] || r.kind, prog: String(v.prog || "").trim(), amount: Math.round(amt * 100) / 100, qty: v.qty === "" ? 0 : Number(v.qty) || 0, uname: String(v.uname || "").trim(), unitName: String(v.unitName || "").trim() });
+    const m = base(id, v); if (m) { Object.assign(r, keep); return m; } if (JSON.stringify(keep) !== JSON.stringify({ name: r.name, code: r.code, ebud: r.ebud, type: r.type, kind: r.kind, prog: r.prog, amount: r.amount, qty: r.qty, uname: r.uname, unitName: r.unitName })) audit(["แก้ข้อมูลรายการงบประมาณที่นำเข้า", "Planning corrected the imported item"], id); return ""; }
+  return base(id, v); }; }
+// the kind follows the type when the type changes
+document.addEventListener("change", e => { const t = e.target; if (!t || !t.matches || !t.matches('form[data-pl95] select[name="type"]')) return; const k = t.form.querySelector('select[name="kind"]'); if (k && BI_TYPES[t.value]) k.value = BI_TYPES[t.value]; });
+
+/* ---- 98zzzzzk-klang-conlist99.js ---- */
+// ---------- P99: สัญญางบประมาณ, filters on the list (asked for: "สัญญางบประมาณ ไม่มีตัวกรอง") ----------
+// Search (name, code, contract no., supplier), สำนัก/กอง, สถานะ (grouped from mmState), สัญญา (มี / ยังไม่มี); counts follow the filter.
+const MM99 = { q: "", unit: "", st: "", con: "" };
+const MM99_ST = [["wait", "รอกองแผนงานนำส่ง"], ["proc", "อยู่ระหว่างจัดซื้อจัดจ้าง"], ["signed", "ลงนามสัญญา / ส่งมอบงาน"], ["pay", "อยู่ระหว่างเบิกจ่าย"], ["close", "รอปิด / ปิดโครงการ"]];
+function mm99Grp(s) { const t = s[0]; if (/^รอกองแผนงานนำส่ง/.test(t)) return "wait"; if (/ปิดโครงการ/.test(t)) return "close"; if (/^รอ(ผู้ตรวจสอบ|การบัญชี|การเงิน)/.test(t)) return "pay"; if (/ลงนามสัญญา|ส่งมอบ/.test(t)) return "signed"; return "proc"; }
+{ const base = PROC.conList; PROC.conList = function () { if (BI_OPEN) return base(); const all = prDtRows(BI.fy, false), q = MM99.q.trim().toLowerCase();
+  const units = [...new Set(all.map(r => r.unit))].sort((a, b) => a.localeCompare(b, "th")), info = all.map(r => ({ r, s: mmState(r) }));
+  const rows = info.filter(({ r, s }) => (!MM99.unit || r.unit === MM99.unit) && (!MM99.st || mm99Grp(s) === MM99.st) && (!MM99.con || (MM99.con === "y") === !!r.k)
+    && (!q || `${r.id} ${r.name} ${r.code || ""} ${r.unit} ${r.k ? r.k.no + " " + tx(r.k.vendor) : ""}`.toLowerCase().includes(q)));
+  const sel = (k, opts, lab) => `<div class="f"><label>${lab}</label><select data-mm99="${k}"><option value="">ทั้งหมด</option>${opts.map(([v, t]) => `<option value="${esc(v)}" ${MM99[k] === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></div>`;
+  const on = MM99.q || MM99.unit || MM99.st || MM99.con;
+  const bar = `<div class="mm99-bar"><div class="f" style="flex:2 1 260px"><label>ค้นหา</label><input type="search" data-mm99q placeholder="ชื่อรายการ รหัส เลขที่สัญญา คู่สัญญา" value="${esc(MM99.q)}"></div>
+    ${sel("unit", units.map(u => [u, u]), "สำนัก/กอง")}${sel("st", MM99_ST, "สถานะ")}${sel("con", [["y", "มีสัญญาแล้ว"], ["n", "ยังไม่มีสัญญา"]], "สัญญา")}
+    ${on ? `<button class="btn ghost" type="button" data-mm99x>ล้างตัวกรอง</button>` : ""}</div>`;
+  let h = base(); const a = h.indexOf("<tbody>"), b = h.indexOf("</tbody>");
+  if (a < 0 || b < 0) return h.replace("</header>", `</header>${bar}`);
+  // rebuild the body from the rows of the base table that pass the filter (the base draws every row in prDtRows order)
+  const trs = h.slice(a + 7, b).split(/(?=<tr>)/).filter(Boolean), keep = new Set(rows.map(x => x.r.id)), body = trs.filter((t, i) => all[i] && keep.has(all[i].id)).join("");
+  h = h.slice(0, a + 7) + (body || `<tr><td colspan="7" class="sub" style="text-align:center;padding:18px">ไม่พบรายการตามตัวกรอง</td></tr>`) + h.slice(b);
+  h = h.replace(/<span class="sub">\d+ รายการ · มีสัญญา \d+<\/span><\/header>/, `<span class="sub">แสดง ${rows.length} จาก ${all.length} รายการ · มีสัญญา ${rows.filter(x => x.r.k).length}</span></header>${bar}`);
+  return `<style>.mm99-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;padding:12px 16px;border-bottom:1px solid var(--line)}.mm99-bar .f{display:flex;flex-direction:column;gap:3px;flex:1 1 170px;min-width:0}.mm99-bar input,.mm99-bar select{width:100%}</style>` + h; }; }
+document.addEventListener("change", e => { const t = e.target; if (t && t.matches && t.matches("[data-mm99]")) { MM99[t.dataset.mm99] = t.value; route(); } });
+document.addEventListener("input", e => { const t = e.target; if (!t || !t.matches || !t.matches("[data-mm99q]")) return; MM99.q = t.value; clearTimeout(MM99.tm);
+  MM99.tm = setTimeout(() => { route(); const i = document.querySelector("[data-mm99q]"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); });
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-mm99x]") : null; if (t) { Object.assign(MM99, { q: "", unit: "", st: "", con: "" }); route(); } });
+
+/* ---- 98zzzzzl-klang-ctgo99.js ---- */
+// ---------- P99: "สร้างสัญญา" opens the contract's own tab, no popup ----------
+// Asked for: both "สร้างสัญญา" buttons (สัญญางบประมาณ, and step 4 ทำสัญญา of the purchase) go straight to the tab
+// สัญญาและสัญญาแก้ไข, whose form already has every field; step 4 then shows that form too (98zzzv: cmPanel 4).
+// The button makes the contract from the award (supplier, price, days of the requisition, one phase) and opens it; the officer fills
+// and saves the rest there. The acceptance committee is chosen afterwards in the contract (the dialog required it first).
+function ct99Create(cs) { if (!isProcRole() && ROLE !== "admin") return "เฉพาะเจ้าหน้าที่พัสดุสร้างสัญญา"; if (!cs || caseState(cs) !== 8) return "รายการจัดซื้อยังไม่ถึงขั้นทำสัญญา";
+  const rq = famReq(cs.reqn), p = famPlan(rq.plan), amount = Math.min(cs.award.price, rq.amount), vendor = tx(cs.award.winner);
+  if (typeof blBlocked === "function" && blBlocked(cs, vendor)) return "คู่สัญญาอยู่ในรายชื่อผู้ทิ้งงาน (R-17) ทำสัญญาไม่ได้";
+  const days = rq.detail && rq.detail.days > 0 ? rq.detail.days : 120, no = `CT-70/${String(S.contracts.length + 1).padStart(3, "0")}`;
+  const c = { id: nextId("CT", S.contracts), reqn: rq.id, plan: p.id, line: p.line, vendor: [vendor, vendor], no, signed: TODAY, amount, by: me().id, inspectors: [], cm: "", status: "active",
+    phases: [{ n: 1, name: ["งวดที่ 1", "Phase 1"], due: addDays(TODAY, days - 1), amount, signs: [], need: 0 }],
+    base: amount, ver: 1, versions: [{ v: 1, amount, t: nowIso(), by: me().id, why: "" }], vars: [], guarantee: null, warrantyMonths: 24,
+    supervision: cs.kind === "construction" ? { who: "", reports: [], assess: [] } : null, defects: [], letters: [] };
+  S.contracts.push(c); const x = kxOf(c); Object.assign(x, { projNo: cs.egp7Proj || "", no, date: TODAY, amount, days, start: TODAY, fine: Math.max(100, Math.round(amount * 0.001)), nPhases: 1 });
+  rq.status = "contracted"; p.status = "contracted"; caseOnContract(cs, c);
+  audit(["สร้างสัญญา", "Created a contract"], `${c.id} ${rq.id}`); notify(["fin", "exec"], [`สัญญา ${c.id} ผูกพันวงเงิน ${mb(amount)} ล้านบาท`, `Contract ${c.id} commits ${mb(amount)} M`], "fnc-chain");
+  return c; }
+function ct99Go(cs) { const c = ct99Create(cs); if (typeof c === "string") { toast(c); return; } CT_OPEN = false; CT_FROM = null; CON_OPEN = c.id; CON_TAB = "phases"; commit(); renderShell(); procSet("contracts:main"); route();
+  toast("สร้างสัญญาแล้ว · กรอกรายละเอียดในแท็บสัญญาและสัญญาแก้ไข แล้วกดบันทึกสัญญา"); }
+document.addEventListener("click", e => { if (!m88On()) return; const t = e.target && e.target.closest ? e.target.closest("#case-tocon, #ct-open") : null; if (!t) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const open = S.cases.filter(c => caseState(c) === 8), cs = t.id === "case-tocon" ? (open.find(c => c.id === CASE_OPEN) || open.find(c => c.id === CT_FROM)) : open.find(c => c.id === CT_FROM) || open[0];
+  ct99Go(cs || open[0]); }, true);
+// the "สร้างสัญญา" panel of สัญญางบประมาณ: one button per ready purchase, no dialog
+{ const base = PROC.conCreate; PROC.conCreate = function () { if (!m88On()) return base(); const open = S.cases.filter(c => caseState(c) === 8);
+  if (!isProcRole() || !open.length) return base().replace(/<dialog id="ct-dlg"[\s\S]*?<\/dialog>/, "");
+  return `<section class="panel"><header><h2>สร้างสัญญา</h2><span class="sp"></span><span class="sub">รายการจัดซื้อที่ประกาศผู้ชนะและพ้นกำหนดอุทธรณ์แล้ว · กดสร้างแล้วกรอกรายละเอียดในแท็บสัญญาและสัญญาแก้ไข</span></header>
+    <div class="tbl-wrap"><table><thead><tr><th>รายการจัดซื้อ</th><th>ผู้ชนะ</th><th class="n">ราคาที่ประกาศ (บาท)</th><th></th></tr></thead><tbody>${open.map(c => `<tr><td><span class="mono sub">${esc(c.id)}</span> ${esc(caseName(c))}</td><td>${esc(tx(c.award.winner))}</td><td class="n">${fmt(c.award.price)}</td><td><button class="btn primary" type="button" data-ct99="${esc(c.id)}">สร้างสัญญา</button></td></tr>`).join("")}</tbody></table></div></section>`; }; }
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-ct99]") : null; if (t) ct99Go(S.cases.find(c => c.id === t.dataset.ct99)); });
+
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
 // With no signed-in session, the sign-in screen opens on top.
