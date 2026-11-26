@@ -40,3 +40,9 @@ document.addEventListener("click", async e => { const t = e.target && e.target.c
 function rm99Unit(id) { const ok = u => u && !u.retired && u.parent && u.id !== "U00"; if (S.units.some(u => u.id === id && !u.retired)) return id;
   const withUser = S.units.find(u => ok(u) && S.users.some(x => x.role === "div" && x.unit === u.id)); return (withUser || S.units.find(ok) || {}).id || id; }
 { const base = rmCreate; rmCreate = function (v) { if (v && ROLE !== "div") { v = Object.assign({}, v); if (v.srcType === "unit") v.srcUnit = rm99Unit(v.srcUnit); if (v.owner || v.srcType === "unit") v.owner = rm99Unit(v.owner || v.srcUnit); } return base(v); }; }
+// The registers of laws, conditions and kinds of document were seeded for the sample department only (98zzzs: k === "sample"), so the
+// department กรมโยธาธิการและผังเมือง had them empty ("ข้อมูลที่ทำไว้ไม่ตามมาด้วย"). A department with an empty register gets a copy of the
+// sample's (the same drafts; editable there). A register someone filled is left as it is.
+function rm99Regs() { if (!S || ((S.rmLaw || []).length && (S.rmCond || []).length && (S.rmDocType || []).length)) return false; const src = SEEDS.sample && SEEDS.sample.seed && SEEDS.sample.seed(); if (!src) return false;
+  let ch = false; [["rmLaw"], ["rmCond"], ["rmDocType"]].forEach(([k]) => { if (!(S[k] || []).length && (src[k] || []).length) { S[k] = JSON.parse(JSON.stringify(src[k])); ch = true; } }); return ch; }
+{ const base = rmSyncDocs; rmSyncDocs = function () { if (rm99Regs()) commit(); return base.apply(this, arguments); }; }

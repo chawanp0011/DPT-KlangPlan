@@ -12,7 +12,7 @@
 
 window.MENU_ALL = !!window.MENU_ALL;
 const m88On = () => !window.MENU_ALL;
-const M88 = { apps: ["org", "budget", "procurement", "contract"], bud: ["rmake", "dashboard", "od-dash"], budGroups: ["regg"],
+const M88 = { apps: ["org", "budget", "procurement", "contract"], bud: ["rmake", "dashboard", "od-dash"], budGroups: ["regg"], budHide: ["rg-mstrat", "rg-msvc", "rg-prog", "bq-money", "rg-acct"], // P99: hidden for now (asked 26 Nov 2569)
   proc: ["plan", "mplan", "reqn", "cases", "progress88", "contracts", "suppliers", "disb", "library"], procNav: ["procurement", "cm-reg", "cm-mem", "cm-meet", "cm-type", "cm-slot"],
   dq: "m", lib: { item: "", q: "", prev: null } };
 const M88_APPS_ALL = APP_IDS.slice();
@@ -20,7 +20,7 @@ function m88NavShown(n) {
   if (!m88On() || !n) return true;
   if (n.app === "all") return n.id !== "flow";
   if (!M88.apps.includes(n.app)) return false;
-  if (n.app === "budget") return M88.bud.includes(n.id) || M88.budGroups.includes(n.group);
+  if (n.app === "budget") return !M88.budHide.includes(n.id) && (M88.bud.includes(n.id) || M88.budGroups.includes(n.group));
   if (n.app === "procurement") return M88.procNav.includes(n.id);
   return true;
 }
