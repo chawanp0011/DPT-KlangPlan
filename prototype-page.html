@@ -1459,6 +1459,10 @@ input[type="file"]:disabled::file-selector-button { opacity: .5; cursor: not-all
 .as-flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; padding: 14px; }
 .as-step { display: flex; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--surface); }
 .as-n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 600; display: grid; place-items: center; font-size: 13px; }
+/* P99: top bar: the search fills the room left by the breadcrumb, the controls sit together at the right end */
+.top .crumb{flex:0 1 auto;max-width:32%}
+.top .gsearch{flex:1 1 auto;min-width:160px}
+.top .gsearch input{width:100%!important}
 </style>
 </head>
 <body>
@@ -30842,9 +30846,9 @@ MON_PANELS.track = () => { const R = tfRows(); return `${PD_CSS}${R.ov.length ? 
 function d90Report() { const rows = sptRows(), fy = BI.fy;
   let h = rows.length ? ov89Table(rows) : `<div class="sub">ไม่มีรายการ</div>`;
   h = h.replace(/<\/tr><tr>/, `</tr><tr>${OV89_ST.map(([k]) => `<th colspan="2" class="sub" style="font-weight:400;white-space:normal;max-width:150px;font-size:11px">คอลัมน์ ${esc(D90_COLS[k])}</th>`).join("")}</tr><tr>`).replace('<th rowspan="2" style="min-width:170px"></th><th rowspan="2" class="n">จำนวน</th><th rowspan="2" class="n">งบประมาณ</th>', '<th rowspan="3" style="min-width:170px"></th><th rowspan="3" class="n">จำนวน</th><th rowspan="3" class="n">งบประมาณ<div class="sub" style="font-weight:400">คอลัมน์ 13</div></th>');
-  return `<style>.ov89-t th,.ov89-t td{border:1px solid var(--line);padding:4px 6px;white-space:nowrap}.ov89-t .ov89-h{text-align:center;background:var(--info-soft)}.ov89-t .pd-go{display:inline;width:auto}</style>
+  return `<style>.ov89-t th,.ov89-t td{border:1px solid var(--line);padding:4px 6px;white-space:nowrap}.ov89-t .ov89-h{text-align:center;background:var(--info-soft)}.ov89-t .pd-go{display:inline-block;width:auto;min-width:30px;padding:2px 9px;border-radius:999px;background:var(--info-soft,#eff6ff);color:var(--accent,#2563eb);font-weight:600;text-align:center;border:0;box-shadow:none;cursor:pointer;transition:background .15s,color .15s}.ov89-t .pd-go:hover{background:var(--accent,#2563eb);color:#fff}.ov89-t .pd-go:focus-visible{outline:2px solid var(--accent,#2563eb);outline-offset:1px}</style>
   <section class="panel ov89"><header><div><h2 style="margin:0">รายงานสถานะการจัดซื้อจัดจ้าง ประจำปีงบประมาณ พ.ศ. ${fy}</h2><div class="sub">จำนวน ${fmt(rows.length)} รายการ เป็นเงิน ${fmt(rows.reduce((s, r) => s + sptNum(r[11]), 0), 4)} ล้านบาท · หน่วย: ล้านบาท · ขั้นตอนของแต่ละรายการอ่านจากคอลัมน์ของแบบฟอร์มติดตามความก้าวหน้า (67 คอลัมน์) ที่ระบุใต้หัวตาราง</div></div><span class="sp"></span>
-    <div class="tabs" role="tablist" style="margin:0">${Object.entries(OV89_GRP).map(([k, [t]]) => `<button class="tab ${OV89.g === k ? "on" : ""}" type="button" data-ov89g="${k}">ตาม${t}</button>`).join("")}</div><button class="btn primary" type="button" id="d90-xl">ดาวน์โหลด Excel</button></header><div class="body">${h}</div></section>`; }
+    <div class="tabs" role="tablist" style="margin:0">${Object.entries(OV89_GRP).map(([k, [t]]) => `<button class="tab ${OV89.g === k ? "on" : ""}" type="button" data-ov89g="${k}">ตาม${t}</button>`).join("")}</div><button class="btn" type="button" id="d90-pdf">ออกรายงาน PDF</button><button class="btn primary" type="button" id="d90-xl">ดาวน์โหลด Excel</button></header><div class="body">${h}</div></section>`; }
 function d90Book() { const rows = sptRows(), g = OV89.g, [k1, k2, k3] = ov89Lv(g), N = OV89_ST.length;
   const grp = (l, k) => { const o = {}; l.forEach(r => { const v = k === "area" ? ov89Area(r) : ov89Key[k](r); (o[v] = o[v] || []).push(r); }); return Object.entries(o).sort((a, b) => b[1].length - a[1].length); };
   const line = (lab, l) => [lab, l.length, Math.round(l.reduce((s, r) => s + sptNum(r[11]), 0) * 1e4) / 1e4].concat(...OV89_ST.map(([k]) => { const x = l.filter(r => ov89Stage(r) === k); return [x.length || "", x.length ? Math.round(x.reduce((s, r) => s + sptNum(r[11]), 0) * 1e4) / 1e4 : ""]; }));
@@ -30876,6 +30880,11 @@ SPT.m = "";
 // P90e: one year for every tab of ติดตามความก้าวหน้า; the demo month selector "ข้อมูล ณ" is taken off every tab
 { const base = d90Strip; d90Strip = function (h) { h = base(h).replace(/<div class="asof"><label for="asof-sel">[\s\S]*?<\/select><span class="sub">[^<]*<\/span><\/div>/g, "");
     if (!/id="pr-fy"/.test(h)) h = h.replace(/(<div class="tabs" role="tablist")/, `<div class="tf-top" style="display:flex;gap:10px;align-items:center;margin:0 0 6px">${prFySel().replace("margin:0 0 10px", "margin:0")}</div>$1`); return h; }; }
+// P99: the status report as PDF: the table opens in a print view (A3 landscape); "Save as PDF" in the print dialog makes the file
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("#d90-pdf") : null; if (!t) return; const sec = document.querySelector("section.ov89"); if (!sec) return;
+  const head = sec.querySelector("header h2"), sub = sec.querySelector("header .sub"), tbl = sec.querySelector("table"); const w = window.open("", "_blank"); if (!w) { toast("เปิดหน้าต่างพิมพ์ไม่ได้ (เบราว์เซอร์บล็อกป๊อปอัป)"); return; }
+  w.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>${head ? head.textContent : "รายงาน"}</title><style>@page{size:A3 landscape;margin:10mm}body{font-family:"Sarabun","TH Sarabun New",sans-serif;font-size:11px;color:#111}h1{font-size:16px;margin:0 0 4px}.sub{color:#555;margin:0 0 8px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:3px 5px;white-space:nowrap}th{background:#eef2ff}td{text-align:right}td:first-child{text-align:left}button{all:unset}</style></head><body><h1>${head ? head.innerHTML : ""}</h1><div class="sub">${sub ? sub.textContent : ""} · พิมพ์เมื่อ ${fdate(TODAY)}</div>${tbl ? tbl.outerHTML : ""}</body></html>`);
+  w.document.close(); w.focus(); setTimeout(() => w.print(), 300); });
 
 /* ---- 98zzzzv-klang-sample70.js ---- */
 // KlangFinance, round P91 (25 Nov 2569): the sample of FY 2570 shaped like the department's follow-up files
