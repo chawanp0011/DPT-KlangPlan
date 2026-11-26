@@ -31808,6 +31808,12 @@ async function rm99Seed() { if (RM99.busy) return "กำลังสร้า�
   h = h.replace(/(<section class="panel"><header><h2>[^<]*<\/h2><span class="sp"><\/span>)/, `$1${btn}`);
   return (RM99.msg ? `<div class="sub" style="margin:0 0 8px">${esc(RM99.msg)}</div>` : "") + h; }; }
 document.addEventListener("click", async e => { const t = e.target && e.target.closest ? e.target.closest("[data-rm99]") : null; if (!t) return; t.disabled = true; const m = await rm99Seed(); RM99.msg = m || "ใส่ข้อมูลตัวอย่าง 4 เรื่องแล้ว (สมมติ)"; route(); toast(RM99.msg); });
+// The sample buttons name a unit of the sample department (RM_SAMPLES[i][3], e.g. "U02"); in another department (กรมโยธาธิการและผังเมือง)
+// that unit does not exist and rmCreate refused ("เลือกสำนัก/กองที่ส่งเอกสาร"). A unit that is not in this department
+// becomes a division of this department (one with a division user first). A unit that exists is kept as chosen.
+function rm99Unit(id) { const ok = u => u && !u.retired && u.parent && u.id !== "U00"; if (S.units.some(u => u.id === id && !u.retired)) return id;
+  const withUser = S.units.find(u => ok(u) && S.users.some(x => x.role === "div" && x.unit === u.id)); return (withUser || S.units.find(ok) || {}).id || id; }
+{ const base = rmCreate; rmCreate = function (v) { if (v && ROLE !== "div") { v = Object.assign({}, v); if (v.srcType === "unit") v.srcUnit = rm99Unit(v.srcUnit); if (v.owner || v.srcType === "unit") v.owner = rm99Unit(v.owner || v.srcUnit); } return base(v); }; }
 
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
