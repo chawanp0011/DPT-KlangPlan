@@ -24,7 +24,7 @@ const kxAmount = x => { const a = x.amends.filter(m => m.amount !== "" && m.amou
 const kxAdvAmt = x => (x.adv.has && Number(x.adv.pct) > 0 ? Math.round(Number(x.amount) * Number(x.adv.pct)) / 100 : 0);
 const kxAdvLeft = (x, upto) => Math.max(0, kxAdvAmt(x) - x.dl.slice(0, upto == null ? x.dl.length : upto).reduce((s, d) => s + (Number(d.deduct) || 0), 0));
 const kxDeductOf = (x, amount) => { const a = kxAdvAmt(x), base = Number(x.amount) || 0; return a && base ? Math.min(kxAdvLeft(x), Math.round(a * amount / base * 100) / 100) : 0; }; // repaid in the share of the work
-const kxWarrEnd = x => (x.lastAccept ? kxAddYears(x.lastAccept, 2) : "");
+const kxWarrEnd = x => (x.lastAccept ? kxAddYears(x.lastAccept, Number(x.warrY) > 0 ? Number(x.warrY) : 2) : ""); // P99: the years of the defect warranty are set in the contract (default 2)
 function kxLate(x) { const e = kxEnd(x); if (!e || x.lastAccept || e >= TODAY) return 0; return kxDiff(e, TODAY); }
 const kxFine = x => kxLate(x) * (Number(x.fine) || 0);
 function kxAlerts(k) {

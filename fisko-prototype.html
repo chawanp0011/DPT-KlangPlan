@@ -28745,7 +28745,7 @@ const kxAmount = x => { const a = x.amends.filter(m => m.amount !== "" && m.amou
 const kxAdvAmt = x => (x.adv.has && Number(x.adv.pct) > 0 ? Math.round(Number(x.amount) * Number(x.adv.pct)) / 100 : 0);
 const kxAdvLeft = (x, upto) => Math.max(0, kxAdvAmt(x) - x.dl.slice(0, upto == null ? x.dl.length : upto).reduce((s, d) => s + (Number(d.deduct) || 0), 0));
 const kxDeductOf = (x, amount) => { const a = kxAdvAmt(x), base = Number(x.amount) || 0; return a && base ? Math.min(kxAdvLeft(x), Math.round(a * amount / base * 100) / 100) : 0; }; // repaid in the share of the work
-const kxWarrEnd = x => (x.lastAccept ? kxAddYears(x.lastAccept, 2) : "");
+const kxWarrEnd = x => (x.lastAccept ? kxAddYears(x.lastAccept, Number(x.warrY) > 0 ? Number(x.warrY) : 2) : ""); // P99: the years of the defect warranty are set in the contract (default 2)
 function kxLate(x) { const e = kxEnd(x); if (!e || x.lastAccept || e >= TODAY) return 0; return kxDiff(e, TODAY); }
 const kxFine = x => kxLate(x) * (Number(x.fine) || 0);
 function kxAlerts(k) {
@@ -31857,6 +31857,91 @@ EGP7[1].t = "รายงานขอซื้อขอจ้าง ราคา
 const P99_STEP5_OLD = ["ส่งมอบและตรวจรับ", "คณะกรรมการตรวจรับ", "เบิกจ่ายตามงวด", "เบิกจ่ายเป็นครั้ง"];
 { const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On() || window.STEP5_OLD) return out;
   return out.filter(p => { const h = p && p.el && p.el.querySelector && p.el.querySelector(":scope > header h2"); return !(h && P99_STEP5_OLD.includes(h.textContent.trim())); }); }; }
+
+/* ---- 98zzzzzq-klang-casetidy.js ---- */
+// ---------- P99: the case page keeps only the new sections; step 2 is view-only once the unit's part is done ----------
+// Asked for: take out, for now, the older sections that still showed:
+//   step 2 จัดทำข้อมูล: รายละเอียดโครงการที่ขอซื้อขอจ้าง; step 3 ส่ง e-GP: อุทธรณ์ (e-GP step 5 holds the appeal);
+//   step 4 ทำสัญญา: สัญญา, หลักประกันและการแก้ไขสัญญา, ขยายสัญญา / ปรับวงเงิน (the panel สัญญาและสัญญาแก้ไข holds them).
+//   step 1 รายการงบประมาณ: รายการงบประมาณ, จัดทำแผนงาน, อนุมัติแผนงาน; in their place the details Planning wrote for the item.
+// And: when the case has gone past the unit (step 2), step 2 is shown read-only.
+// The panels are hidden, not deleted: MENU_ALL or window.CASE_OLD = true shows them again.
+const P99_CASE_OLD = ["รายละเอียดโครงการที่ขอซื้อขอจ้าง", "รายการงบประมาณ", "จัดทำแผนงาน", "อนุมัติแผนงาน", "อุทธรณ์", "สัญญา", "หลักประกันและการแก้ไขสัญญา", "ขยายสัญญา / ปรับวงเงิน"];
+function p99CaseTidy() { if (!m88On() || window.CASE_OLD) return; const tab = document.querySelector('button.cphase[aria-selected="true"]'); if (!tab) return;
+  document.querySelectorAll("section.panel").forEach(s => { const h = s.querySelector(":scope > header h2"); if (h && P99_CASE_OLD.includes(h.textContent.trim()) && s.style.display !== "none") s.style.display = "none"; });
+  const c = typeof CASE_OPEN !== "undefined" && CASE_OPEN ? S.cases.find(x => x.id === CASE_OPEN) : null; if (!c || tab.dataset.cphase !== "2" || !(caseMainNow(c) > 2)) return;
+  const secs = [...document.querySelectorAll(".cmain .panel, section.panel")].filter(s => { const h = s.querySelector(":scope > header h2"); return h && /^\d\.\s/.test(h.textContent.trim()) && !s.closest(".cphases"); });
+  const more = [...document.querySelectorAll("h3")].filter(h => /^6\.\s/.test(h.textContent.trim())).map(h => h.parentElement);
+  let n = 0; secs.concat(more).forEach(s => { if (!s || s.dataset.p99ro) return; s.dataset.p99ro = "1"; n++;
+    s.querySelectorAll("input, select, textarea").forEach(i => { i.disabled = true; if (i.type === "file") i.style.display = "none"; });
+    s.querySelectorAll("button").forEach(b => { if (!b.closest(".tabs") && !b.matches(".tab, [role=tab], [data-rqdoc], [data-dlv]")) { b.disabled = true; b.style.display = "none"; } }); });
+  if (n && !document.getElementById("p99-ro")) { const first = secs[0] || more[0]; if (first) { const d = document.createElement("div"); d.id = "p99-ro"; d.className = "sub"; d.style.cssText = "margin:0 0 8px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2,#f8fafc)";
+    d.textContent = "ดูอย่างเดียว: รายการนี้ผ่านขั้นจัดทำข้อมูลของสำนัก/กองแล้ว"; first.parentNode.insertBefore(d, first); } } }
+(function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(p99CaseTidy, 30); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["aria-selected", "class"] }); document.addEventListener("click", e => { if (e.target && e.target.closest && e.target.closest("button.cphase")) setTimeout(p99CaseTidy, 0); }); })();
+// step 1: the budget item as Planning wrote it (รายละเอียด / มอบหมาย)
+function p99BiOf(c) { const p = famPlan(c.plan); return ((S.bi && S.bi.rows) || []).find(r => (r.sent && (r.sent.pp === c.plan || (r.sent.extra || []).some(e => e.pp === c.plan))) || (p && p.biSrc === r.id)) || null; }
+function p99BiPanel(c) { const r = p99BiOf(c); if (!r) return `<div class="sub">รายการนี้ไม่ได้มาจากรายการงบประมาณที่กองแผนงานนำเข้า</div>`; const pl = r.pl || {}, us = typeof p95Units === "function" ? p95Units(r) : [], yrs = pl.yrs || {};
+  const kv = (k, v) => `<dt>${k}</dt><dd>${v === "" || v == null ? "–" : v}</dd>`, M = BI_MON.map((m, i) => `<th class="n">${m}</th>`).join("");
+  return `<dl class="kv" style="display:grid;grid-template-columns:max-content 1fr max-content 1fr;gap:6px 14px;margin:0">${kv("ชื่อรายการ", esc(r.name))}${kv("เลขที่รายการ", `<span class="mono">${esc(r.id)}</span>`)}${kv("รหัสงบประมาณ (GFMIS)", `<span class="mono">${esc(r.code || "")}</span>`)}${kv("รหัส e-bud", esc(r.ebud || ""))}
+    ${kv("ประเภทรายการ", esc(r.type || ""))}${kv("งบรายจ่าย", esc(r.kind || ""))}${kv("แผนงาน / ภารกิจ", esc(r.prog || ""))}${kv("ผลผลิต/โครงการ", esc(pl.prod || r.prod || ""))}
+    ${kv("วงเงิน (บาท)", fmt(r.amount))}${kv("จำนวน / หน่วยนับ", r.qty ? `${fmt(r.qty)} ${esc(r.uname || "")}` : "")}${kv("ที่มาของงบประมาณ", esc(pl.act || ""))}${kv("ลักษณะงบประมาณ", esc(pl.years || r.years || ""))}
+    ${kv("พื้นที่ดำเนินการ", esc(pl.prov || ""))}${kv("ปีที่เริ่ม / จำนวนปี", pl.startY ? `${pl.startY} / ${pl.nYears || 1} ปี` : "")}
+    ${kv("หน่วยงานที่มอบหมาย", us.map(u => `${esc(unitName(u.unit))} ${fmt(u.amt)} บาท`).join("<br>"))}${kv("งบประมาณรายปี (ล้านบาท)", Object.keys(yrs).length ? Object.entries(yrs).map(([y, v]) => `ปี ${y}: ${fmt(v, 4)}`).join(" · ") : "")}</dl>
+    <div class="tbl-wrap" style="margin-top:8px"><table><thead><tr><th>แผนเงิน (บาท)</th>${M}<th class="n">รวม</th></tr></thead><tbody><tr><td>${r.planRev ? `ปรับแผนครั้งที่ ${r.planRev}` : "แผนตั้งต้น"}</td>${r.plan.map(v => `<td class="n">${v ? fmt(Math.round(v)) : "–"}</td>`).join("")}<td class="n"><b>${fmt(Math.round(r.plan.reduce((a, b) => a + b, 0)))}</b></td></tr></tbody></table></div>
+    <div class="sub">${r.sent && r.sent.t ? `นำส่งสำนัก/กองเมื่อ ${fdate(String(r.sent.t).slice(0, 10))}` : ""}</div>`; }
+{ const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On() || window.CASE_OLD) return out; out.push(cmPanel(1, 0, "รายละเอียดรายการงบประมาณ (กองแผนงาน)", p99BiPanel(c))); return out; }; }
+
+/* ---- 98zzzzzr-klang-conamend99.js ---- */
+// ---------- P99: one place for contract amendments ----------
+// Asked for: on สัญญาและสัญญาแก้ไข, "สัญญาแก้ไข (ขยายเวลา / ปรับวงเงิน)" and "การแก้ไขสัญญา" are the same thing; keep one and move the data.
+// The older panel (change requests of 63-contracts, c.vars) is no longer drawn below the tab; its requests are listed as rows of the
+// amendment table, marked "คำขอเดิม" with their state, so nothing is lost. Hidden, not deleted: MENU_ALL or window.CON_OLDVARS = true.
+const P99_VST = { pending: "รออนุมัติ", approved: "อนุมัติแล้ว", rejected: "ไม่อนุมัติ" };
+function p99VarRows(c) { return (c.vars || []).map((v, j) => { const kind = v.kind === "time" ? "ขยายระยะเวลาสัญญา" : v.kind === "amount" || v.kind === "value" ? "ปรับวงเงินสัญญา" : "แก้ไขอื่น";
+  return `<tr class="p99-var"><td><span class="sub">คำขอเดิม ${j + 1}</span></td><td class="mono">${esc(v.id || "")}</td><td>${fdate(String(v.t || "").slice(0, 10))}</td><td>${kind}</td><td class="n">${v.days || "—"}</td><td class="n">${v.amount != null && v.amount !== "" ? fmt(v.amount) : "—"}</td><td>${tag(P99_VST[v.status] || v.status || "—", v.status === "approved" ? "p-ok" : v.status === "rejected" ? "p-bad" : "p-warn")}</td><td>${esc(tx(v.why || ""))}</td><td>—</td></tr>`; }).join(""); }
+{ const base = conTabBody; conTabBody = function (c, k) { if (k !== "phases" || !m88On() || window.CON_OLDVARS || !(c.vars || []).length) return base(c, k);
+  let h = kxContractView(c); const rows = p99VarRows(c), i = h.indexOf('<table class="cx-amends">'); if (i < 0) return h;
+  const j = h.indexOf("</tbody>", i); if (j < 0) return h; let body = h.slice(h.indexOf("<tbody>", i) + 7, j);
+  if (/ยังไม่มีการแก้ไขสัญญา/.test(body) && !/<td>\d/.test(body)) body = ""; return h.slice(0, h.indexOf("<tbody>", i) + 7) + body + rows + h.slice(j); }; }
+
+/* ---- 98zzzzzs-klang-manage99.js ---- */
+// ---------- P99: บริหารสัญญาและเบิกจ่าย, summary cards and the advance in million baht ----------
+// Asked for: with an advance, a box "เบิกจ่ายเงิน Advance <the % set in the contract>% ..... (ลบ.)" and the % deducted back shown;
+// and cards in place of the small chips, to see the payment as a whole.
+// Cards: contract amount, phases, deliveries (accepted), requested, paid (with the advance), advance (paid, % set, deducted, left,
+// % deducted per payment), still to pay, % paid with a bar. The advance input is in ลบ.; it fills the older field in baht (amt).
+function m99Cards(k) { const x = kxOf(k), A = kxAmount(x), dl = x.dl || [], adv = kxAdvAmt(x), P = x.adv && x.adv.paid, advPaid = P ? Number(P.amt) || 0 : 0;
+  const paid = dl.filter(d => d.status === "paid").reduce((s, d) => s + (Number(d.pay) || 0), 0), req = dl.reduce((s, d) => s + (Number(d.amount) || 0), 0), ded = dl.reduce((s, d) => s + (Number(d.deduct) || 0), 0);
+  const out = paid + advPaid, pct = A ? out / A * 100 : 0, acc = dl.filter(d => d.accept).length, pctSet = Number((x.adv && (x.adv.pctSet != null ? x.adv.pctSet : x.adv.pct)) || 0);
+  const dedPct = Number(x.adv && x.adv.dedPct) > 0 ? Number(x.adv.dedPct) : pctSet, B = v => fmt(v / 1e6, 2), mode = (typeof KX88_MODE !== "undefined" && KX88_MODE[x.payMode || "time"]) || "";
+  const card = (l, v, d, c) => `<div class="m99-c" style="border-top:3px solid ${c}"><span class="l">${l}</span><b>${v}</b><span class="d">${d || ""}</span></div>`;
+  return `<div class="m99-cards">${card("วงเงินสัญญา", B(A), "ลบ." + (x.po ? ` · PO ${esc(x.po)}` : ""), "#3b4fa8")}${card("งวดงานตามสัญญา", fmt(Number(x.nPhases) || 0), `งวด · การเบิกจ่าย${mode}`, "#64748b")}
+    ${card("ส่งมอบ / ตรวจรับ", `${dl.length} / ${acc}`, "ครั้ง", "#0ea5e9")}${card("ขอเบิกรวม", B(req), "ลบ.", "#94a3b8")}
+    ${x.adv && x.adv.has ? card(`เงินล่วงหน้า ${fmt(pctSet, 0)}%`, B(advPaid || adv), advPaid ? `ลบ. จ่ายแล้ว${P.gf ? ` · GF ${esc(P.gf)}` : ""}` : "ลบ. ยังไม่จ่าย", "#f59e0b") + card("หักคืนล่วงหน้า", B(ded), `ลบ. · หักคืน ${fmt(dedPct, dedPct % 1 ? 2 : 0)}% ต่อครั้ง · คงเหลือ ${B(kxAdvLeft(x))} ลบ.`, "#d97706") : ""}
+    ${card("จ่ายจริงแล้ว", B(out), `ลบ.${advPaid ? ` (รวมเงินล่วงหน้า ${B(advPaid)})` : ""}`, "#16a34a")}${card("คงเหลือตามสัญญา", B(Math.max(0, A - paid - advPaid + ded)), "ลบ. ที่ยังต้องจ่าย", "#dc2626")}
+    <div class="m99-c m99-w" style="border-top:3px solid #16a34a"><span class="l">ผลการเบิกจ่าย</span><b>${fmt(pct, 1)}%</b><div class="m99-bar"><i style="width:${Math.min(100, pct)}%"></i></div><span class="d">ของวงเงินสัญญา</span></div></div>`; }
+{ const base = kxManageView; kxManageView = function (k) { let h = base(k); if (!m88On()) return h; const x = kxOf(k);
+  h = h.replace(/<div class="facts[^"]*">(?:(?!<div)[\s\S])*?<\/div>/g, "");
+  if (x.adv && x.adv.has) { const pct = Number(x.adv.pctSet != null ? x.adv.pctSet : x.adv.pct) || 15, P = x.adv.paid, def = P ? P.amt : Math.round(kxAmount(x) * Math.min(15, pct)) / 100;
+    h = h.replace(/<div class="f"><label>จำนวนเงิน Advance \(บาท, ไม่เกิน 15%\)<\/label><input type="number" name="amt"([^>]*)><\/div>/, `<div class="f"><label>เบิกจ่ายเงิน Advance ${fmt(pct, pct % 1 ? 2 : 0)}% (ลบ.)</label><input type="number" data-m99m min="0" step="0.0001" value="${Math.round(def / 100) / 1e4}"><input type="hidden" name="amt" value="${def}"><div class="sub">= <span data-m99b>${fmt(def)}</span> บาท · ไม่เกิน 15% ของวงเงินสัญญา</div></div>`);
+    const dedPct = Number(x.adv.dedPct) > 0 ? Number(x.adv.dedPct) : pct; h = h.replace("<b>เบิกจ่ายเงิน Advance (เงินเบิกล่วงหน้า)</b>", `<b>เบิกจ่ายเงิน Advance (เงินเบิกล่วงหน้า)</b> <span class="sub">· หักคืนล่วงหน้า ${fmt(dedPct, dedPct % 1 ? 2 : 0)}% ต่อการเบิกแต่ละครั้ง จนครบ ${fmt(kxAdvAmt(x))} บาท</span>`); }
+  return `<style>.m99-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 12px}.m99-c{background:var(--panel,#fff);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.m99-c .l{font-size:12px;color:var(--muted,#64748b)}.m99-c b{font-size:20px}.m99-c .d{font-size:11.5px;color:var(--muted,#64748b)}.m99-bar{height:6px;background:var(--line,#e5e7eb);border-radius:99px;overflow:hidden;margin:4px 0 2px}.m99-bar i{display:block;height:100%;background:#16a34a}</style>`
+    + h.replace(/(<div class="body cx-manage"[^>]*>)/, `$1${m99Cards(k)}`); }; }
+document.addEventListener("input", e => { const t = e.target; if (!t || !t.matches || !t.matches("[data-m99m]")) return; const f = t.closest("form"), b = Math.round(Number(t.value) * 1e6 * 100) / 100;
+  const h = f && f.querySelector('input[name="amt"]'); if (h) h.value = b > 0 ? b : ""; const s = f && f.querySelector("[data-m99b]"); if (s) s.textContent = fmt(b || 0); });
+// ---------- P99: ทำสัญญา, the defect warranty period (ระยะรับประกันความชำรุดบกพร่อง) ----------
+// Asked for: a default checkbox for the warranty period on the contract form. Choices 1 ปี / 2 ปี (ticked by default) / อื่น ๆ (ระบุปี);
+// one choice at a time. Stored as cx.warrY (years); kxWarrEnd counts from the last acceptance with it.
+if (!KX_F.includes("warrY")) KX_F.push("warrY");
+{ const base = kxContractView; kxContractView = function (k) { const h = base(k), x = kxOf(k), can = kxCanEdit(), y = Number(x.warrY) > 0 ? Number(x.warrY) : 2, other = y !== 1 && y !== 2, dis = can ? "" : "disabled";
+  const box = `<div class="f m99-warr" style="flex:1 1 100%"><label>ระยะรับประกันความชำรุดบกพร่อง *</label><div class="row" style="gap:16px;align-items:center;flex-wrap:wrap">
+    <label style="font-weight:400"><input type="checkbox" data-m99w="1" ${y === 1 ? "checked" : ""} ${dis}> 1 ปี</label><label style="font-weight:400"><input type="checkbox" data-m99w="2" ${y === 2 ? "checked" : ""} ${dis}> 2 ปี (ค่าเริ่มต้น)</label>
+    <label style="font-weight:400"><input type="checkbox" data-m99w="o" ${other ? "checked" : ""} ${dis}> อื่น ๆ</label><input type="number" data-m99wy min="1" max="20" step="1" value="${other ? y : ""}" placeholder="ปี" style="width:80px;${other ? "" : "display:none"}" ${dis}>
+    <input type="hidden" name="warrY" value="${y}"><span class="sub">นับจากวันตรวจรับงวดสุดท้าย${x.lastAccept ? ` · ครบ ${fdate(kxWarrEnd(x))}` : ""}</span></div></div>`;
+  const key = '<div class="f"><label>จำนวนงวดงานตามสัญญา *</label>'; return h.includes(key) ? h.replace(key, box + key) : h.replace("</form>", box + "</form>"); }; }
+document.addEventListener("change", e => { const t = e.target; if (!t || !t.matches) return; const f = t.closest && t.closest(".m99-warr"); if (!f) return; const hid = f.querySelector('input[name="warrY"]'), num = f.querySelector("[data-m99wy]");
+  if (t.matches("[data-m99w]")) { f.querySelectorAll("[data-m99w]").forEach(c => { if (c !== t) c.checked = false; }); if (!t.checked) t.checked = true; const v = t.dataset.m99w; num.style.display = v === "o" ? "" : "none"; hid.value = v === "o" ? num.value || "" : v; if (v === "o") num.focus(); }
+  if (t.matches("[data-m99wy]")) hid.value = t.value; });
 
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
