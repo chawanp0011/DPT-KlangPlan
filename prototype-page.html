@@ -32153,6 +32153,34 @@ document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matc
 (function () { const st = document.createElement("style"); st.textContent = ".s6-ks{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.s6-k{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}"; document.head.appendChild(st);
   let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => { if (!m88On()) return; document.querySelectorAll("section.panel > header h2").forEach(h => { if (/^ส่งมอบต่อให้ อปท\. \/ เจ้าของโครงการ/.test(h.textContent.trim())) h.textContent = "รายการส่งมอบ"; }); }, 40); }).observe(document.body, { childList: true, subtree: true }); })();
 
+/* ---- 98zzzzzw-klang-rebid99.js ---- */
+// ---------- P99: จัดซื้อใหม่ = นำส่ง e-GP ใหม่, the earlier round kept as history ----------
+// Asked for: when a purchase is cancelled or an appeal is upheld and the budget item is bought again, e-GP is sent again, and the values
+// of the earlier round stay as history. (P80 already sends the case back to the unit to send the request again; this is the other way,
+// when the request stands: the Treasury restarts e-GP on the same request.)
+// Data: cs.egpHist = [{ n, kind, why, by, t, egp7, egp, award, appeal, state }]; the case goes back to state 4 (กำหนดคุณลักษณะ/ส่ง e-GP)
+// with no e-GP data, no winner and no appeal. Only before a contract is signed.
+function caseRebid(c, kind, why) { if (!isProcRole() && ROLE !== "admin") return "เฉพาะกองคลัง (พัสดุ) บันทึกได้"; if (caseCon(c)) return "ทำสัญญาแล้ว ใช้การบอกเลิกสัญญาแทน";
+  if (!caseReq(c)) return "ยังไม่มีใบขอซื้อขอจ้าง"; if (!RS_KIND[kind]) return "เลือกกรณี: ยกเลิก หรือ อุทธรณ์"; const w = String(why || "").trim(); if (!w) return "ระบุเหตุผล";
+  const H = (c.egpHist = c.egpHist || []), t = nowIso(); H.push({ n: H.length + 1, kind, why: w.slice(0, 500), by: me().id, t, state: caseState(c), egp7: c.egp7 ? JSON.parse(JSON.stringify(c.egp7)) : null, egp: c.egp ? JSON.parse(JSON.stringify(c.egp)) : null, award: c.award || null, appeal: c.appeal || null });
+  c.egp7 = null; c.egp = null; c.award = null; c.appeal = null; c.appealElapsed = false; c.cancelled = null;
+  setState(c, 4, "rebid", `${RS_KIND[kind]} · ${w}`); audit(["จัดซื้อใหม่: นำส่ง e-GP ใหม่", "Procure again: e-GP again"], `${c.id} รอบที่ ${H.length + 1}`);
+  notify(["div", "divhead"], [`${c.id}: ${RS_KIND[kind]} กองคลังนำส่ง e-GP ใหม่ (รอบที่ ${H.length + 1})`, `${c.id}: procured again`], "case:" + c.id); return ""; }
+const RB_V = (E, s, k) => (E && E["s" + s] && E["s" + s][k] != null && E["s" + s][k] !== "" ? E["s" + s][k] : "");
+function rbHist(c) { const H = c.egpHist || []; if (!H.length) return "";
+  return `<div class="tbl-wrap"><table><thead><tr><th>รอบที่</th><th>กรณี</th><th>เหตุผล</th><th>วันที่</th><th>ผู้บันทึก</th><th>ขั้น e-GP ที่ถึง</th><th>เลขที่โครงการ</th><th>ผู้เสนอราคาต่ำสุด / ราคา</th><th></th></tr></thead><tbody>${H.map(h => { const E = h.egp7, st = E && E.stage ? `${E.stage}. ${EGP7[E.stage - 1].t}` : "ยังไม่เริ่ม";
+    const all = E ? Object.entries(EGP7_F).flatMap(([s, F]) => F.filter(f => !f[0].startsWith("f:")).map(f => [f[1], RB_V(E, s.slice(1), f[0])]).filter(x => x[1] !== "")) : [], files = E ? Object.values(E).flatMap(s => (s && s.files ? Object.values(s.files).map(f => f.name) : [])) : [];
+    return `<tr><td><b>${h.n}</b></td><td>${tag(RS_KIND[h.kind] || h.kind, "p-warn")}</td><td style="white-space:normal;max-width:260px">${esc(h.why)}</td><td>${fdate(String(h.t).slice(0, 10))}</td><td>${esc(userName(h.by))}</td><td>${esc(st)}</td><td class="mono">${esc(RB_V(E, 2, "projNo") || (h.egp && h.egp.no) || "–")}</td><td>${esc(RB_V(E, 4, "winner") || (h.award && tx(h.award.winner)) || "–")}${RB_V(E, 4, "price") || (h.award && h.award.price) ? ` · ${fmt(RB_V(E, 4, "price") || h.award.price)}` : ""}</td>
+      <td>${all.length || files.length ? `<details><summary class="btn ghost" style="display:inline-block">ดูข้อมูลรอบนี้</summary><dl class="kv" style="margin:6px 0 0;white-space:normal">${all.map(([l, v]) => `<dt>${esc(l)}</dt><dd>${esc(typeof v === "boolean" ? (v ? "ใช่" : "ไม่") : String(v))}</dd>`).join("")}${files.length ? `<dt>ไฟล์</dt><dd>${files.map(n => "📎 " + esc(n)).join("<br>")}</dd>` : ""}</dl></details>` : "–"}</td></tr>`; }).join("")}</tbody></table></div>`; }
+function rbPanel(c) { if (caseCon(c) || !caseReq(c) || !(isProcRole() || ROLE === "admin")) return "";
+  return `<form data-rb="${esc(c.id)}" class="inline-form" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end"><div class="f"><label>กรณี *</label><select name="kind">${Object.entries(RS_KIND).map(([k, t]) => `<option value="${k}">${t}</option>`).join("")}</select></div>
+    <div class="f" style="flex:1 1 320px"><label>เหตุผล *</label><input name="why" maxlength="500" placeholder="เช่น ไม่มีผู้เสนอราคา / ศาลปกครองให้ดำเนินการใหม่"></div><button class="btn primary" type="submit">จัดซื้อใหม่: นำส่ง e-GP ใหม่</button></form>
+    <div class="sub" style="margin-top:6px">ใช้ใบขอซื้อขอจ้างเดิม ข้อมูล e-GP รอบนี้ย้ายไปเป็นประวัติ แล้วเริ่มบันทึก e-GP ขั้นที่ 1 ใหม่ · ถ้าสำนัก/กองต้องแก้ใบขอ ใช้ "ยกเลิก / อุทธรณ์: ให้สำนัก/กองส่งใหม่"</div>`; }
+{ const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On()) return out; const p = rbPanel(c), h = rbHist(c);
+  if (p) out.push(cmPanel(3, 8, "จัดซื้อใหม่ (ยกเลิก / อุทธรณ์)", p)); if (h) out.push(cmPanel(3, 0.2, `ประวัติการจัดซื้อ: e-GP รอบก่อน (${c.egpHist.length} รอบ) · ตอนนี้รอบที่ ${c.egpHist.length + 1}`, h)); return out; }; }
+document.addEventListener("submit", e => { const f = e.target; if (!f || !f.matches || !f.matches("[data-rb]")) return; e.preventDefault(); const c = caseOf(f.dataset.rb), d = new FormData(f); if (!c) return;
+  if (!confirm("ยืนยันจัดซื้อใหม่: ข้อมูล e-GP รอบนี้จะย้ายไปเป็นประวัติ")) return; const m = caseRebid(c, String(d.get("kind")), String(d.get("why") || "")); if (m) { toast(m); return; } commit(); route(); toast("เริ่ม e-GP รอบใหม่แล้ว ข้อมูลรอบก่อนอยู่ในประวัติ"); });
+
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
 // With no signed-in session, the sign-in screen opens on top.
