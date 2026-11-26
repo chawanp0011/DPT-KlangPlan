@@ -9,3 +9,6 @@ function p99VarRows(c) { return (c.vars || []).map((v, j) => { const kind = v.ki
   let h = kxContractView(c); const rows = p99VarRows(c), i = h.indexOf('<table class="cx-amends">'); if (i < 0) return h;
   const j = h.indexOf("</tbody>", i); if (j < 0) return h; let body = h.slice(h.indexOf("<tbody>", i) + 7, j);
   if (/ยังไม่มีการแก้ไขสัญญา/.test(body) && !/<td>\d/.test(body)) body = ""; return h.slice(0, h.indexOf("<tbody>", i) + 7) + body + rows + h.slice(j); }; }
+Object.assign(P99_VST, { prep: "เตรียมเอกสาร", check: "รอตรวจสอบ", draft: "ร่าง", sent: "ส่งแล้ว" });
+// P99: ความยาว (เมตร) is asked at e-GP step 4 (สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน); not on the contract form any more (data kept)
+{ const base = kxContractView; kxContractView = function (k) { const h = base(k); return m88On() ? h.replace(/<div class="f"><label>ความยาว \(เมตร\)<\/label><input[^>]*name="qLen"[^>]*><\/div>/, "") : h; }; }

@@ -31964,6 +31964,9 @@ function p99VarRows(c) { return (c.vars || []).map((v, j) => { const kind = v.ki
   let h = kxContractView(c); const rows = p99VarRows(c), i = h.indexOf('<table class="cx-amends">'); if (i < 0) return h;
   const j = h.indexOf("</tbody>", i); if (j < 0) return h; let body = h.slice(h.indexOf("<tbody>", i) + 7, j);
   if (/ยังไม่มีการแก้ไขสัญญา/.test(body) && !/<td>\d/.test(body)) body = ""; return h.slice(0, h.indexOf("<tbody>", i) + 7) + body + rows + h.slice(j); }; }
+Object.assign(P99_VST, { prep: "เตรียมเอกสาร", check: "รอตรวจสอบ", draft: "ร่าง", sent: "ส่งแล้ว" });
+// P99: ความยาว (เมตร) is asked at e-GP step 4 (สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน); not on the contract form any more (data kept)
+{ const base = kxContractView; kxContractView = function (k) { const h = base(k); return m88On() ? h.replace(/<div class="f"><label>ความยาว \(เมตร\)<\/label><input[^>]*name="qLen"[^>]*><\/div>/, "") : h; }; }
 
 /* ---- 98zzzzzs-klang-manage99.js ---- */
 // ---------- P99: บริหารสัญญาและเบิกจ่าย, summary cards and the advance in million baht ----------
@@ -31986,8 +31989,9 @@ function m99Cards(k) { const x = kxOf(k), A = kxAmount(x), dl = x.dl || [], adv 
   if (x.adv && x.adv.has) { const pct = Number(x.adv.pctSet != null ? x.adv.pctSet : x.adv.pct) || 15, P = x.adv.paid, def = P ? P.amt : Math.round(kxAmount(x) * Math.min(15, pct)) / 100;
     h = h.replace(/<div class="f"><label>จำนวนเงิน Advance \(บาท, ไม่เกิน 15%\)<\/label><input type="number" name="amt"([^>]*)><\/div>/, `<div class="f"><label>เบิกจ่ายเงิน Advance ${fmt(pct, pct % 1 ? 2 : 0)}% (ลบ.)</label><input type="number" data-m99m min="0" step="0.0001" value="${Math.round(def / 100) / 1e4}"><input type="hidden" name="amt" value="${def}"><div class="sub">= <span data-m99b>${fmt(def)}</span> บาท · ไม่เกิน 15% ของวงเงินสัญญา</div></div>`);
     const dedPct = Number(x.adv.dedPct) > 0 ? Number(x.adv.dedPct) : pct; h = h.replace("<b>เบิกจ่ายเงิน Advance (เงินเบิกล่วงหน้า)</b>", `<b>เบิกจ่ายเงิน Advance (เงินเบิกล่วงหน้า)</b> <span class="sub">· หักคืนล่วงหน้า ${fmt(dedPct, dedPct % 1 ? 2 : 0)}% ต่อการเบิกแต่ละครั้ง จนครบ ${fmt(kxAdvAmt(x))} บาท</span>`); }
+  const advNote = x.adv && x.adv.has ? "" : `<div class="m88-adv" style="border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin:0 0 12px"><b>เบิกจ่ายเงิน Advance (เงินเบิกล่วงหน้า)</b><div class="sub">สัญญานี้ตั้งไว้ว่า "ไม่มีเงินเบิกล่วงหน้า" · ถ้ามี ให้เลือก "มี" และใส่ % ที่แท็บ สัญญาและสัญญาแก้ไข แล้วกล่อง "เบิกจ่ายเงิน Advance …% (ลบ.)" จะแสดงที่นี่</div></div>`;
   return `<style>.m99-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 12px}.m99-c{background:var(--panel,#fff);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.m99-c .l{font-size:12px;color:var(--muted,#64748b)}.m99-c b{font-size:20px}.m99-c .d{font-size:11.5px;color:var(--muted,#64748b)}.m99-bar{height:6px;background:var(--line,#e5e7eb);border-radius:99px;overflow:hidden;margin:4px 0 2px}.m99-bar i{display:block;height:100%;background:#16a34a}</style>`
-    + h.replace(/(<div class="body cx-manage"[^>]*>)/, `$1${m99Cards(k)}`); }; }
+    + h.replace(/(<div class="body cx-manage"[^>]*>)/, `$1${m99Cards(k)}${advNote}`); }; }
 document.addEventListener("input", e => { const t = e.target; if (!t || !t.matches || !t.matches("[data-m99m]")) return; const f = t.closest("form"), b = Math.round(Number(t.value) * 1e6 * 100) / 100;
   const h = f && f.querySelector('input[name="amt"]'); if (h) h.value = b > 0 ? b : ""; const s = f && f.querySelector("[data-m99b]"); if (s) s.textContent = fmt(b || 0); });
 // ---------- P99: ทำสัญญา, the defect warranty period (ระยะรับประกันความชำรุดบกพร่อง) ----------
