@@ -2440,7 +2440,7 @@
         ok("P88: procurement shows its menus in the order asked, the committee menus stay", JSON.stringify(navIds().filter(x => M88.proc.includes(x))) === JSON.stringify(M88.proc.filter(x => prSees(prPage(x)))) && !navIds().includes("today") && !navIds().includes("egp") && !navIds().includes("tor") && navIds().includes("cm-reg") && tx(prPage("cases").label) === "บริหารงบประมาณ", navIds());
         window.MENU_ALL = true; m88ApplyApps(); renderShell(); ok("P88: MENU_ALL shows every menu again (nothing deleted)", APP_IDS.includes("finance") && navIds().includes("today") && tx(prPage("reqn").label) === "ขอซื้อขอจ้าง"); window.MENU_ALL = false; m88ApplyApps();
         // Planning: the import, the details of its part, the unit and its amount
-        S.bi = null; login("plan"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("plan"); BI.view = "imp"; route(); await tick(300);
+        S.bi = null; login("plan"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("plan:budget"); BI.view = "imp"; route(); await tick(300);
         document.querySelector("#bi-sample").click(); for (let i = 0; i < 40 && !(S.bi && S.bi.rows && S.bi.rows.length); i++) await tick(300);
         BI.fy = biFy(S.bi.rows[0]); BI.view = "list"; route(); await tick(200);
         ok("P88: the item list has no money-plan columns and no money-plan filter", !!document.querySelector("table.bi88") && !/>ต\.ค\.</.test(document.querySelector("table.bi-table thead").innerHTML) && !document.querySelector('[data-pdf="mon"]'));
