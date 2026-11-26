@@ -32094,6 +32094,19 @@ function rm99Unit(id) { const ok = u => u && !u.retired && u.parent && u.id !== 
 function rm99Regs() { if (!S || ((S.rmLaw || []).length && (S.rmCond || []).length && (S.rmDocType || []).length)) return false; const src = SEEDS.sample && SEEDS.sample.seed && SEEDS.sample.seed(); if (!src) return false;
   let ch = false; [["rmLaw"], ["rmCond"], ["rmDocType"]].forEach(([k]) => { if (!(S[k] || []).length && (src[k] || []).length) { S[k] = JSON.parse(JSON.stringify(src[k])); ch = true; } }); return ch; }
 { const base = rmSyncDocs; rmSyncDocs = function () { if (rm99Regs()) commit(); return base.apply(this, arguments); }; }
+// ---------- P99: the tabs of เตรียมคำของบประมาณ ----------
+// Asked for: Planning always sees the tab ตรวจสอบเอกสาร (the unit still sees it only after Planning has processed); no numbers in front of
+// the tab names; no drop-down of cases on the tabs ตรวจสอบเอกสาร and ส่งต่อและติดตาม: the name of the case is shown, with "← รายการเรื่อง".
+// Planning opening ตรวจสอบเอกสาร of a case not yet processed processes it (when it has been received and has files).
+RM_TABS.forEach(t => { t[1] = [String(t[1][0]).replace(/^\d+\s+/, ""), String(t[1][1]).replace(/^\d+\s+/, "")]; });
+if (VIEWS["rmake"]) { const base = VIEWS["rmake"]; VIEWS["rmake"] = function () { let h = base.apply(this, arguments); if (!m88On()) return h; const c = rmCur();
+  if (ROLE === "plan" && c && !c.ai && !h.includes('data-rmt="ai"')) h = h.replace(/(<button class="tab[^"]*" type="button" role="tab" aria-selected="[^"]*" data-rmt="in">[^<]*<\/button>)/, `$1<button class="tab" type="button" role="tab" aria-selected="false" data-rmt="ai">${tx(RM_TABS.find(t => t[0] === "ai")[1])}</button>`);
+  h = h.replace(/<div class="row" style="align-items:center;gap:8px;margin:0 0 10px"><label class="sub" for="rm-sel">[\s\S]*?<\/select>([\s\S]*?)<\/div>/, (m, st) => c ? `<div class="row" style="align-items:center;gap:10px;margin:0 0 10px"><button class="btn ghost" type="button" data-rm2back>← รายการเรื่อง</button><b style="font-weight:600">${esc(rmTitle(c))}</b><span class="sub mono">${esc(c.id)}</span>${st}</div>` : `<div class="row" style="margin:0 0 10px"><button class="btn ghost" type="button" data-rm2back>← รายการเรื่อง</button></div>`);
+  return h; }; }
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest('[data-rmt="ai"]') : null; if (!t || ROLE !== "plan" || !m88On()) return; const c = rmCur(); if (!c || c.ai) return; e.stopImmediatePropagation();
+  if (!["received", "processed", "returned"].includes(c.status)) { toast(c.status === "submitted" ? "รับเรื่องก่อน แล้วระบบจะประมวลผลและตรวจเอกสาร" : "เรื่องนี้ยังประมวลผลไม่ได้"); return; }
+  if (!c.files.length) { toast("ยังไม่มีไฟล์ให้ตรวจ แนบเอกสารที่แท็บรับเอกสารก่อน"); return; }
+  const m = rmProcess(c.id); if (m) { toast(m); return; } commit(); RM.tab = "ai"; RM.nw = false; route(); toast("ประมวลผลและตรวจเอกสารแล้ว"); }, true);
 
 /* ---- 98zzzzzo-klang-egp99.js ---- */
 // ---------- P99: ส่ง e-GP, the form cleaned to the latest follow-up file (ฟอร์มติดตาม 67 columns, group "e-GP") ----------
@@ -32170,6 +32183,19 @@ function p99BiPanel(c) { const r = p99BiOf(c); if (!r) return `<div class="sub">
     <div class="tbl-wrap" style="margin-top:8px"><table><thead><tr><th>แผนเงิน (บาท)</th>${M}<th class="n">รวม</th></tr></thead><tbody><tr><td>${r.planRev ? `ปรับแผนครั้งที่ ${r.planRev}` : "แผนตั้งต้น"}</td>${r.plan.map(v => `<td class="n">${v ? fmt(Math.round(v)) : "–"}</td>`).join("")}<td class="n"><b>${fmt(Math.round(r.plan.reduce((a, b) => a + b, 0)))}</b></td></tr></tbody></table></div>
     <div class="sub">${r.sent && r.sent.t ? `นำส่งสำนัก/กองเมื่อ ${fdate(String(r.sent.t).slice(0, 10))}` : ""}</div>`; }
 { const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On() || window.CASE_OLD) return out; out.push(cmPanel(1, 0, "รายละเอียดรายการงบประมาณ (กองแผนงาน)", p99BiPanel(c))); return out; }; }
+// P99: registers that are the same every year (พื้นที่, ตารางอ้างอิงรายจ่าย, ราคากลาง, the law/condition/document registers): no year selector; พื้นที่ is titled as its menu.
+{ const base = menuFyChip; menuFyChip = function () { if (m88On() && ["bq-geo", "bq-ref", "bq-cat", "rg-law", "rg-cond", "rg-doct"].includes(fyRouteId())) { document.querySelectorAll(".fy-filter").forEach(x => x.remove()); return; } return base.apply(this, arguments); }; }
+{ const p = typeof bPage === "function" ? bPage("bq-geo") : null; if (p) p.h1 = ["พื้นที่", "Areas"]; }
+if (VIEWS["bq-geo"]) { const base = VIEWS["bq-geo"]; VIEWS["bq-geo"] = function () { const h = base.apply(this, arguments); return m88On() ? h.replace("ตารางพื้นที่และพิกัด", "พื้นที่") : h; }; }
+// P99: e-GP step 4 has its own heading "สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน": the งบผูกพัน switch and the Budget Bureau and debt-extension
+// fields are grouped under it, after the fields of the evaluation.
+const P99_BB = ["bbLetter", "bbOkLetter", "bbAmount", "cab", "cabLetter", "cabFrom", "cabTo"];
+function p99BbGroup() { if (!m88On()) return; document.querySelectorAll('form[data-e7$="|4"]').forEach(f => { if (f.dataset.p99bb) return; f.dataset.p99bb = "1";
+  const box = f.querySelector('input[name="multi"]'), sw = box && box.closest(".f"); if (!sw) return; const lab = sw.querySelector("label"); if (lab) lab.lastChild.textContent = " งบผูกพัน (ต้องส่ง สงป. พิจารณาความเหมาะสม และขยายระยะเวลาก่อหนี้ผูกพัน)";
+  const h = document.createElement("div"); h.className = "f"; h.style.cssText = "flex:1 1 100%;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)"; h.innerHTML = `<b style="font-weight:600">สงป. พิจารณา / ขยายระยะเวลาก่อหนี้ผูกพัน</b>${box.checked ? "" : `<div class="sub">ติ๊กงบผูกพันเพื่อกรอก ส่ง สงป. พิจารณา, สงป. พิจารณาแล้ว, วงเงินที่ สงป. เห็นชอบ และการขยายระยะเวลาก่อหนี้ผูกพัน</div>`}`;
+  const last = f.querySelector('button[type="submit"]') ? f.querySelector('button[type="submit"]').closest("div") : null; f.insertBefore(h, last); f.insertBefore(sw, last);
+  P99_BB.forEach(n => { const el = f.querySelector(`[name="${n}"]`), fd = el && el.closest(".f"); if (fd) f.insertBefore(fd, last); }); }); }
+(function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(p99BbGroup, 50); }).observe(document.body, { childList: true, subtree: true }); })();
 
 /* ---- 98zzzzzr-klang-conamend99.js ---- */
 // ---------- P99: one place for contract amendments ----------
@@ -32226,6 +32252,7 @@ document.addEventListener("change", e => { const t = e.target; if (!t || !t.matc
 /* ---- 98zzzzzt-klang-trkio99.js ---- */
 // ---------- P99: steps 2 จัดทำข้อมูล, 3 ส่ง e-GP, 4 ทำสัญญา: download the follow-up form, import it back ----------
 // Asked for: a button to download แบบฟอร์มติดตามความก้าวหน้าการดำเนินงาน and a button to import it, to update the data.
+// The two buttons sit at the top right of the case (next to ประวัติ) on steps 2-4; the import shows what the reader found before it updates.
 // Download: the form of the latest layout (m88Track67) with this item's row only. Import: the row of this item (found by the GFMIS
 // code, or the only data row) updates the columns of the step it is imported from, nothing else:
 //   step 2 (สำนัก/กอง): ไร่ ครัวเรือน แห่ง, สำรวจ/ออกแบบ, แบบแล้วเสร็จ, ประมาณราคา, จัดทำ TOR;
@@ -32243,9 +32270,10 @@ const t99Date = v => { if (v === "" || v == null) return ""; if (typeof v === "n
 const t99Range = v => String(v || "").split(/\s+-\s+|\s+ถึง\s+/).map(t99Date);
 const t99Num = v => { const n = Number(String(v == null ? "" : v).replace(/,/g, "")); return v === "" || v == null || isNaN(n) ? "" : n; };
 const t99Baht = v => { const n = t99Num(v); return n === "" ? "" : Math.round(n * 1e6 * 100) / 100; };
-async function t99Import(c, step, file) { const rows = await xlsxRead(await file.arrayBuffer(), 200), { r } = t99Row(c); if (!r) return "ไม่พบรายการนี้ในแบบฟอร์มติดตาม";
+let T99_LOG = [];
+async function t99Import(c, step, file, rowsIn) { const rows = rowsIn || await xlsxRead(await file.arrayBuffer(), 200), { r } = t99Row(c); if (!r) return "ไม่พบรายการนี้ในแบบฟอร์มติดตาม";
   const data = rows.slice(5).filter(x => x && x.some(v => v !== "" && v != null)), row = data.find(x => String(x[4] || "").trim() && String(x[4]).trim() === String(r.code || "").trim()) || (data.length === 1 ? data[0] : null);
-  if (!row) return "ไม่พบแถวของรายการนี้ในไฟล์ (ตรวจรหัสงบประมาณ GFMIS)"; const v = i => (row[i] == null ? "" : row[i]); let n = 0; const set = (o, k, x) => { if (x !== "" && x != null && o[k] !== x) { o[k] = x; n++; } };
+  if (!row) return "ไม่พบแถวของรายการนี้ในไฟล์ (ตรวจรหัสงบประมาณ GFMIS)"; const v = i => (row[i] == null ? "" : row[i]); let n = 0; const set = (o, k, x) => { if (x !== "" && x != null && o[k] !== x) { T99_LOG.push([k, o[k], x]); o[k] = x; n++; } };
   const E = egp7Of(c);
   if (step === 2) { const rq = caseReq(c) || S.reqn.find(q => q.plan === c.plan); if (rq) { rq.detail = rq.detail || {}; set(rq.detail, "qRai", t99Num(v(15))); set(rq.detail, "qHouse", t99Num(v(16))); set(rq.detail, "qPlace", t99Num(v(17))); }
     set(E.s2, "survey", t99Date(v(18))); set(E.s2, "designDone", t99Date(v(19))); set(E.s2, "estDate", t99Date(v(20))); set(E.s2, "torDone", t99Date(v(21))); }
@@ -32260,13 +32288,89 @@ async function t99Import(c, step, file) { const rows = await xlsxRead(await file
     set(x, "po", String(v(49)).trim()); set(x, "qLen", t99Num(v(37))); set(x, "work", t99Num(v(51))); set(x, "problem", String(v(54)).trim()); }
   if (!n) return "ไม่มีค่าที่เปลี่ยน (ไฟล์มีค่าเท่าเดิม หรือช่องของขั้นนี้ว่าง)"; (c.events = c.events || []).push({ t: nowIso(), by: me().id, ev: "trkimport", note: `นำเข้าแบบฟอร์มติดตาม ขั้น ${T99_STEP[step]} ${n} ค่า` });
   audit(["นำเข้าแบบฟอร์มติดตามความก้าวหน้า", "Imported the follow-up form"], `${c.id} ขั้น ${step} · ${n} ค่า`); return `ok:${n}`; }
-function t99Panel(c, step) { return `<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" data-t99dl="${esc(c.id)}">ดาวน์โหลดแบบฟอร์มติดตามความก้าวหน้าการดำเนินงาน</button>
-  <label class="btn primary" style="cursor:pointer;margin:0">นำเข้า<input type="file" accept=".xlsx" hidden data-t99im="${esc(c.id)}|${step}"></label>
-  <span class="sub">นำเข้าแล้วระบบอัปเดตเฉพาะคอลัมน์ของขั้น ${T99_STEP[step]} ในแถวของรายการนี้ (จับคู่ด้วยรหัสงบประมาณ GFMIS)</span></div>`; }
-{ const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On()) return out; [2, 3, 4].forEach(s => out.push(cmPanel(s, -1, "แบบฟอร์มติดตามความก้าวหน้า", t99Panel(c, s)))); return out; }; }
-document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-t99dl]") : null; if (!t) return; const m = t99Download(S.cases.find(c => c.id === t.dataset.t99dl)); toast(m || "ดาวน์โหลดแบบฟอร์มแล้ว"); });
+// the buttons sit at the top right of the case, for the step shown (2, 3, 4)
+const T99_COLS = { 2: [15, 21], 3: [22, 44], 4: [45, 54] };
+const T99_LBL = { qRai: "ไร่", qHouse: "ครัวเรือน", qPlace: "แห่ง", survey: "สำรวจ/ออกแบบ", designDone: "แบบแล้วเสร็จ", estDate: "ประมาณราคา", torDone: "จัดทำ TOR แล้วเสร็จ", projNo: "เลขที่โครงการ (e-bidding)", date: "วันที่", refPrice: "ราคากลาง (บาท)", refDate: "เห็นชอบราคากลาง", reqDate: "เห็นชอบรายงานขอซื้อขอจ้าง",
+  draft: "มีประกาศร่าง TOR", draftDate: "ประกาศร่าง TOR ตั้งแต่", draftEnd: "ประกาศร่าง TOR ถึง", inviteDate: "ประกาศขายแบบ/เชิญชวน ตั้งแต่", inviteEnd: "ประกาศขายแบบ/เชิญชวน ถึง", bidDate: "เสนอราคา", start: "เริ่ม", end: "ถึง", round: "ครั้งที่ประกวดราคา", winner: "ผู้เสนอราคาได้ต่ำสุด", price: "วงเงินที่เสนอ (บาท)",
+  bbLetter: "ส่ง สงป. พิจารณา", bbOkLetter: "สงป. พิจารณาแล้ว", bbAmount: "วงเงินที่ สงป. เห็นชอบ (บาท)", cab: "ขยายก่อหนี้ผูกพัน", cabLetter: "ขยายก่อหนี้ผูกพัน เลขที่หนังสือ", approve: "อนุมัติจ้าง", days: "จำนวนวัน", winnerDate: "ประกาศผู้ชนะ", callDate: "แจ้งผู้รับจ้างลงนาม", offerDate: "เสนอลงนามสัญญา",
+  no: "เลขที่สัญญา", amount: "วงเงินสัญญา (บาท)", po: "เลขที่ PO", qLen: "ความยาว (เมตร)", work: "ผลการดำเนินงานสะสม (%)", problem: "ปัญหา/อุปสรรค" };
+function t99Bar(c, step) { return `<div class="t99-bar"><button class="btn" type="button" data-t99dl="${esc(c.id)}">ดาวน์โหลดแบบฟอร์มติดตามความก้าวหน้า</button><label class="btn primary" style="cursor:pointer;margin:0">นำเข้าเอกสารรายการงบประมาณ<input type="file" accept=".xlsx" hidden data-t99im="${esc(c.id)}|${step}"></label></div>`; }
+function t99Place() { if (!m88On()) return; const tab = document.querySelector('button.cphase[aria-selected="true"]'), c = typeof CASE_OPEN !== "undefined" && CASE_OPEN ? S.cases.find(x => x.id === CASE_OPEN) : null, old = document.querySelector(".t99-bar");
+  const step = tab ? Number(tab.dataset.cphase) : 0; if (!c || ![2, 3, 4].includes(step)) { if (old) old.remove(); return; } if (old && old.dataset.k === c.id + step && old.isConnected) return; if (old) old.remove();
+  const h = [...document.querySelectorAll("button, a")].find(b => b.textContent.trim() === "ประวัติ" && b.offsetParent), host = h ? h.parentElement : null; if (!host) return;
+  const d = document.createElement("div"); d.innerHTML = t99Bar(c, step); const bar = d.firstChild; bar.dataset.k = c.id + step; host.appendChild(bar); }
+(function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(t99Place, 40); }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["aria-selected"] });
+  const st = document.createElement("style"); st.textContent = ".t99-bar{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;justify-content:flex-end}.t99-back{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:90}.t99-dlg{position:fixed;z-index:91;top:4vh;left:50%;transform:translateX(-50%);width:min(1100px,95vw);max-height:92vh;display:flex;flex-direction:column;background:var(--surface,#fff);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.3)}.t99-dlg header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}.t99-body{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 18px;overflow:auto}.t99-body h4{margin:0 0 8px;font-size:14px}.t99-doc td,.t99-doc th,.t99-ai td,.t99-ai th{padding:5px 8px;border-bottom:1px solid var(--line);font-size:12.5px;vertical-align:top}.t99-doc tr.hit td,.t99-doc tr.hit th{background:#eff6ff}.t99-doc th{text-align:left;color:var(--muted,#64748b);font-weight:500;width:45%}.t99-ai .new{color:#16a34a;font-weight:600}.t99-ai .old{color:var(--muted,#94a3b8);text-decoration:line-through}.t99-dlg footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}@media(max-width:800px){.t99-body{grid-template-columns:1fr}}"; document.head.appendChild(st); })();
+// the AI step: read the document, show it and what was found, apply on confirm
+const T99 = { pend: null };
+async function t99Preview(c, step, file) { const rows = await xlsxRead(await file.arrayBuffer(), 200), rq0 = caseReq(c) || S.reqn.find(q => q.plan === c.plan), k0 = caseCon(c);
+  const snap = JSON.stringify({ e: c.egp7 || null, rq: rq0 ? rq0.detail || null : null, cx: k0 ? k0.cx || null : null, ev: (c.events || []).length });
+  T99_LOG = []; const m = await t99Import(c, step, null, rows); const log = T99_LOG.slice(), back = JSON.parse(snap); c.egp7 = back.e; if (rq0) rq0.detail = back.rq; if (k0) k0.cx = back.cx; if (c.events) c.events.length = back.ev; if (!/^ok:/.test(m)) return m;
+  const head = rows[4] || [], data = rows.slice(5).filter(x => x && x.some(v => v !== "" && v != null)), { r } = t99Row(c), row = data.find(x => String(x[4] || "").trim() === String(r.code || "").trim()) || data[0], [a, b] = T99_COLS[step];
+  T99.pend = { c, step, rows }; const show = v => (v === "" || v == null ? "–" : esc(String(v)));
+  document.body.insertAdjacentHTML("beforeend", `<div class="t99-back" data-t99x></div><div class="t99-dlg" role="dialog" aria-modal="true"><header><b>AI อ่านเอกสารรายการงบประมาณ</b><span class="sub">${esc(file.name)} · ขั้น ${T99_STEP[step]}</span><span style="flex:1"></span><button class="btn ghost" type="button" data-t99x>✕</button></header>
+    <div class="t99-body"><div><h4>เอกสาร: แถวของรายการนี้</h4><div class="sub" style="margin-bottom:6px">${esc(row[6] || r.name)} · GFMIS ${esc(row[4] || "")}</div><table class="t99-doc">${head.map((h, i) => (row[i] === "" || row[i] == null) && !(i >= a && i <= b) ? "" : `<tr class="${i >= a && i <= b ? "hit" : ""}"><th>${esc(String(h || "").replace(/\n/g, " "))}</th><td>${show(row[i])}</td></tr>`).join("")}</table><div class="sub" style="margin-top:6px">แถบสีฟ้า = คอลัมน์ของขั้นนี้ที่ระบบใช้</div></div>
+    <div><h4>ข้อมูลที่ AI ดึงได้ (${log.length} ค่า)</h4><table class="t99-ai"><thead><tr><th>ช่อง</th><th>ในระบบ</th><th>จากเอกสาร</th></tr></thead><tbody>${log.map(([k, o, n]) => `<tr><td>${esc(T99_LBL[k] || k)}</td><td class="old">${show(o)}</td><td class="new">${show(n)}</td></tr>`).join("")}</tbody></table>
+      <div class="sub" style="margin-top:8px">ระบบอ่านแถวที่รหัสงบประมาณ GFMIS ตรงกับรายการนี้ แปลงวันที่ (พ.ศ.) และจำนวนเงิน (ลบ. เป็นบาท) ให้ ตรวจแล้วกดอัปเดต (ตัวอ่านใช้กฎคงที่ ไม่ใช่โมเดลภาษา)</div></div></div>
+    <footer><button class="btn ghost" type="button" data-t99x>ยกเลิก</button><button class="btn primary" type="button" data-t99ok>อัปเดตข้อมูล ${log.length} ค่า</button></footer></div>`); return ""; }
+const t99Close = () => { document.querySelectorAll(".t99-back,.t99-dlg").forEach(x => x.remove()); T99.pend = null; };
+document.addEventListener("click", async e => { const t = e.target && e.target.closest ? e.target : null; if (!t) return;
+  const dl = t.closest("[data-t99dl]"); if (dl) { const m = t99Download(S.cases.find(c => c.id === dl.dataset.t99dl)); toast(m || "ดาวน์โหลดแบบฟอร์มแล้ว"); return; }
+  if (t.closest("[data-t99x]")) { t99Close(); return; }
+  if (t.closest("[data-t99ok]") && T99.pend) { const { c, step, rows } = T99.pend; T99_LOG = []; const m = await t99Import(c, step, null, rows); t99Close(); if (/^ok:/.test(m)) { commit(); route(); toast(`อัปเดตแล้ว ${m.slice(3)} ค่า`); } else toast(m); } });
 document.addEventListener("change", async e => { const t = e.target; if (!t || !t.matches || !t.matches("[data-t99im]") || !t.files[0]) return; const [id, s] = t.dataset.t99im.split("|"), c = S.cases.find(x => x.id === id);
-  try { const m = await t99Import(c, Number(s), t.files[0]); if (/^ok:/.test(m)) { commit(); route(); toast(`นำเข้าแล้ว อัปเดต ${m.slice(3)} ค่า`); } else toast(m); } catch (err) { toast("อ่านไฟล์ไม่ได้: " + (err.message || err)); } t.value = ""; });
+  try { const m = await t99Preview(c, Number(s), t.files[0]); if (m) toast(m); } catch (err) { toast("อ่านไฟล์ไม่ได้: " + (err.message || err)); } t.value = ""; });
+
+/* ---- 98zzzzzu-klang-exec99.js ---- */
+// ---------- P99: แดชบอร์ดผู้บริหาร as an infographic of the budget ----------
+// Asked for: the executive dashboard is broken and not nice; redo it as an infographic to see the budget in detail.
+// One page for the year chosen, read from the same data as the other pages (prDtRows: budget, monthly plan and result by payment
+// date; the follow-up stages p92St; the groups of d96Items):
+//   the headline (budget, paid, % paid ring, plan to date, contracts signed), the money flow (budget -> contracted -> paid -> left),
+//   the budget by งบรายจ่าย and by ประเภท, the units (budget and paid), the procurement pipeline by stage, the plan and result by
+//   month (cumulative), and what needs attention. The older content of the page is not shown (MENU_ALL shows the page as before).
+const X99_PAL = ["#3b4fa8", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6", "#64748b"];
+const x99M = v => fmt(v / 1e6, v >= 1e9 ? 0 : 2);
+function x99Ring(pct, col, label) { const r = 54, c = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pct));
+  return `<svg viewBox="0 0 140 140" width="140" height="140" role="img" aria-label="${esc(label)} ${fmt(p, 1)}%"><circle cx="70" cy="70" r="${r}" fill="none" stroke="var(--line,#e5e7eb)" stroke-width="14"/><circle cx="70" cy="70" r="${r}" fill="none" stroke="${col}" stroke-width="14" stroke-linecap="round" stroke-dasharray="${c * p / 100} ${c}" transform="rotate(-90 70 70)"/><text x="70" y="68" text-anchor="middle" font-size="24" font-weight="700" fill="currentColor">${fmt(p, 1)}%</text><text x="70" y="88" text-anchor="middle" font-size="11" fill="var(--muted,#64748b)">${esc(label)}</text></svg>`; }
+function x99Donut(parts) { const tot = parts.reduce((s, p) => s + p[1], 0) || 1, r = 50, c = 2 * Math.PI * r; let off = 0;
+  return `<svg viewBox="0 0 130 130" width="130" height="130">${parts.map(([n, v], i) => { const l = c * v / tot, s = `<circle cx="65" cy="65" r="${r}" fill="none" stroke="${X99_PAL[i % 8]}" stroke-width="20" stroke-dasharray="${l} ${c - l}" stroke-dashoffset="${-off}" transform="rotate(-90 65 65)"><title>${esc(n)} ${x99M(v)} ลบ.</title></circle>`; off += l; return s; }).join("")}</svg>`; }
+function x99Bars(rows, max, opt) { return rows.map(([n, b, a], i) => `<div class="x99-br"><div class="x99-bl" title="${esc(n)}">${esc(n)}</div><div class="x99-bt"><i style="width:${Math.max(1, b / max * 100)}%;background:${opt && opt.one ? opt.one : X99_PAL[i % 8]}33"></i>${a != null ? `<b style="width:${Math.max(0, a / max * 100)}%;background:${opt && opt.one ? opt.one : X99_PAL[i % 8]}"></b>` : ""}</div><div class="x99-bv">${x99M(b)}${a != null ? `<span class="sub"> · จ่าย ${b ? fmt(a / b * 100, 0) : 0}%</span>` : ""}</div></div>`).join(""); }
+function x99Line(P, A, mi) { const W = 560, H = 170, cp = [], ca = []; P.reduce((s, v, i) => (cp[i] = s + v), 0); A.reduce((s, v, i) => (ca[i] = s + v), 0); const mx = Math.max(1, ...cp, ...ca), x = i => 30 + i * (W - 50) / 11, y = v => H - 22 - v / mx * (H - 40);
+  const path = (arr, n) => arr.slice(0, n).map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="แผนและผลสะสมรายเดือน">${[0, .5, 1].map(f => `<line x1="30" x2="${W - 20}" y1="${y(mx * f)}" y2="${y(mx * f)}" stroke="var(--line,#e5e7eb)"/><text x="26" y="${y(mx * f) + 4}" text-anchor="end" font-size="10" fill="var(--muted,#64748b)">${x99M(mx * f)}</text>`).join("")}
+    ${P.map((v, i) => `<rect x="${x(i) - 7}" y="${y(v)}" width="6" height="${H - 22 - y(v)}" fill="#94a3b8" opacity=".5"/><rect x="${x(i) + 1}" y="${y(A[i])}" width="6" height="${H - 22 - y(A[i])}" fill="#2563eb" opacity="${i <= mi ? .55 : 0}"/><text x="${x(i)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--muted,#64748b)">${BI_MON[i]}</text>`).join("")}
+    <path d="${path(cp, 12)}" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="5 4"/><path d="${path(ca, mi + 1)}" fill="none" stroke="#2563eb" stroke-width="3"/><line x1="${x(mi)}" x2="${x(mi)}" y1="10" y2="${H - 22}" stroke="#f59e0b" stroke-dasharray="3 3"/></svg>`; }
+function x99Page(fy) { const it = d96Items(fy), D = prDtRows(fy, false), B = prTrackBook(fy)[0].rows.slice(5), mi = Math.min(11, prMonIdx(TODAY)), sum = (l, k) => l.reduce((s, x) => s + (x[k] || 0), 0);
+  const bud = sum(it, "B"), paid = sum(it, "A"), plan = sum(it, "P"), pct = bud ? paid / bud * 100 : 0, P = Array(12).fill(0), A = Array(12).fill(0); D.forEach(r => { r.plan.forEach((v, i) => (P[i] += v)); r.act.forEach((v, i) => (A[i] += v)); });
+  const st = {}, con = { n: 0, amt: 0 }; D.forEach((r, i) => { const s = B[i] ? p92St(B[i]) : "s0"; st[s] = (st[s] || 0) + 1; const v = B[i] ? Number(String(B[i][47]).replace(/,/g, "")) || 0 : 0; if (v) { con.n++; con.amt += v * 1e6; } });
+  const grp = k => { const G = {}; it.forEach(x => { const key = typeof k === "function" ? k(x) : x[k], g = (G[key] = G[key] || [key, 0, 0]); g[1] += x.B; g[2] += x.A; }); return Object.values(G).sort((a, b) => b[1] - a[1]); };
+  const kinds = grp(x => (x.b && x.b.kind) || "ไม่ระบุ"), types = grp("type"), units = grp("unit"), umax = Math.max(1, ...units.map(u => u[1])), tmax = Math.max(1, ...types.map(u => u[1]));
+  const late = it.filter(x => x.P > 0 && x.A < x.P * 0.7), lateU = units.map(([n, b, a]) => [n, b, a, b ? a / b : 0]).sort((a, b) => a[3] - b[3]).slice(0, 5);
+  const flow = [["งบประมาณ", bud, "#3b4fa8"], ["ทำสัญญาแล้ว", con.amt, "#8b5cf6"], ["เบิกจ่ายแล้ว", paid, "#10b981"], ["คงเหลือ", Math.max(0, bud - paid), "#f59e0b"]], fmax = Math.max(1, ...flow.map(f => f[1]));
+  const stages = (typeof P92_ST !== "undefined" ? P92_ST : []).filter(([k]) => k !== "sx"), smax = Math.max(1, ...stages.map(([k]) => st[k] || 0));
+  return `<style>.x99{display:grid;gap:14px}.x99-card{background:var(--panel,#fff);border:1px solid var(--line);border-radius:14px;padding:16px 18px}.x99-card h3{margin:0 0 10px;font-size:15px}.x99-g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px}.x99-g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.x99-hero{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,#1e3a8a,#3b4fa8 55%,#0ea5e9);color:#fff;border:0}.x99-hero .sub{color:#dbeafe}.x99-kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.x99-kp div{background:rgba(255,255,255,.12);border-radius:10px;padding:10px 12px}.x99-kp b{display:block;font-size:22px}.x99-hero svg text{fill:#fff}.x99-hero svg circle:first-child{stroke:rgba(255,255,255,.25)}
+.x99-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end}.x99-fl{display:flex;flex-direction:column;gap:6px}.x99-fl i{display:block;border-radius:8px 8px 0 0}.x99-fl b{font-size:18px}
+.x99-br{display:grid;grid-template-columns:minmax(0,170px) 1fr 140px;gap:8px;align-items:center;font-size:12.5px;margin:5px 0}.x99-bl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.x99-bt{position:relative;height:14px}.x99-bt i,.x99-bt b{position:absolute;left:0;top:0;bottom:0;border-radius:4px}.x99-bv{text-align:right;font-variant-numeric:tabular-nums}
+.x99-lg{display:flex;flex-direction:column;gap:6px;font-size:12.5px}.x99-lg span{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}.x99-fun{display:flex;flex-direction:column;gap:5px}.x99-fun div{display:grid;grid-template-columns:200px 1fr 40px;gap:8px;align-items:center;font-size:12.5px}.x99-fun i{display:block;height:18px;border-radius:4px;background:linear-gradient(90deg,#3b4fa8,#0ea5e9)}
+.x99-al{display:flex;flex-direction:column;gap:6px}.x99-al div{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:8px;background:#fef2f2;font-size:12.5px}@media(max-width:700px){.x99-hero{grid-template-columns:1fr}.x99-br{grid-template-columns:110px 1fr 90px}.x99-fun div{grid-template-columns:120px 1fr 30px}}</style>
+  <div class="x99">
+  <div class="x99-card x99-hero">${x99Ring(pct, "#fde047", "เบิกจ่ายแล้ว")}<div><div class="sub">ภาพรวมงบประมาณ ปีงบประมาณ พ.ศ. ${fy}</div><h2 style="margin:2px 0 10px;font-size:22px">งบประมาณ ${x99M(bud)} ล้านบาท · ${it.length} รายการ</h2>
+    <div class="x99-kp"><div><span class="sub">เบิกจ่ายแล้ว</span><b>${x99M(paid)}</b><span class="sub">ล้านบาท</span></div><div><span class="sub">แผนสะสมถึง ${BI_MON[mi]}</span><b>${x99M(plan)}</b><span class="sub">ผลเทียบแผน ${plan ? fmt(paid / plan * 100, 1) : "–"}%</span></div><div><span class="sub">ลงนามสัญญาแล้ว</span><b>${con.n}</b><span class="sub">สัญญา ${x99M(con.amt)} ลบ.</span></div><div><span class="sub">ต่ำกว่าแผนเกิน 30%</span><b>${late.length}</b><span class="sub">รายการ</span></div></div></div></div>
+  <div class="x99-g2">
+   <div class="x99-card"><h3>เส้นทางของเงิน</h3><div class="x99-flow">${flow.map(([n, v, c]) => `<div class="x99-fl"><i style="height:${Math.max(6, v / fmax * 150)}px;background:${c}"></i><span class="sub">${n}</span><b>${x99M(v)}</b><span class="sub">${bud ? fmt(v / bud * 100, 0) : 0}% ของงบ</span></div>`).join("")}</div></div>
+   <div class="x99-card"><h3>แผนและผลการเบิกจ่ายสะสม (ล้านบาท)</h3>${x99Line(P, A, mi)}<div class="sub">เส้นประ = แผนสะสม · เส้นน้ำเงิน = ผลสะสมตามวันที่จ่าย · แท่ง = รายเดือน · เส้นส้ม = เดือนปัจจุบัน</div></div></div>
+  <div class="x99-g3">
+   <div class="x99-card"><h3>ตามงบรายจ่าย</h3><div style="display:flex;gap:14px;align-items:center">${x99Donut(kinds.map(k => [k[0], k[1]]))}<div class="x99-lg">${kinds.map((k, i) => `<div><span style="background:${X99_PAL[i % 8]}"></span>${esc(k[0])} <b>${x99M(k[1])}</b> <span class="sub">(${bud ? fmt(k[1] / bud * 100, 0) : 0}%)</span></div>`).join("")}</div></div></div>
+   <div class="x99-card"><h3>ตามประเภทรายการ</h3>${x99Bars(types, tmax)}<div class="sub">แถบอ่อน = งบประมาณ · แถบเข้ม = เบิกจ่ายแล้ว</div></div>
+   <div class="x99-card"><h3>ขั้นตอนจัดซื้อจัดจ้าง (จำนวนรายการ)</h3><div class="x99-fun">${stages.map(([k, t]) => `<div><span>${esc(t)}</span><i style="width:${Math.max(2, (st[k] || 0) / smax * 100)}%"></i><b>${st[k] || 0}</b></div>`).join("")}</div>${st.sx ? `<div class="sub" style="margin-top:6px">ยกเลิก ${st.sx} รายการ</div>` : ""}</div></div>
+  <div class="x99-g2">
+   <div class="x99-card"><h3>หน่วยงาน: งบประมาณและการเบิกจ่าย (ล้านบาท)</h3>${x99Bars(units.slice(0, 10), umax, { one: "#3b4fa8" })}${units.length > 10 ? `<div class="sub">และอีก ${units.length - 10} หน่วยงาน</div>` : ""}</div>
+   <div class="x99-card"><h3>ต้องติดตาม</h3><div class="x99-al">${lateU.map(([n, b, a, r]) => `<div><span>${esc(n)}</span><b style="color:#dc2626">เบิกจ่าย ${fmt(r * 100, 1)}%</b></div>`).join("")}</div>
+     <div class="sub" style="margin-top:8px">${late.length} รายการเบิกจ่ายต่ำกว่าแผนสะสมเกิน 30% · ดูรายการที่ ติดตามการเบิกจ่าย</div></div></div></div>`; }
+if (VIEWS["od-dash"]) { const base = VIEWS["od-dash"]; VIEWS["od-dash"] = function () { if (!m88On()) return base.apply(this, arguments); let s = ""; try { s = x99Page(BI.fy); } catch (e) { s = `<div class="sub">สรุปไม่ได้: ${esc(e && e.message)}</div>`; }
+  const h = base.apply(this, arguments), t = document.createElement("template"); t.innerHTML = h; const hd = t.content.querySelector(".head"); if (hd) [...hd.children].forEach(ch => { if (!ch.matches(".headico") && !ch.querySelector("h1")) ch.remove(); }); return (hd ? hd.outerHTML : "") + prFySel() + s; }; }
 
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.

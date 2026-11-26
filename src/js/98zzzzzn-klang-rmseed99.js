@@ -46,3 +46,16 @@ function rm99Unit(id) { const ok = u => u && !u.retired && u.parent && u.id !== 
 function rm99Regs() { if (!S || ((S.rmLaw || []).length && (S.rmCond || []).length && (S.rmDocType || []).length)) return false; const src = SEEDS.sample && SEEDS.sample.seed && SEEDS.sample.seed(); if (!src) return false;
   let ch = false; [["rmLaw"], ["rmCond"], ["rmDocType"]].forEach(([k]) => { if (!(S[k] || []).length && (src[k] || []).length) { S[k] = JSON.parse(JSON.stringify(src[k])); ch = true; } }); return ch; }
 { const base = rmSyncDocs; rmSyncDocs = function () { if (rm99Regs()) commit(); return base.apply(this, arguments); }; }
+// ---------- P99: the tabs of เตรียมคำของบประมาณ ----------
+// Asked for: Planning always sees the tab ตรวจสอบเอกสาร (the unit still sees it only after Planning has processed); no numbers in front of
+// the tab names; no drop-down of cases on the tabs ตรวจสอบเอกสาร and ส่งต่อและติดตาม: the name of the case is shown, with "← รายการเรื่อง".
+// Planning opening ตรวจสอบเอกสาร of a case not yet processed processes it (when it has been received and has files).
+RM_TABS.forEach(t => { t[1] = [String(t[1][0]).replace(/^\d+\s+/, ""), String(t[1][1]).replace(/^\d+\s+/, "")]; });
+if (VIEWS["rmake"]) { const base = VIEWS["rmake"]; VIEWS["rmake"] = function () { let h = base.apply(this, arguments); if (!m88On()) return h; const c = rmCur();
+  if (ROLE === "plan" && c && !c.ai && !h.includes('data-rmt="ai"')) h = h.replace(/(<button class="tab[^"]*" type="button" role="tab" aria-selected="[^"]*" data-rmt="in">[^<]*<\/button>)/, `$1<button class="tab" type="button" role="tab" aria-selected="false" data-rmt="ai">${tx(RM_TABS.find(t => t[0] === "ai")[1])}</button>`);
+  h = h.replace(/<div class="row" style="align-items:center;gap:8px;margin:0 0 10px"><label class="sub" for="rm-sel">[\s\S]*?<\/select>([\s\S]*?)<\/div>/, (m, st) => c ? `<div class="row" style="align-items:center;gap:10px;margin:0 0 10px"><button class="btn ghost" type="button" data-rm2back>← รายการเรื่อง</button><b style="font-weight:600">${esc(rmTitle(c))}</b><span class="sub mono">${esc(c.id)}</span>${st}</div>` : `<div class="row" style="margin:0 0 10px"><button class="btn ghost" type="button" data-rm2back>← รายการเรื่อง</button></div>`);
+  return h; }; }
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest('[data-rmt="ai"]') : null; if (!t || ROLE !== "plan" || !m88On()) return; const c = rmCur(); if (!c || c.ai) return; e.stopImmediatePropagation();
+  if (!["received", "processed", "returned"].includes(c.status)) { toast(c.status === "submitted" ? "รับเรื่องก่อน แล้วระบบจะประมวลผลและตรวจเอกสาร" : "เรื่องนี้ยังประมวลผลไม่ได้"); return; }
+  if (!c.files.length) { toast("ยังไม่มีไฟล์ให้ตรวจ แนบเอกสารที่แท็บรับเอกสารก่อน"); return; }
+  const m = rmProcess(c.id); if (m) { toast(m); return; } commit(); RM.tab = "ai"; RM.nw = false; route(); toast("ประมวลผลและตรวจเอกสารแล้ว"); }, true);
