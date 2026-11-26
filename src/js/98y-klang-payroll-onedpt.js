@@ -82,7 +82,7 @@ Object.keys(SEEDS).forEach(k => {
 
 // ---------- file reading ----------
 async function odInflate(bytes) { const ds = new DecompressionStream("deflate-raw"), w = ds.writable.getWriter(); w.write(bytes); w.close(); return new Uint8Array(await new Response(ds.readable).arrayBuffer()); }
-async function xlsxRead(buf) {
+async function xlsxRead(buf, maxCols) { // maxCols: P99, the follow-up form has more than 30 columns
   const u8 = new Uint8Array(buf), dv = new DataView(buf), dec = new TextDecoder("utf-8"); let eocd = -1;
   for (let i = u8.length - 22; i >= Math.max(0, u8.length - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
   if (eocd < 0) throw new Error(L("ไม่ใช่ไฟล์ .xlsx (ไม่พบโครงสร้าง zip)", "Not an .xlsx file (no zip structure)"));
@@ -93,7 +93,7 @@ async function xlsxRead(buf) {
   if (!sheet) throw new Error(L("ไม่พบแผ่นงานในไฟล์", "No worksheet in the file"));
   const dom = t => new DOMParser().parseFromString(t, "application/xml"), sst = await read("xl/sharedStrings.xml"), shared = sst ? [...dom(sst).getElementsByTagName("si")].map(si => [...si.getElementsByTagName("t")].map(t => t.textContent).join("")) : [];
   const rows = [], colIdx = ref => { let c = 0; for (const ch of ref.replace(/\d+/g, "")) c = c * 26 + ch.charCodeAt(0) - 64; return c - 1; };
-  [...dom(await read(sheet)).getElementsByTagName("row")].slice(0, OD_ROWS_MAX + 1).forEach(r => { const row = []; [...r.getElementsByTagName("c")].forEach(c => { const i = colIdx(c.getAttribute("r") || "A1"); if (i >= OD_COLS_MAX) return; const t = c.getAttribute("t"), v = c.getElementsByTagName("v")[0], is = c.getElementsByTagName("is")[0]; let val = ""; if (t === "s" && v) val = shared[Number(v.textContent)] || ""; else if (t === "inlineStr" && is) val = [...is.getElementsByTagName("t")].map(x => x.textContent).join(""); else if (v) { const num = Number(v.textContent); val = t === "str" || t === "b" || t === "e" || isNaN(num) ? v.textContent : num; } while (row.length < i) row.push(""); row[i] = val; }); rows.push(row); });
+  [...dom(await read(sheet)).getElementsByTagName("row")].slice(0, OD_ROWS_MAX + 1).forEach(r => { const row = []; [...r.getElementsByTagName("c")].forEach(c => { const i = colIdx(c.getAttribute("r") || "A1"); if (i >= (maxCols || OD_COLS_MAX)) return; const t = c.getAttribute("t"), v = c.getElementsByTagName("v")[0], is = c.getElementsByTagName("is")[0]; let val = ""; if (t === "s" && v) val = shared[Number(v.textContent)] || ""; else if (t === "inlineStr" && is) val = [...is.getElementsByTagName("t")].map(x => x.textContent).join(""); else if (v) { const num = Number(v.textContent); val = t === "str" || t === "b" || t === "e" || isNaN(num) ? v.textContent : num; } while (row.length < i) row.push(""); row[i] = val; }); rows.push(row); });
   return rows;
 }
 function odCsv(text) {
