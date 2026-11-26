@@ -31849,6 +31849,15 @@ EGP7[1].t = "รายงานขอซื้อขอจ้าง ราคา
 // the days: a number above 0
 { const base = egp7Save; egp7Save = function (c, n, v, files) { if (n === 5 && "days" in v) { const d = v.days; if (d !== "" && !(Number(d) > 0)) return "จำนวนวันแล้วเสร็จต้องมากกว่า 0"; } return base(c, n, v, files); }; }
 
+/* ---- 98zzzzzp-klang-step5.js ---- */
+// ---------- P99: step 5 บริหารสัญญาและเบิกจ่าย without the older panels ----------
+// Asked for: take out, for now, the older sections that step 5 still showed: ส่งมอบและตรวจรับ, คณะกรรมการตรวจรับ, เบิกจ่ายตามงวด,
+// เบิกจ่ายเป็นครั้ง. The panel "ส่งมอบ ตรวจรับ และเบิกจ่าย" of the contract (98zzzv) holds that work now. Hidden, not deleted:
+// MENU_ALL (or window.STEP5_OLD = true) shows them again.
+const P99_STEP5_OLD = ["ส่งมอบและตรวจรับ", "คณะกรรมการตรวจรับ", "เบิกจ่ายตามงวด", "เบิกจ่ายเป็นครั้ง"];
+{ const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On() || window.STEP5_OLD) return out;
+  return out.filter(p => { const h = p && p.el && p.el.querySelector && p.el.querySelector(":scope > header h2"); return !(h && P99_STEP5_OLD.includes(h.textContent.trim())); }); }; }
+
 /* ---- 99-boot.js ---- */
 // Boot: pick the saved organization, load its state, draw the shell and the current page.
 // With no signed-in session, the sign-in screen opens on top.
