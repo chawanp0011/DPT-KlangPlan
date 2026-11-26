@@ -35,7 +35,7 @@ function m88All(on) { window.MENU_ALL = !!on; m88ApplyApps(); if (typeof renderS
 // labels that change only while the menus are trimmed (the full menu keeps its old names)
 const m88Label = (o, th, en) => { const old = o.label; Object.defineProperty(o, "label", { configurable: true, get: () => (m88On() ? [th, en] : old), set: v => { Object.defineProperty(o, "label", { value: v, writable: true, configurable: true }); } }); };
 { const d = NAV.find(n => n.id === "dashboard"); if (d) m88Label(d, "ติดตามความก้าวหน้า", "Progress"); const r = NAV.find(n => n.id === "rmake"); if (r) m88Label(r, "จัดเตรียมคำของบประมาณ", "Prepare the budget request"); }
-[["reqn", "ขอจัดซื้อจัดจ้าง", "Purchase requests"], ["cases", "บริหารงบประมาณ", "Budget management"], ["disb", "ติดตามการเบิกจ่าย", "Payment follow-up"], ["plan", "แผนจัดซื้อ (กองแผนงาน)", "Procurement plan"]].forEach(([id, th, en]) => { const p = prPage(id); if (p) m88Label(p, th, en); });
+[["reqn", "ขอจัดซื้อจัดจ้าง", "Purchase requests"], ["cases", "บริหารงบประมาณ", "Budget management"], ["disb", "ติดตามการเบิกจ่าย", "Payment follow-up"], ["plan", "แผนจัดซื้อ", "Procurement plan"]].forEach(([id, th, en]) => { const p = prPage(id); if (p) m88Label(p, th, en); });
 
 // ---------- the procurement pages: three new ones ----------
 const M88_ROLES = ["proc", "prochead", "div", "divhead", "plan", "exec", "fin", "finhead", "audit", "admin", "vchk1", "vchk2", "acc"];

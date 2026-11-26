@@ -1,0 +1,45 @@
+// ---------- P98: แผนเงิน, read only, by quarter; a click shows the months (plan / result) and the payments of the item ----------
+// Asked for: "ดึงข้อมูลมาแสดงอย่างเดียว ปรับให้เป็นแสดงแบบไตรมาสก่อน แล้วสามารถดูรายละเอียดรายเดือนได้ ทั้งแผน ผล ซึ่งผลดูจากการเบิกจ่ายของรายการนั้นๆ"
+// The plan comes from the budget item (r.plan, with its revision number); the result is what was paid, by the payment date (prDtRows act).
+// The editing of the earlier page (P95) is left out here; the revision history stays in the data.
+const MP98 = { open: null, q: "" };
+const MP98_Q = [[0, 3, "ไตรมาส 1", "ต.ค.–ธ.ค."], [3, 6, "ไตรมาส 2", "ม.ค.–มี.ค."], [6, 9, "ไตรมาส 3", "เม.ย.–มิ.ย."], [9, 12, "ไตรมาส 4", "ก.ค.–ก.ย."]];
+const mp98S = (a, i, j) => a.slice(i, j).reduce((s, v) => s + (Number(v) || 0), 0);
+function mp98Cell(p, a, past) { const pc = p ? a / p * 100 : 0, col = !past ? "var(--muted,#94a3b8)" : pc >= 90 ? "#16a34a" : pc >= 70 ? "#b45309" : "#dc2626";
+  return `<div class="mp98-c"><div class="mp98-r"><span class="sub">แผน</span><b>${p ? fmt(Math.round(p)) : "–"}</b></div><div class="mp98-r"><span class="sub">ผล</span><b style="color:#2563eb">${a || past ? fmt(Math.round(a)) : "–"}</b></div>
+    ${p ? `<div class="mp98-bar"><i style="width:${Math.min(100, pc)}%;background:${col}"></i></div><div class="mp98-pc" style="color:${col}">${past || a ? fmt(pc, 0) + "%" : "ยังไม่ถึง"}</div>` : ""}</div>`; }
+function mp98Months(r, a, mi) { const p = BI_MON.map((x, i) => Number(r.plan[i]) || 0); let cp = 0, ca = 0;
+  return `<div class="tbl-wrap"><table class="mp98-m"><thead><tr><th></th>${BI_MON.map((m, i) => `<th class="n ${i === mi ? "now" : ""}">${m}</th>`).join("")}<th class="n">รวม</th></tr></thead><tbody>
+    <tr><td>แผน</td>${p.map((v, i) => `<td class="n ${i === mi ? "now" : ""}">${v ? fmt(Math.round(v)) : "–"}</td>`).join("")}<td class="n"><b>${fmt(Math.round(p.reduce((s, v) => s + v, 0)))}</b></td></tr>
+    <tr><td style="color:#2563eb">ผล</td>${a.map((v, i) => `<td class="n ${i === mi ? "now" : ""}" style="color:${i <= mi && p[i] && v < p[i] * 0.8 ? "#dc2626" : "#2563eb"}">${i <= mi || v ? (v ? fmt(Math.round(v)) : "0") : ""}</td>`).join("")}<td class="n" style="color:#2563eb"><b>${fmt(Math.round(a.reduce((s, v) => s + v, 0)))}</b></td></tr>
+    <tr><td class="sub">แผนสะสม</td>${p.map((v, i) => `<td class="n sub ${i === mi ? "now" : ""}">${fmt(Math.round(cp += v))}</td>`).join("")}<td></td></tr>
+    <tr><td class="sub">ผลสะสม</td>${a.map((v, i) => { ca += v; return `<td class="n sub ${i === mi ? "now" : ""}">${i <= mi || v ? fmt(Math.round(ca)) : ""}</td>`; }).join("")}<td></td></tr></tbody></table></div>`; }
+PROC.mplan88 = () => { const fy = BI.fy, mine = ["div", "divhead"].includes(ROLE) ? me().unit : null, q = MP98.q.toLowerCase();
+  const all = m88BiRows().filter(r => biFy(r) === fy && (!mine || p95Units(r).some(u => u.unit === mine))), units = [...new Set(all.map(pdUnit))].sort((a, b) => a.localeCompare(b, "th")), f = M88.mu || "";
+  const D = prDtRows(fy, false), act = id => (D.find(x => x.id === id) || { act: Array(12).fill(0) }).act, mi = Math.min(11, prMonIdx(TODAY)), qNow = Math.floor(mi / 3);
+  const rows = all.filter(r => (!f || pdUnit(r) === f) && (!q || `${r.name} ${r.code || ""} ${pdUnit(r)}`.toLowerCase().includes(q)));
+  const P = Array(12).fill(0), A = Array(12).fill(0); rows.forEach(r => { r.plan.forEach((v, i) => (P[i] += Number(v) || 0)); act(r.id).forEach((v, i) => (A[i] += v)); });
+  const amt = rows.reduce((s, r) => s + (Number(r.amount) || 0), 0), pT = mp98S(P, 0, 12), aT = mp98S(A, 0, 12), pC = mp98S(P, 0, mi + 1), aC = mp98S(A, 0, mi + 1);
+  const kpi = (l, v, d, c) => `<div class="mp98-k" style="border-top:3px solid ${c}"><span class="sub">${l}</span><b>${v}</b><span class="sub">${d}</span></div>`, MB = v => fmt(v / 1e6, 2);
+  const itemRow = r => { const a = act(r.id), rev = r.planRev || 0, tp = mp98S(r.plan, 0, 12), ta = mp98S(a, 0, 12), on = MP98.open === r.id;
+    return `<tr class="${on ? "on" : ""}"><td><b style="font-weight:600">${esc(r.name)}</b><div class="sub">${esc(pdUnit(r))} · <span class="mono">${esc(r.code || r.id)}</span></div></td>
+      <td class="n">${rev ? `<span class="mp98-rev">ครั้งที่ ${rev}</span><div class="sub">${fdate(String(r.planHist[r.planHist.length - 1].t).slice(0, 10))}</div>` : `<span class="sub">แผนตั้งต้น</span>`}</td><td class="n">${fmt(Math.round(Number(r.amount) || 0))}</td>
+      ${MP98_Q.map(([i, j], k) => `<td class="${k === qNow ? "now" : ""}">${mp98Cell(mp98S(r.plan, i, j), mp98S(a, i, j), k <= qNow)}</td>`).join("")}
+      <td>${mp98Cell(tp, ta, true)}</td><td><button class="btn ghost" type="button" data-mp98="${esc(r.id)}">${on ? "ปิด" : "รายเดือน"}</button></td></tr>
+      ${on ? `<tr class="mp98-dt"><td colspan="9"><div class="mp98-dtb"><b>แผน / ผล รายเดือน</b> <span class="sub">ผล = เงินที่จ่ายจริงของรายการนี้ ตามวันที่การเงินบันทึกจ่าย (รวมเงินล่วงหน้า)</span>${mp98Months(r, a, mi)}${(() => { const it = d96Items(fy).find(y => y.r.id === r.id); return it ? `<b>การเบิกจ่ายของรายการ</b>${d96Detail(it).replace(/<div class="tbl-wrap"><table class="d96-m">[\s\S]*?<\/table><\/div>/, "")}` : ""; })()}</div></td></tr>` : ""}`; };
+  return `${prFySel()}<style>
+.mp98-ks{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:0 0 12px}.mp98-k{background:var(--panel,#fff);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.mp98-k b{font-size:20px}
+.mp98-t{border-collapse:separate;border-spacing:0;width:100%}.mp98-t th,.mp98-t td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}.mp98-t thead th{font-size:12px;text-align:center;background:var(--surface-2,#f8fafc);position:sticky;top:0;z-index:1}
+.mp98-t th.now,.mp98-t td.now{background:#fefce8}.mp98-t tr.on>td{background:var(--info-soft,#eff6ff)}.mp98-t td:first-child{min-width:240px;max-width:340px}.mp98-t tfoot td{background:var(--surface-2,#f1f5f9);font-weight:600;border-top:2px solid var(--line)}
+.mp98-c{min-width:118px}.mp98-r{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}.mp98-bar{height:5px;background:var(--line,#e5e7eb);border-radius:99px;overflow:hidden;margin-top:4px}.mp98-bar i{display:block;height:100%}.mp98-pc{font-size:11px;text-align:right;font-weight:600}
+.mp98-rev{display:inline-block;background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:600}
+.mp98-dt>td{background:var(--surface-2,#f8fafc)}.mp98-dtb{display:flex;flex-direction:column;gap:8px;padding:4px 2px}.mp98-m td,.mp98-m th{padding:4px 7px;white-space:nowrap}.mp98-m .now{background:#fefce8}</style>
+  <div class="mp98-ks">${kpi("วงเงิน", MB(amt), `ล้านบาท · ${rows.length} รายการ`, "#3b4fa8")}${kpi("แผนทั้งปี", MB(pT), "ล้านบาท", "#94a3b8")}${kpi(`แผนสะสมถึง ${BI_MON[mi]}`, MB(pC), "ล้านบาท", "#64748b")}${kpi("ผลสะสม", MB(aC), "ล้านบาท ตามวันที่จ่าย", "#2563eb")}${kpi("ผลเทียบแผนสะสม", pC ? fmt(aC / pC * 100, 1) + "%" : "–", pC ? (aC >= pC ? "เป็นไปตามแผน" : `ต่ำกว่าแผน ${MB(pC - aC)} ลบ.`) : "", aC >= pC ? "#16a34a" : "#dc2626")}</div>
+  <section class="panel"><header><h2>แผนเงิน ปีงบประมาณ ${fy}</h2><span class="sp"></span><select data-m88mu style="max-width:260px"><option value="">ทุกสำนัก/กอง</option>${units.map(u => `<option ${f === u ? "selected" : ""}>${esc(u)}</option>`).join("")}</select><input type="search" placeholder="ค้นหารายการ รหัส หน่วยงาน" value="${esc(MP98.q)}" data-mp98q style="max-width:240px"></header>
+  ${rows.length ? `<div class="tbl-wrap"><table class="mp98-t"><thead><tr><th style="text-align:left">รายการ</th><th>ปรับแผน</th><th>วงเงิน (บาท)</th>${MP98_Q.map(([, , t, s], k) => `<th class="${k === qNow ? "now" : ""}">${t}<div class="sub" style="font-weight:400">${s}</div></th>`).join("")}<th>รวมทั้งปี</th><th></th></tr></thead>
+    <tbody>${rows.map(itemRow).join("")}</tbody>
+    <tfoot><tr><td>รวม ${rows.length} รายการ</td><td></td><td class="n">${fmt(Math.round(amt))}</td>${MP98_Q.map(([i, j], k) => `<td class="${k === qNow ? "now" : ""}">${mp98Cell(mp98S(P, i, j), mp98S(A, i, j), k <= qNow)}</td>`).join("")}<td>${mp98Cell(pT, aT, true)}</td><td></td></tr></tfoot></table></div>`
+    : `<div class="body sub">ไม่มีรายการ</div>`}
+  <div class="body sub">หน่วย: บาท · แผนจากรายการงบประมาณ (ตามการปรับแผนครั้งล่าสุด) · ผล = เงินที่จ่ายจริงของรายการนั้นตามวันที่จ่าย · % = ผล/แผน ของไตรมาส (เขียว ≥ 90% เหลือง ≥ 70% แดงต่ำกว่า) · ไตรมาสที่ไฮไลต์คือไตรมาสปัจจุบัน · กด "รายเดือน" เพื่อดูแผน ผล และการเบิกจ่ายรายเดือน</div></section>`; };
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-mp98]") : null; if (t) { MP98.open = MP98.open === t.dataset.mp98 ? null : t.dataset.mp98; route(); } });
+document.addEventListener("input", e => { const t = e.target; if (t && t.matches && t.matches("[data-mp98q]")) { MP98.q = t.value; clearTimeout(MP98.tm); MP98.tm = setTimeout(() => { route(); const i = document.querySelector("[data-mp98q]"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });

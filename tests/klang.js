@@ -2454,8 +2454,9 @@
         { const B = flSpendBook()[0].rows, i0 = prDtRows(BI.fy, false).findIndex(x => x.id === r0.id), row = B[5 + i0];
           ok("P88: the Excel of the follow-up form: 67 columns, who fills each, Planning's values in its columns", B[4].length >= 57 && B[1][0] === "รายการงบประมาณ (กองแผนงาน)" && B[1][15] === "สำนัก/กอง" && B[1][22] === "e-GP" && B[1][45] === "ทำสัญญา" && B[4][13] === `ปี ${BI.fy}` && row[2] === "ตาม พ.ร.บ." && row[5] === (r0.pl.prod || "") && row[12] === 12.5 && row[B[4].lastIndexOf(`ปี ${biFy(r0) + 1}`)] === 3 && B[4].slice(56).every((h, k, a) => !k || Number(h.slice(3)) === Number(a[k - 1].slice(3)) + 1), JSON.stringify([B[4][13], row[2], row[5], row[12], B[4].slice(55)])); }
         // แผนเงิน
-        procSet("mplan"); route(); await tick(200); { const inp = document.querySelector(`[data-p95mp="${r0.id}|0"]`); inp.value = "12345"; inp.dispatchEvent(new Event("change", { bubbles: true })); await tick(200); document.querySelector("[data-p95rev]").click(); await tick(200); }
-        ok("P88/P95: แผนเงิน is its own page; Planning edits a month and saves it as revision 1", r0.plan[0] === 12345 && r0.planRev === 1 && /แผนเงิน ปีงบประมาณ/.test(v().innerText));
+        P95.draft = { [r0.id]: { 0: 12345 } }; p95Revise(); procSet("mplan"); route(); await tick(200);
+        ok("P88/P95/P98: แผนเงิน is its own page, read only, by quarter; a revision shows its number", r0.plan[0] === 12345 && r0.planRev === 1 && /แผนเงิน ปีงบประมาณ/.test(v().innerText) && /ไตรมาส 4/.test(v().innerText) && /ครั้งที่ 1/.test(v().innerText) && !document.querySelector("[data-p95mp]"));
+        { const b = document.querySelector(`[data-mp98="${r0.id}"]`); b.click(); await tick(200); ok("P98: รายเดือน opens the months of the item, plan and result", !!document.querySelector(".mp98-m") && /แผนสะสม/.test(v().innerText)); }
         login("div"); renderShell(); procSet("mplan"); route(); await tick(200); ok("P88: a unit sees the money plan without inputs", !document.querySelector("[data-p95mp]") && !BAD.test(v().innerText));
         // ติดตามความก้าวหน้า, ติดตามการเบิกจ่าย, คลังเอกสาร, แดชบอร์ดผู้บริหาร
         login("plan"); renderShell(); procSet("progress88"); MON_TAB = "track"; OV89.g = "prod"; route(); await tick(300);
