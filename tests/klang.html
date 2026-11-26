@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fisko-KlangFinance tests R1-R9</title>
+<title>KlangFinance tests R1-R9</title>
 <style>
 :root { --bg: #F7F8FA; --surface: #FFFFFF; --line: #E5E7EB; --ink: #111827; --muted: #6B7280; --ok: #15803D; --bad: #B91C1C; --accent: #34498C; }
 @media (prefers-color-scheme: dark) { :root { --bg: #0E1015; --surface: #15181F; --line: #262B36; --ink: #E8EAEE; --muted: #8F96A3; --ok: #4ADE80; --bad: #F08A8A; --accent: #9DB0E3; color-scheme: dark; } }
@@ -25,7 +25,7 @@ iframe { width: 100%; height: 420px; border: 1px solid var(--line); border-radiu
 </head>
 <body>
 <main>
-  <h1>Fisko-KlangFinance tests (rounds R1 to R9)</h1>
+  <h1>KlangFinance tests (rounds R1 to R9)</h1>
   <p class="sub">Serve the project folder (for example <code>python -m http.server 8791 --bind 127.0.0.1</code>) and open <code>http://127.0.0.1:8791/tests/klang.html</code>. Rebuild first with <code>bash src/build.sh</code>. It checks the rules of the new features and opens every new page for every role; it does not replace <code>tests/run.html</code>. It reseeds data in memory and clears the saved demo state at the end.</p>
   <div class="card">
     <div class="row"><button class="primary" type="button" id="go">Run the R1 to R9 tests</button></div>
@@ -33,7 +33,7 @@ iframe { width: 100%; height: 420px; border: 1px solid var(--line); border-radiu
     <div id="status" class="sub">Loading the prototype…</div>
   </div>
   <div class="card"><b>Result</b><pre id="out">–</pre></div>
-  <iframe id="app" src="../Fisko_Prototype.html" title="Fisko prototype under test"></iframe>
+  <iframe id="app" src="../Prototype.html" title="prototype under test"></iframe>
 </main>
 <script>
 (function () {

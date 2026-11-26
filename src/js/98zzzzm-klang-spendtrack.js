@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P84 (24 Nov 2569): the budget page "ติดตามการใช้จ่าย" (#dashboard) is improved on
+// KlangFinance, round P84 (24 Nov 2569): the budget page "ติดตามการใช้จ่าย" (#dashboard) is improved on
 // the department's follow-up form (ฟอร์มติดตาม พ.ร.บ., 72 columns), with the fiscal year. Every number on the page is read from the same rows
 // the Excel export writes (prTrackBook), so the page and the file always agree. Two tabs in front of its tabs:
 //   ภาพรวม: the totals, the budget by year (columns 12-21), by kind / type / unit, the progress through the steps of the form

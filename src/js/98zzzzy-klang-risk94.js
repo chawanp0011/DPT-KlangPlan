@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P94 (25 Nov 2569), ติดตามความก้าวหน้า, as asked:
+// KlangFinance, round P94 (25 Nov 2569), ติดตามความก้าวหน้า, as asked:
 // 1. รายงานความก้าวหน้า: "รายการที่ต้องติดตาม" is no longer a separate box: it is part of the item table. Each row shows its follow-up
 //    issues as tags (มีปัญหา, วงเงินสูงยังเตรียมการ, รอลงนาม, เบิกจ่ายต่ำกว่าแผน); the filter bar has the issues next to the statuses, and
 //    the rows with an issue come first in each status.

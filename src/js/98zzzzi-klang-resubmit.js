@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P80 (24 Nov 2569): when a procurement is cancelled, or an appeal is upheld, the unit sends the request again.
+// KlangFinance, round P80 (24 Nov 2569): when a procurement is cancelled, or an appeal is upheld, the unit sends the request again.
 // The Treasury records it on the e-GP part (cancelled / appeal, with the reason). The current requisition is kept as history (status
 // "ยกเลิก ให้ส่งใหม่", with who, when and why, and the e-GP steps it had reached); the รายการจัดซื้อ goes back to "จัดทำข้อมูล"
 // with the unit's last details filled in, so the unit corrects what it must and sends it again. Only before a contract is signed.

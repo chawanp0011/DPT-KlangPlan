@@ -1,4 +1,4 @@
-// App switcher (round 12): Fisko Budget, Fisko Procurement and Fisko Finance as three apps on one platform.
+// App switcher (round 12): Budget, Procurement and Finance as three apps on one platform.
 // Each app shows only its own menu. My Workspace and System Administration are shared by every app.
 // The page you open decides the current app, so deep links, tasks and notifications switch apps by themselves.
 const APPS = {
@@ -82,7 +82,7 @@ function renderNav() {
 function appSync(n) {
   if (n && n.app !== "all" && n.roles.includes(ROLE)) {
     APP_LAST[n.app] = n.id;
-    if (n.app !== APP) { APP = n.app; store.set("fisko-app", APP); renderNav(); }
+    if (n.app !== APP) { APP = n.app; store.set("app-app", APP); renderNav(); }
   }
   markNav(n);
 }
@@ -114,7 +114,7 @@ function switchApp(id) {
   if (!appAllowed(id)) return;
   toggleAppMenu(false);
   const items = appItems(id), target = items.find(n => n.id === APP_LAST[id]) || items[0];
-  APP = id; store.set("fisko-app", id);
+  APP = id; store.set("app-app", id);
   renderNav();
   go(target.id);
   toast(`${L("เปิดแอป", "Opened")} ${tx(APPS[id].name)}`);

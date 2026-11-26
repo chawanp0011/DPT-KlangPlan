@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q2 (12 Nov 2569): the House and Senate committee observations (ข้อสังเกตกรรมาธิการ สส/สว).
+// KlangFinance, budget round Q2 (12 Nov 2569): the House and Senate committee observations (ข้อสังเกตกรรมาธิการ สส/สว).
 // What the planning division asked for: take the file the Budget Bureau gives, keep only the agency's own items, and let the
 // division key items in by hand. The register lives in S.observations (it already held three samples that the briefing tab of page
 // B6 shows; those rows keep their text and response, and gain a house, a committee, a date, an owner and a status).

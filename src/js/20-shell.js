@@ -97,11 +97,11 @@ VIEWS.soon = n => `
   </div></section>`;
 
 function bindShell() {
-  $("#org").onchange = e => { ORG = e.target.value; store.set("fisko-org", ORG); load(); resetUi(); renderShell(); go("home"); toast(tx(SEEDS[ORG].name)); };
-  $$("#top .seg button").forEach(b => b.onclick = () => { LANG = b.dataset.lang; store.set("fisko-lang", LANG); renderShell(); route(); });
+  $("#org").onchange = e => { ORG = e.target.value; store.set("app-org", ORG); load(); resetUi(); renderShell(); go("home"); toast(tx(SEEDS[ORG].name)); };
+  $$("#top .seg button").forEach(b => b.onclick = () => { LANG = b.dataset.lang; store.set("app-lang", LANG); renderShell(); route(); });
   $("#role").onchange = e => {
-    ROLE = e.target.value; store.set("fisko-role", ROLE);
-    if (SESSION) { SESSION.user = me().id; store.set("fisko-session", JSON.stringify(SESSION)); }
+    ROLE = e.target.value; store.set("app-role", ROLE);
+    if (SESSION) { SESSION.user = me().id; store.set("app-session", JSON.stringify(SESSION)); }
     renderShell(); route(); toast(`${L("สลับเป็นบทบาท", "Switched to")} ${tx(ROLES[ROLE])} · ${tx(me().name)}`);
   };
   $("#userchip").onclick = e => { e.stopPropagation(); toggleNotes(false); toggleUserMenu(); };

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P88 (25 Nov 2569), the procurement plan and the request, as asked:
+// KlangFinance, round P88 (25 Nov 2569), the procurement plan and the request, as asked:
 // 3.1 แผนจัดซื้อ (กองแผนงาน): the import stays; the money plan has its own menu (แผนเงิน, see 98zzzzp) and is taken off the item list
 //     and the dashboard of the items. After the import Planning writes the details of its part of the follow-up form (columns 1-15 and
 //     56-67: เริ่มตั้ง, ตาม พ.ร.บ./โอนเปลี่ยนแปลง, ผลผลิต/โครงการ, ลักษณะงบประมาณ, จังหวัด, งปม.ทั้งสิ้น, the budget by year), assigns the

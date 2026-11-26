@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P1 (9 Nov 2569, redone 10 Nov 2569): committees for procurement.
+// KlangFinance, procurement round P1 (9 Nov 2569, redone 10 Nov 2569): committees for procurement.
 // The central part is the COMMITTEE TYPE (page CM4), kept by the head of procurement and administrators, shared by every
 // unit. A type has a name, a description, how it works (TOR, evaluation, purchasing, acceptance, other), the member
 // positions it needs (CM6: name, fewest and most people, who may fill it, which one is the chair), whether construction

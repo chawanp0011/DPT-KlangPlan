@@ -89,8 +89,8 @@ function toggleUserMenu(show) {
 // ---------- sign-in ----------
 function startSession(u) {
   SESSION = { user: u.id, org: ORG, t: nowIso() };
-  store.set("fisko-session", JSON.stringify(SESSION));
-  ROLE = u.role; store.set("fisko-role", ROLE);
+  store.set("app-session", JSON.stringify(SESSION));
+  ROLE = u.role; store.set("app-role", ROLE);
   audit(["เข้าสู่ระบบด้วย SSO และ MFA", "Signed in with SSO and MFA"], tx(u.name)); commit();
   $("#signin").hidden = true; SIGN = { step: "pick", user: null, err: "" };
   renderShell(); go("home");
@@ -98,7 +98,7 @@ function startSession(u) {
 }
 function signOut() {
   audit(["ออกจากระบบ", "Signed out"], tx(me().name)); commit();
-  SESSION = null; store.del("fisko-session"); showSignIn();
+  SESSION = null; store.del("app-session"); showSignIn();
 }
 function qrPattern(seed) { // decorative QR-like pattern, not a real code
   let h = ""; for (let i = 0; i < 121; i++) { const on = ((i * 7 + seed * 13) % 5 < 2) || [0, 1, 2, 10, 11, 12, 22, 23, 24].includes(i % 33); h += `<i class="${on ? "on" : ""}"></i>`; } return h;
@@ -124,15 +124,15 @@ function showSignIn() {
       <button class="btn ghost" type="button" id="si-back">${L("เลือกบัญชีอื่น", "Choose another account")}</button></div>`;
   }
   el.innerHTML = `<div class="si-card" role="dialog" aria-modal="true" aria-labelledby="si-title">
-    <div class="si-brand"><div class="brand-mark">Fk</div><div><b id="si-title">Fisko</b><small>${L("แพลตฟอร์มงบประมาณ (AEBMS)", "Budget platform (AEBMS)")}</small></div>
+    <div class="si-brand"><div class="brand-mark">KF</div><div><b id="si-title"></b><small>${L("แพลตฟอร์มงบประมาณ (AEBMS)", "Budget platform (AEBMS)")}</small></div>
       <div class="seg" role="group" aria-label="Language" style="margin-left:auto"><button type="button" data-silang="th" class="${LANG === "th" ? "on" : ""}">TH</button><button type="button" data-silang="en" class="${LANG === "en" ? "on" : ""}">EN</button></div></div>
     <h2>${L("เข้าสู่ระบบ", "Sign in")}</h2>
     ${Object.keys(SEEDS).length > 1 ? `<label class="field-inline" for="si-org">${L("หน่วยงาน", "Organization")} <select id="si-org">${Object.keys(SEEDS).map(o => `<option value="${o}" ${o === ORG ? "selected" : ""}>${esc(tx(SEEDS[o].name))}</option>`).join("")}</select></label>` : ""}
     ${body}
     <p class="sub si-foot">${L("ต้นแบบเพื่อการหารือ · ไม่ใช้รหัสผ่านจริง · ข้อมูลทั้งหมดเป็นข้อมูลตัวอย่าง", "Discussion prototype · no real passwords · all data is sample data")}</p></div>`;
   el.hidden = false;
-  $$("[data-silang]").forEach(b => (b.onclick = () => { LANG = b.dataset.silang; store.set("fisko-lang", LANG); renderShell(); showSignIn(); }));
-  const so = $("#si-org"); if (so) so.onchange = () => { ORG = so.value; store.set("fisko-org", ORG); load(); resetUi(); renderShell(); SIGN = { step: "pick", user: null, err: "" }; showSignIn(); };
+  $$("[data-silang]").forEach(b => (b.onclick = () => { LANG = b.dataset.silang; store.set("app-lang", LANG); renderShell(); showSignIn(); }));
+  const so = $("#si-org"); if (so) so.onchange = () => { ORG = so.value; store.set("app-org", ORG); load(); resetUi(); renderShell(); SIGN = { step: "pick", user: null, err: "" }; showSignIn(); };
   $$("[data-acc]").forEach(b => (b.onclick = () => {
     const u = userById(b.dataset.acc);
     if (!u.active) { toast(L("บัญชีนี้ถูกระงับ ติดต่อผู้ดูแลระบบ", "This account is suspended. Contact the administrator.")); return; }

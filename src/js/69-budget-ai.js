@@ -1,4 +1,4 @@
-// Fisko Budget round B6: AI and analytics for the Budget module (design chapters 10 and 11).
+// Budget round B6: AI and analytics for the Budget module (design chapters 10 and 11).
 // - Budget agents as multi-step runs (FR, chapter 10.1): an agent plans steps from a template, runs read and
 //   draft steps on the real data, and stops for a person at every step that changes data or notifies people.
 //   Simulated (D-P09): no model is called; each step runs an existing rule or calculation.

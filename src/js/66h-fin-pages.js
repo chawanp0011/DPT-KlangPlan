@@ -1,4 +1,4 @@
-// Fisko Finance pages (round 43: information architecture). Every Finance page, its menu group, who sees it and its
+// Finance pages (round 43: information architecture). Every Finance page, its menu group, who sees it and its
 // tabs are declared here; each tab lists the sections (FS, registered by rounds 11 and FN1 to FN6) it shows, top to
 // bottom. A pair [a, b] puts two sections side by side. "top" sections show above the tabs, and "drawer" names the
 // section that opens as a side panel when a row is opened. Moving something to another page means editing this table.
@@ -40,13 +40,13 @@ const FIN_PAGES = [
       { id: "gfmis", label: ["รายงาน GFMIS", "GFMIS reports"], secs: ["bkMonth", ["gfRemit", "tb"]] },
       { id: "payfile", label: ["ไฟล์ผลการจ่าย", "Payment files"], secs: ["payfile"] }] },
   { id: "close", code: "F8", group: "books", label: ["ปิดงวด", "Close"],
-    sub: ["ปิดวัน ปิดเดือน ปิดปี ข้อทักท้วง และยอดเบิกจ่ายที่ส่งให้ Fisko Budget", "Daily, monthly and yearly close, audit queries, and spending sent to Fisko Budget"],
+    sub: ["ปิดวัน ปิดเดือน ปิดปี ข้อทักท้วง และยอดเบิกจ่ายที่ส่งให้ Budget", "Daily, monthly and yearly close, audit queries, and spending sent to Budget"],
     tabs: [
       { id: "day", label: ["ปิดวัน", "Day"], secs: ["dayClose"] },
       { id: "month", label: ["ปิดเดือน", "Month"], secs: ["monthClose"] },
       { id: "year", label: ["สิ้นปี", "Year end"], secs: ["yearEnd"] },
       { id: "audit", label: ["ข้อทักท้วง", "Audit queries"], secs: ["auditQ"] },
-      { id: "budget", label: ["ส่งให้ Fisko Budget", "To Fisko Budget"], secs: ["budgetFeed"] }] },
+      { id: "budget", label: ["ส่งให้ Budget", "To Budget"], secs: ["budgetFeed"] }] },
   { id: "ai", code: "F9", group: "more", label: ["AI และ Analytics", "AI and analytics"], get: () => FAI_TAB, set: v => (FAI_TAB = v),
     sub: ["Agent การเงิน พยากรณ์ จำลองสถานการณ์ ตัวชี้วัด และสัญญาณเตือน", "Finance agents, forecasts, what-ifs, KPIs and warning signals"],
     tabs: [

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P26 (16 Nov 2569): the menu "Strategy and programmes" (B2) gets, on the user's brief:
+// KlangFinance, round P26 (16 Nov 2569): the menu "Strategy and programmes" (B2) gets, on the user's brief:
 //   1. a new second tab "ยุทธศาสตร์จัดสรร" (allocation strategies): the list is kept by Planning (add, edit, retire);
 //   2. the tab "แผนงานตามโครงสร้างยุทธศาสตร์": Planning can now ADD a programme there, and every programme is linked to an allocation strategy
 //      (node.alloc); the link can be changed in the same tab (file 98zp: the table, the selected-node panel and the add form);

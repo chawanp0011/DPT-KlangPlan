@@ -1,13 +1,13 @@
-# Build Fisko_Conceptual_Architecture_v0.2.pptx and .pdf from the v0.1 deck with PowerPoint (COM).
+# Build Conceptual_Architecture_v0.2.pptx and .pdf from the v0.1 deck with PowerPoint (COM).
 # Usage: node deck/gen_slides.js deck/slides.json ; powershell -File deck/build_deck.ps1
 # The file is ASCII only; Thai text comes from deck/slides.json and deck/cover.json (UTF-8).
-param([string]$Src = "D:\Avalant\AI_Product\Fisko-main\Fisko_Conceptual_Architecture.pptx", [string]$OutDir = "D:\Avalant\AI_Product\Fisko-ERP-Gov", [string]$Png = "")
+param([string]$Src = "D:\Avalant\AI_Product\-main\Conceptual_Architecture.pptx", [string]$OutDir = "D:\Avalant\AI_Product\ERP-Gov", [string]$Png = "")
 $ErrorActionPreference = "Stop"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $slides = Get-Content -Raw -Encoding UTF8 (Join-Path $here "slides.json") | ConvertFrom-Json
 $cover = Get-Content -Raw -Encoding UTF8 (Join-Path $here "cover.json") | ConvertFrom-Json
 function C($hex) { [int]([Convert]::ToInt32($hex.Substring(0,2),16) + 256 * [Convert]::ToInt32($hex.Substring(2,2),16) + 65536 * [Convert]::ToInt32($hex.Substring(4,2),16)) }
-$work = Join-Path $env:TEMP "fisko_v02_work.pptx"
+$work = Join-Path $env:TEMP "deck_v02_work.pptx"
 Copy-Item $Src $work -Force
 $app = New-Object -ComObject PowerPoint.Application
 $d = $app.Presentations.Open($work, $false, $false, $false)
@@ -34,7 +34,7 @@ try {
       }
     }
   }
-  $pptx = Join-Path $OutDir "Fisko_Conceptual_Architecture_v0.2.pptx"; $pdf = Join-Path $OutDir "Fisko_Conceptual_Architecture_v0.2.pdf"
+  $pptx = Join-Path $OutDir "Conceptual_Architecture_v0.2.pptx"; $pdf = Join-Path $OutDir "Conceptual_Architecture_v0.2.pdf"
   $d.SaveCopyAs($pptx)
   $d.SaveAs($pdf, 32)
   if ($Png) { New-Item -ItemType Directory -Force $Png | Out-Null; for ($i = 1; $i -le $d.Slides.Count; $i++) { $d.Slides.Item($i).Export((Join-Path $Png ("s{0:00}.png" -f $i)), "PNG", 1280, 720) } }

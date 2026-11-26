@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P20 (16 Nov 2569): the tabs of the division request, in the order and with the names the user gave:
+// KlangFinance, round P20 (16 Nov 2569): the tabs of the division request, in the order and with the names the user gave:
 //   1 รายการคำขอ · 2 รายการผูกพัน (only for a multi-year request) · 3 แผนค่าใช้จ่ายงบประมาณ · 4 สถานะดำเนินการ · 5 ตัวชี้วัด · 6 ประมาณการรายจ่ายล่วงหน้า (MTEF)
 //   · 7 ความพร้อมและความเสี่ยง · 8 ความสอดคล้อง · 9 เวอร์ชัน (n); the tab เอกสารอื่นๆ (file 98zzy) sits after ความสอดคล้อง
 // Many earlier files add, rename or hide tabs one after another, so this last wrapper reads the finished bar and only puts its buttons in the asked order and

@@ -1,6 +1,6 @@
-// Fisko-KlangFinance, round R4: disbursement plan and result per Project ID (month, quarter, year, and plan revision
+// KlangFinance, round R4: disbursement plan and result per Project ID (month, quarter, year, and plan revision
 // number), carry-over reserves ("เงินกัน") and lapsed funds ("เงินพับ"), commitment kind (single-year, new, existing),
-// and a plan-versus-result dashboard. Written new for the DPT finance division (not from Fisko-ERP-Gov).
+// and a plan-versus-result dashboard. Written new for the DPT finance division (not from ERP-Gov).
 // Definitions come from the user (3 Nov 2569): a lapsed fund is budget not disbursed by year end and not reserved, or a
 // reserve whose extended period has ended; it falls to state revenue at once. Reserves are read from GF in practice; here
 // they are typed or imported from a file of our assumed layout. Nothing is connected to GF, eBud or BB-EVACUBE, and

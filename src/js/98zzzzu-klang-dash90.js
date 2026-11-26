@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P90 (25 Nov 2569): ติดตามความก้าวหน้า › ภาพรวม is cleared and redone as a dashboard that reads at a glance
+// KlangFinance, round P90 (25 Nov 2569): ติดตามความก้าวหน้า › ภาพรวม is cleared and redone as a dashboard that reads at a glance
 // (asked for: "เคลียร์ภาพรวมใหม่ทั้งหมด ทำเป็น dashboard ที่อ่านรู้เรื่องกว่านี้ ส่วนกราฟที่ทำมาให้ออกเป็นรายงานแทน โดยเทียบคอลัมน์ที่มีใน
 // ไฟล์ติดตามความก้าวหน้า"):
 //   ภาพรวม: six figures, the procurement state in five phases, budget against payments by the group chosen (ประเภท, ผลผลิต/โครงการ,

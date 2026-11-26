@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q4b (12 Nov 2569): area with coordinates, the reference price register, and the
+// KlangFinance, budget round Q4b (12 Nov 2569): area with coordinates, the reference price register, and the
 // monthly spending plan with monthly status and results on the budget request.
 //  - Area (C2 item 8): a request lists one or more places, each with province, district, sub-district and a latitude and
 //    longitude. The coordinates are looked up in an area table (page BQ4, kept by Planning) when the three names match a row,

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, menu round M5 (16 Nov 2569): the page "สรุปและส่ง สงป." loses three tabs, and the allocation shows the act amounts from it.
+// KlangFinance, menu round M5 (16 Nov 2569): the page "สรุปและส่ง สงป." loses three tabs, and the allocation shows the act amounts from it.
 // On the user's brief:
 //   1. "สรุปและส่ง สงป." (B6): take out, for now, the tabs "ชุดคำขอและแบบฟอร์ม" (pack), "สถานะและรัฐสภา" (status) and "ชุดชี้แจง" (brief).
 //      What is left: the two tabs of round P21 (overview of the requests, the request list with the bill and act amounts) and the checks.

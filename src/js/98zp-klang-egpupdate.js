@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, 13 Nov 2569: "Send to e-GP" with an update for every e-GP step. (16 Nov 2569: EVERY listed item has its own Update control, see below.)
+// KlangFinance, 13 Nov 2569: "Send to e-GP" with an update for every e-GP step. (16 Nov 2569: EVERY listed item has its own Update control, see below.)
 // The officer runs the procurement in e-GP; this panel shows, for each of the seven e-GP steps, WHAT HAS TO BE UPDATED here (the items the system holds or
 // needs, ticked or marked red) and lets the officer update it at any time, not only at one internal step. Data goes in c.egpUp[step] = { ..fields, by, t };
 // steps 4 and 5 also write the e-GP project number, dates and bidders into c.egp (as the old forms did); steps 3 and 6 are compared with what the case holds.

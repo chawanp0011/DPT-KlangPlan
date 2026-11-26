@@ -1,4 +1,4 @@
-// Fisko Budget, design system v2 (round 25). Two parts:
+// Budget, design system v2 (round 25). Two parts:
 // 1. uiDecorate(view) runs after every page render (from route): it gives the page heading an icon chip and
 //    upgrades legacy KPI tiles (.kpis > .kpi) with an icon chosen from the label and an accent colour, so
 //    every Budget screen shares the look of the new stat cards without rewriting each module.

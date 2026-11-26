@@ -143,7 +143,7 @@ th { color: var(--muted); font-weight: 600; }
 .c1 { background: var(--c-1); } .c2 { background: var(--c-2); } .c3 { background: var(--c-3); } .c4 { background: var(--c-4); } .c5 { background: var(--c-6); }
 
 /* ---------- charts: the one place with brand colour (round 26b) ----------
-   Series 1 is the Fisko green, series 2 the navy, then light green, amber,
+   Series 1 is the green, series 2 the navy, then light green, amber,
    teal and grey. Status colours still mean status only. */
 .bar i, .prog > i, .rbar i { background: var(--ch-1); }
 .funnel > div { background: var(--ch-1); } .funnel > div:hover { background: color-mix(in srgb, var(--ch-1) 80%, #000); }

@@ -1,6 +1,6 @@
-// Fisko-ERP-Gov, part 6: Fisko AI (module 8). One place for the AI assistants and agents of all eight modules.
-// The registry reads the agents Fisko already has (S.agents: budget, procurement, finance) and adds four agents for
-// the new apps (AG-30 to AG-33). The new agents are rule-based and simulated, like Fisko's own: they read the data,
+// ERP-Gov, part 6: AI (module 8). One place for the AI assistants and agents of all eight modules.
+// The registry reads the agents already has (S.agents: budget, procurement, finance) and adds four agents for
+// the new apps (AG-30 to AG-33). The new agents are rule-based and simulated, like's own: they read the data,
 // list findings with the steps they took, and stop for a person before anything is sent. No language model is called.
 const AI_ROLES = ERP_ROLES;
 const AI_APP = "DPT AI";
@@ -95,7 +95,7 @@ ePageDef("ai", "ai-log", "X3", "aig", AI_ROLES, ["ทะเบียนการ
 
 // ---------- the flow document ----------
 NAV.push({ id: "flow", code: "", group: "sys", app: "all", roles: ERP_ROLES, label: ["Flow 9 โมดูล (รวม HR)", "Flows of the 9 modules (with HR)"] });
-VIEWS.flow = () => `<div class="head"><div><div class="eyebrow">Fisko-ERP-Gov</div><h1>${L("Flow 9 โมดูล (8 โมดูลและ HR)", "Flows of the 9 modules (8 plus HR)")}</h1><p>${L("ผู้เกี่ยวข้อง ขั้นตอน สถานะ จุดอนุมัติ ข้อมูลเข้า-ออก และการเชื่อมกับโมดูลและระบบภายนอก ของแต่ละโมดูล", "Actors, steps, statuses, approval points, data in and out, and links to other modules and external systems, for each module")}</p></div></div>
+VIEWS.flow = () => `<div class="head"><div><div class="eyebrow">ERP-Gov</div><h1>${L("Flow 9 โมดูล (8 โมดูลและ HR)", "Flows of the 9 modules (8 plus HR)")}</h1><p>${L("ผู้เกี่ยวข้อง ขั้นตอน สถานะ จุดอนุมัติ ข้อมูลเข้า-ออก และการเชื่อมกับโมดูลและระบบภายนอก ของแต่ละโมดูล", "Actors, steps, statuses, approval points, data in and out, and links to other modules and external systems, for each module")}</p></div></div>
   <section class="panel"><div class="body"><p>${L("เอกสาร Flow เป็นไฟล์ HTML แยก (ไฟล์ Flow_9_Modules.html ในโฟลเดอร์เดียวกับระบบ) ใช้ข้อมูลชุดเดียวกับที่เขียนไว้ในโค้ดของแต่ละหน้า", "The flow document is a separate HTML file (Flow_9_Modules.html in the system folder)")}</p>
   <a class="btn primary" href="Flow_9_Modules.html" target="_blank" rel="noopener">${L("เปิดเอกสาร Flow", "Open the flow document")}</a></div></section>`;
 BIND.flow = () => {};

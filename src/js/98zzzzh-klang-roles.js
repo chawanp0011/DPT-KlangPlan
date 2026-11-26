@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P77 (23 Nov 2569): the voucher checker, accounting and finance are three roles (asked for: "user การเงิน การบัญชี
+// KlangFinance, round P77 (23 Nov 2569): the voucher checker, accounting and finance are three roles (asked for: "user การเงิน การบัญชี
 // ต้องแยกกัน เพราะส่วนของเบิกจ่ายทำงานไม่เหมือนกัน").
 //   chk = ผู้ตรวจสอบใบสำคัญ: checks the voucher of a delivery the Treasury sent for payment, passes it or sends it back;
 //   acc = การบัญชี: attaches the payment documents and sends them to finance;

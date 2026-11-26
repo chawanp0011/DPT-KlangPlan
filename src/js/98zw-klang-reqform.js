@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P10 (14 Nov 2569), reworked in round P11 (15 Nov 2569): the division request is one ordered form.
+// KlangFinance, round P10 (14 Nov 2569), reworked in round P11 (15 Nov 2569): the division request is one ordered form.
 // Order of the main tab: 1 name of the request; 2 who asked, with as many attached files as needed (a request that another agency makes through the
 // division needs its request document); 3 the AI that drafts the request document from the details and from ALL the attached files, with a sample
 // of the official letter; 4 programme, output or project, activity, budget type, expenditure categories; 5 the lines (kind of money, an item chosen

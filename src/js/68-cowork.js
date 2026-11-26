@@ -1,7 +1,7 @@
 // AI co-work (round 27): a Claude/ChatGPT-style chat that works with people in every module.
 // Two surfaces share one engine: a side panel that opens from any page (it knows the page and record you
 // are on) and a full page (#cowork) with conversation history and an agent directory. You can talk to the
-// general Fisko Assistant, which routes the question, or pick a specialist agent from M09.
+// general Assistant, which routes the question, or pick a specialist agent from M09.
 // Files: real picker, drag-and-drop and paste; text and CSV files are read in the browser, images and PDFs
 // get a simulated reading (D-P10). Voice: the browser's speech recognition when it is allowed, otherwise a
 // simulated recording. Answers come from rules and the prototype data, not a model (D-P09). Agents never
@@ -11,7 +11,7 @@ const CW_FILES = [], CW_RECS = [], CW_URLS = {};
 ICONS.mic = '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>';
 
 // ---------- agents ----------
-const CW_GENERAL = { id: "FA", app: "all", icon: "sparkle", name: ["ผู้ช่วย Fisko", "Fisko Assistant"], what: ["ตอบคำถามทั่วไปและส่งต่อให้ผู้ช่วยเฉพาะทางที่เหมาะสม", "Answers general questions and hands them to the right specialist"], level: "L0",
+const CW_GENERAL = { id: "FA", app: "all", icon: "sparkle", name: ["ผู้ช่วย", "Assistant"], what: ["ตอบคำถามทั่วไปและส่งต่อให้ผู้ช่วยเฉพาะทางที่เหมาะสม", "Answers general questions and hands them to the right specialist"], level: "L0",
   can: [["ค้นหาและสรุปข้อมูลข้ามแอป", "Find and summarise data across apps"], ["ส่งต่อให้ผู้ช่วยเฉพาะทาง", "Hand off to a specialist"], ["พาไปยังหน้าที่เกี่ยวข้อง", "Take you to the right page"]] };
 const CW_META = {
   "AG-01": ["budget", "pen", "L1", [["ร่างเหตุผลความจำเป็นของคำขอ", "Draft a request's justification"], ["เสนอตัวชี้วัดและรายการ", "Suggest KPIs and lines"]]],
@@ -329,7 +329,7 @@ function cwChatHTML(full) {
       <textarea data-cwinput rows="1" placeholder="${esc(cwPlaceholder())}" aria-label="${L("ข้อความถึงผู้ช่วย AI", "Message to the AI assistant")}"></textarea>
       <div class="cw-bar">
         <div class="cw-menuwrap"><button type="button" class="cw-ib" data-cwplus aria-haspopup="menu" aria-label="${L("แนบ", "Attach")}" title="${L("แนบไฟล์หรือรายการ", "Attach a file or record")}">+</button>
-          <div class="cw-menu" data-cwmenu hidden role="menu"><button type="button" role="menuitem" data-cwupload>${svgI("download")} ${L("อัปโหลดไฟล์ (รูป PDF CSV ข้อความ)", "Upload a file (image, PDF, CSV, text)")}</button><div class="cw-mh">${L("แนบรายการจาก Fisko", "Attach a Fisko record")}</div>${cwRecChoices().map(r => `<button type="button" role="menuitem" data-cwrec="${r.kind}|${r.id}">${svgI(r.kind === "req" ? "inbox" : "folder")} <span class="mono">${esc(r.id)}</span> ${esc(r.name).slice(0, 34)}</button>`).join("")}</div></div>
+          <div class="cw-menu" data-cwmenu hidden role="menu"><button type="button" role="menuitem" data-cwupload>${svgI("download")} ${L("อัปโหลดไฟล์ (รูป PDF CSV ข้อความ)", "Upload a file (image, PDF, CSV, text)")}</button><div class="cw-mh">${L("แนบรายการจาก", "Attach a record")}</div>${cwRecChoices().map(r => `<button type="button" role="menuitem" data-cwrec="${r.kind}|${r.id}">${svgI(r.kind === "req" ? "inbox" : "folder")} <span class="mono">${esc(r.id)}</span> ${esc(r.name).slice(0, 34)}</button>`).join("")}</div></div>
         <button type="button" class="cw-agentbtn" data-cwagentbtn aria-haspopup="menu">${cwAv(ag, 20)}<span>${tx(ag.name)}</span>▾</button>
         <div class="cw-menu cw-agmenu" data-cwagmenu hidden role="menu">${cwAgents().map(a => `<button type="button" role="menuitem" data-cwag="${a.id}" class="${a.id === ag.id ? "on" : ""}">${cwAv(a, 22)}<span><b>${tx(a.name)}</b><small>${a.id !== "FA" ? a.id + " · " : ""}${cwAppName(a)}${a.on === false ? " · " + L("ปิดอยู่", "off") : ""}</small></span></button>`).join("")}</div>
         <span class="sp"></span>
@@ -431,7 +431,7 @@ function cwPageInner() {
   const right = CW_PAGE_TAB === "chats" ? `<aside class="cw-info">${cwAv(ag, 40)}<b>${tx(ag.name)}</b><span class="sub">${ag.id !== "FA" ? ag.id + " · " : ""}${cwAppName(ag)}</span><p>${tx(ag.what)}</p>
     <div class="cw-mh">${L("ทำอะไรได้", "What it can do")}</div><ul>${ag.can.map(c => `<li>${tx(c)}</li>`).join("")}</ul>
     <div class="cw-mh">${L("ขอบเขต", "Limits")}</div><p class="sub">${L("ไม่อนุมัติ ไม่ปรับวงเงิน ไม่ลงนาม ไม่จ่ายเงิน และไม่เลือกผู้ขาย สิ่งที่เขียนข้อมูลเป็นปุ่มที่คุณกดเอง ทุกคำตอบบันทึกใน M09", "Never approves, changes amounts, signs, pays or picks suppliers. Anything that writes data is a button you press. Every answer is logged in M09.")}</p>
-    <div class="cw-mh">${L("แนบได้", "You can attach")}</div><p class="sub">${L("รูปภาพ PDF CSV ข้อความ (สูงสุด 15 MB) รายการจาก Fisko และพูดแทนพิมพ์", "Images, PDF, CSV, text (up to 15 MB), Fisko records, and voice")}</p></aside>` : "";
+    <div class="cw-mh">${L("แนบได้", "You can attach")}</div><p class="sub">${L("รูปภาพ PDF CSV ข้อความ (สูงสุด 15 MB) รายการจาก และพูดแทนพิมพ์", "Images, PDF, CSV, text (up to 15 MB), records, and voice")}</p></aside>` : "";
   return `<div class="cw-page">${side}${center}${right}</div>`;
 }
 let CW_PAGE_Q = "";

@@ -1,6 +1,6 @@
-// Fisko Finance (round 11, light version): commitments and the chain from allocation to payment,
+// Finance (round 11, light version): commitments and the chain from allocation to payment,
 // payment requests with approval, and GFMIS reconciliation by file import (files only, per D-F05).
-// Official recording and payment stay in GFMIS; Fisko controls the commitment and matches the result.
+// Official recording and payment stay in GFMIS; controls the commitment and matches the result.
 let FIN_TAB = "chain", PAY_FORM = null, GF_ROWS = null;
 const PAY_ST = { pending: [["รออนุมัติ", "Pending"], "p-warn"], approved: [["อนุมัติแล้ว", "Approved"], "p-ok"], rejected: [["ไม่อนุมัติ", "Rejected"], "p-bad"] };
 const RECON_ST = { matched: [["ตรงกับ GFMIS", "Matches GFMIS"], "p-ok"], diff: [["ผลต่าง", "Difference"], "p-bad"], explained: [["ชี้แจงแล้ว", "Explained"], "p-info"], none: [["รอไฟล์ GFMIS", "Waiting for a file"], "p-mute"] };
@@ -56,7 +56,7 @@ FS.payfile = () => {
   const open = appr.filter(p => reconState(p) === "none" || reconState(p) === "diff").length;
   return `
   <div class="alert"><div class="ic" style="background:var(--info-soft);color:var(--info)">i</div><div><b>${L("กระทบยอดกับไฟล์รายงานจาก GFMIS", "Reconcile with a GFMIS report file")}</b>
-    <p>${L("ระหว่างรอยืนยันช่องทางเชื่อมต่อ (ประเด็น D-F05) ใช้ไฟล์รายงานที่ส่งออกจาก GFMIS ระบบเทียบรายการจ่ายกับที่อนุมัติใน Fisko ผู้กระทบยอดต้องไม่ใช่ผู้อนุมัติรายการนั้น (SD-05)", "Until the access channel is confirmed (decision D-F05), a report file exported from GFMIS is used. Payments are matched with what was approved in Fisko; the person reconciling can't be the one who approved it (SD-05).")}</p></div></div>
+    <p>${L("ระหว่างรอยืนยันช่องทางเชื่อมต่อ (ประเด็น D-F05) ใช้ไฟล์รายงานที่ส่งออกจาก GFMIS ระบบเทียบรายการจ่ายกับที่อนุมัติใน ผู้กระทบยอดต้องไม่ใช่ผู้อนุมัติรายการนั้น (SD-05)", "Until the access channel is confirmed (decision D-F05), a report file exported from GFMIS is used. Payments are matched with what was approved in; the person reconciling can't be the one who approved it (SD-05).")}</p></div></div>
   <section class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))">
     <div class="kpi"><span class="l">${L("อนุมัติเบิกจ่ายแล้ว", "Approved payments")}</span><span class="v">${appr.length}</span></div>
     <div class="kpi"><span class="l">${L("ตรงกับ GFMIS / ชี้แจงแล้ว", "Matched / explained")}</span><span class="v">${appr.filter(p => ["matched", "explained"].includes(reconState(p))).length}</span></div>
@@ -64,7 +64,7 @@ FS.payfile = () => {
   </section>
   <section class="panel"><header><h2>${L("นำเข้าไฟล์ GFMIS", "Import a GFMIS file")}</h2><span class="sp"></span>${isFin ? `<button class="btn" type="button" id="gf-sample">${L("สร้างไฟล์ตัวอย่าง", "Create a sample file")}</button>` : `<span class="sub">${L("เจ้าหน้าที่การเงินนำเข้า", "Finance officers import")}</span>`}</header>
     ${GF_ROWS ? `<div class="tbl-wrap"><table><thead><tr><th>${L("เลขที่คำขอ", "Request")}</th><th>${L("เลขที่เอกสาร GFMIS", "GFMIS document")}</th><th class="n">${L("วงเงินในไฟล์ (บาท)", "File amount (baht)")}</th><th>${L("วันที่", "Date")}</th><th>${L("ผลตรวจ", "Check")}</th></tr></thead>
-      <tbody>${GF_ROWS.map(r => `<tr><td class="mono">${esc(r.pay || "—")}</td><td class="mono">${esc(r.doc)}</td><td class="n">${fmt(r.amount)}</td><td class="sub">${fdate(r.date)}</td><td>${r.state === "matched" ? tag(L("ตรงกัน", "Matches"), "p-ok") : r.state === "diff" ? tag(`${L("ผลต่าง", "Difference")} ${fmt(r.amount - r.expect)}`, "p-bad") : tag(L("ไม่พบในระบบ", "Not in Fisko"), "p-warn")}</td></tr>`).join("")}</tbody></table></div>
+      <tbody>${GF_ROWS.map(r => `<tr><td class="mono">${esc(r.pay || "—")}</td><td class="mono">${esc(r.doc)}</td><td class="n">${fmt(r.amount)}</td><td class="sub">${fdate(r.date)}</td><td>${r.state === "matched" ? tag(L("ตรงกัน", "Matches"), "p-ok") : r.state === "diff" ? tag(`${L("ผลต่าง", "Difference")} ${fmt(r.amount - r.expect)}`, "p-bad") : tag(L("ไม่พบในระบบ", "Not in"), "p-warn")}</td></tr>`).join("")}</tbody></table></div>
       <div class="body row"><button class="btn primary" type="button" id="gf-go">${L("นำเข้าไฟล์", "Import file")}</button><button class="btn ghost" type="button" id="gf-clear">${L("ล้าง", "Clear")}</button></div>`
       : `<div class="body sub">${isFin ? L("กด “สร้างไฟล์ตัวอย่าง” เพื่อสร้างไฟล์จากรายการที่อนุมัติแล้วและยังไม่ตรงกับ GFMIS", "Press “Create a sample file” to build one from approved payments that haven't been matched yet") : L("ยังไม่ได้เลือกไฟล์", "No file chosen")}</div>`}</section>
   <section class="panel"><header><h2>${L("ผลกระทบยอดรายการเบิกจ่าย", "Reconciliation by payment")}</h2></header>
@@ -119,7 +119,7 @@ FIN_BINDS.push(() => {
     const todo = S.payreqs.filter(p => p.status === "approved" && ["none", "diff"].includes(reconState(p)));
     GF_ROWS = todo.map((p, i) => ({ pay: p.id, doc: `GF-70-${String(430 + i).padStart(6, "0")}`, amount: i === 0 ? p.amount - 1000 : p.amount, expect: p.amount, date: TODAY, state: i === 0 ? "diff" : "matched" }));
     GF_ROWS.push({ pay: "", doc: "GF-70-000499", amount: 250000, expect: 0, date: TODAY, state: "extra" });
-    if (!todo.length) toast(L("ไม่มีรายการอนุมัติที่รอกระทบยอด จึงมีเฉพาะแถวที่ไม่พบในระบบ", "No approved payment is waiting, so the file only has a row that isn't in Fisko"));
+    if (!todo.length) toast(L("ไม่มีรายการอนุมัติที่รอกระทบยอด จึงมีเฉพาะแถวที่ไม่พบในระบบ", "No approved payment is waiting, so the file only has a row that isn't in"));
     route();
   };
   const go_ = $("#gf-go");

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P20 (16 Nov 2569): the tab "เอกสารอื่นๆ" (other documents) of the division request.
+// KlangFinance, round P20 (16 Nov 2569): the tab "เอกสารอื่นๆ" (other documents) of the division request.
 // The user's words: the "other documents" heading of the request had gone when the documents tab was taken out; add a tab called "other documents" instead,
 // where the division (สำนัก/กอง) can attach files and Planning, the budget group, can ask for more documents.
 //   r.odocs    files the division attached here: { id, name, note, by, t, req }   (req = the id of the request for documents it answers, if any)

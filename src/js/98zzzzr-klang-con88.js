@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P88 (25 Nov 2569), the contract and its payments, as asked (บริหารงบประมาณ 3.2-3.6):
+// KlangFinance, round P88 (25 Nov 2569), the contract and its payments, as asked (บริหารงบประมาณ 3.2-3.6):
 // - the contract: the PO number, how it is paid (แบบงวดงาน: by the phases of the contract, or แบบเบิกเป็นครั้ง: any amount each time), and,
 //   when there is an advance, the share deducted from each payment (หักคืนล่วงหน้า ... %). When what is left of the advance is less than that
 //   share, everything left is deducted. Data: cx.po, cx.payMode ("phase" | "time"), cx.adv.dedPct.

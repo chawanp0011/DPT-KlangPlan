@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P30 (17 Nov 2569): the register of contractors and suppliers ("ปรับวิธีการเพิ่มทะเบียนผู้ขายใหม่ ให้ปุ่มเพิ่มอยู่ด้านบน", more details
+// KlangFinance, procurement round P30 (17 Nov 2569): the register of contractors and suppliers ("ปรับวิธีการเพิ่มทะเบียนผู้ขายใหม่ ให้ปุ่มเพิ่มอยู่ด้านบน", more details
 // kept for each, a fuller history, and the name "ผู้รับจ้าง/ผู้ขาย"):
 //   1. The add button is at the top of the register (not a form under the table). It opens the form at the top; the same form edits a vendor.
 //   2. The details kept (v.*): registration date regDate, registered capital capital (baht), how many projects it can take at once maxProj, the most work in hand maxAmt (baht),

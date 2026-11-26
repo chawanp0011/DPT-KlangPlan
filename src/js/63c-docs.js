@@ -1,4 +1,4 @@
-// Fisko Procurement round 21 (Q4 of design v0.2): document intake with simulated OCR (D-P10).
+// Procurement round 21 (Q4 of design v0.2): document intake with simulated OCR (D-P10).
 // Upload or pick a sample → classify → extract fields with a confidence each → check rules V-01..V-07 →
 // match to a contract, phase or case → a person verifies every low-confidence field and fixes what's wrong →
 // confirm → the data is used: invoice → three-way gate, delivery note → delivery date, bank guarantee →

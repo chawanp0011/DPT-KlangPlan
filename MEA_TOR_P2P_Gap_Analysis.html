@@ -36,13 +36,13 @@ ol li,ul li{margin:4px 0}
 <body>
 <main>
 <h1>MEA P2P TOR: requirements and prototype gap analysis</h1>
-<div class="sub">Source: TOR draft 01 July 2026 (e-bidding DT7-4616-TGZ, 91 pages, RPA removed) · Compared with: Fisko Procurement (P1–P17) and Fisko Finance (F1–F3), build at commit b96cf0d · Prepared 18 Oct 2026</div>
+<div class="sub">Source: TOR draft 01 July 2026 (e-bidding DT7-4616-TGZ, 91 pages, RPA removed) · Compared with: Procurement (P1–P17) and Finance (F1–F3), build at commit b96cf0d · Prepared 18 Oct 2026</div>
 
 <h2>1. Headline</h2>
 <div class="card">
 <p>The TOR asks for a <b>P2P system</b> for MEA (การไฟฟ้านครหลวง): procurement management plus payment, integrated with <b>SAP S/4HANA</b> (PS, PM, CO, BU, MM, FI), bundled with a commercial <b>ECM</b>, a <b>no-code workflow engine</b> and an RDBMS, delivered in 540 days. The prototype is a <b>procurement case-management layer</b> designed for a budget agency: it is strong on the case lifecycle, rules, committees, contracts and analytics, and weak or absent on everything that makes this TOR a P2P and a platform bid.</p>
 <ul>
-<li><b>Biggest mismatch:</b> the prototype assumes the Thai government chain (Budget → e-GP → GFMIS, file based). The TOR's money side is <b>SAP</b> (AP posting, payment voucher, bank e-payment, WHT, VAT). Fisko Finance reconciles GFMIS files and has none of the SAP-side functions.</li>
+<li><b>Biggest mismatch:</b> the prototype assumes the Thai government chain (Budget → e-GP → GFMIS, file based). The TOR's money side is <b>SAP</b> (AP posting, payment voucher, bank e-payment, WHT, VAT). Finance reconciles GFMIS files and has none of the SAP-side functions.</li>
 <li><b>Three whole TOR packages have no prototype counterpart:</b> ECM (TOR 5.3), workflow and form designer (5.4), and SAP integration (5.2).</li>
 <li><b>Real functional gaps inside Procurement:</b> vendor-facing role, sample and type-test workflow, drawing approval, serial numbers, committee fees, bid security, appeal forwarding to the Comptroller General's Department (อธ.1), RFQ, e-mail delivery and e-signature.</li>
 <li><b>Good news:</b> a large share of the Annex 12 detail (plan versions, TOR library, committees and conflict of interest, evaluation scoring, appeal window, contract guarantee, penalties, warranty claims, supplier register, สขร.1 report, dashboards, audit dossier) is already demonstrable.</li>
@@ -71,7 +71,7 @@ ol li,ul li{margin:4px 0}
 <li>Is e-GP integrated by API or by file? The TOR only says "send/receive via API, Batch or Web Service as MEA specifies".</li>
 <li>The TOR points to Annex 12 as an "example overview" and Annexes 1, 2 and 6 are blank placeholders. Which parts of Annex 12 are binding requirements?</li>
 <li>Marked as removed or struck through in the draft (5.2.5.1, 5.2.6.2, 5.2.6.3, 5.4.7): confirm they are out of scope.</li>
-<li>Training: at least 245 users, 10 + 10 admin, 10 + 10 developer seats on ECM and workflow. Is Fisko in the 245?</li>
+<li>Training: at least 245 users, 10 + 10 admin, 10 + 10 developer seats on ECM and workflow. Is in the 245?</li>
 </ul></div>
 
 <h2>5. Reading notes and limits</h2>
@@ -89,7 +89,7 @@ const R = [
 // [section, ref, requirement, status, evidence]
 ["A. Plan and request (Annex 12 system 1)"],
 ["1.1","Create, store, edit, delete, search plan items with budget data and attachments","Covered","Procurement plan with versions proposed by the officer, approved by the executive, recorded as published in e-GP (P2)."],
-["1.2, 5.2.1","Import plan and budget data MEA already holds: SAP PS (WBS) and operating budget","Gap","Plan lines come from Fisko Budget FY2570 allocation lines and M06 demand. No WBS concept, no operating-budget (งบทำการ) or SAP import."],
+["1.2, 5.2.1","Import plan and budget data MEA already holds: SAP PS (WBS) and operating budget","Gap","Plan lines come from Budget FY2570 allocation lines and M06 demand. No WBS concept, no operating-budget (งบทำการ) or SAP import."],
 ["1.3","Create RFQ (ใบสอบถามราคา) and e-invitation letters and send them to vendors","Partial","Letters to suppliers from templates with sent dates (Q2). No RFQ document, no real e-mail; the e-mail channel is only a listed interface (IF-07)."],
 ["1.4","Vendor records the reply to an RFQ in the system","Gap","No vendor role or portal. Quotations are keyed in by the officer."],
 ["1.5","Alert when a vendor adds items outside the reference-price list","Gap","Not modelled."],
@@ -114,7 +114,7 @@ const R = [
 ["3.1.1.5–6","Price analysis (% vs last purchase), import oil price, LME, FX","Partial","Price trend exists; no external index import and no FX or commodity data."],
 ["3.1.1.7–9","Attach files by file-folder type; alert on bid-security return date; publish results to MEA website","Gap","Attachments are filenames only. No folder types, no web publishing."],
 ["3.2.1–3.2.2","Vendor master: search, create with GDX and Linkage Center (DOPA), 15 fields, status, bank account from ERP, bidding history","Partial","Supplier register with tax-ID check, history and abandoned-work list. No GDX or DOPA lookup, no bank data, no status such as 'may be terminated'."],
-["3.3","Equipment master: code, name, picture, group, history, catalog, MiT, ISO, Price Performance, bidders, spec, claim history","Gap","Stock and assets belong to Fisko Assets (D-P11). No equipment master in Procurement."],
+["3.3","Equipment master: code, name, picture, group, history, catalog, MiT, ISO, Price Performance, bidders, spec, claim history","Gap","Stock and assets belong to Assets (D-P11). No equipment master in Procurement."],
 ["3.4, Annex 12 s.3","Appeal (อุทธรณ์) tracking: deadline, appellant, decision by MEA, send to Comptroller General (แบบ อธ.1), their decision, notify the appellant; alerts 3 and 7 days before deadlines","Partial","Appeal window, filing, head-of-procurement decision and effects are built. Missing: อธ.1 form and forwarding, Comptroller General's decision, reminder schedule."],
 ["D. Contract and delivery (system 4)"],
 ["4.1.1–4.1.2","Contract search and record: 40+ fields incl. BOQ, installments, penalty rate, warranty, cumulative progress %, 9% penalty cap date","Partial","Contracts with phases, penalty rate and cap warning, versions, guarantee, delivery notices (P5). No BOQ, no drawing or asset code, no cumulative progress, no WBS."],
@@ -130,7 +130,7 @@ const R = [
 ["4.7","Inspection (ตรวจรับ): actual dates and quantities, test numbers, e-GP inspection no., status, check list of e-documents, alerts for contract end, warranty end","Partial","Acceptance with partial results, recorded dissent and deadlines (P5). No test fields, no e-GP inspection no., no check list of e-documents (audit dossier is related)."],
 ["Annex 12 s.4","Serial Number of equipment (5.1.10)","Gap","No serial number anywhere."],
 ["E. Invoice, AP and payment (4.8–4.11, 5.2.6)"],
-["4.8, 4.9","Post vendor invoice and tax invoice into ERP (AP): indirect and direct posting, 14 types of payment postings (loan repayment, taxes, social fund, payroll, bonus, fees)","Gap","Fisko Finance has payment requests and GFMIS file reconciliation. No invoice posting, no SAP document simulation, no payment types beyond contract phases."],
+["4.8, 4.9","Post vendor invoice and tax invoice into ERP (AP): indirect and direct posting, 14 types of payment postings (loan repayment, taxes, social fund, payroll, bonus, fees)","Gap","Finance has payment requests and GFMIS file reconciliation. No invoice posting, no SAP document simulation, no payment types beyond contract phases."],
 ["4.8.4, 5.2.6.7","ERP postings: advance payment, down payment, retention, guarantee deposit and return, penalty and compensation","Gap","Retention and guarantee are tracked in Procurement, but nothing posts to a ledger."],
 ["4.8.5, 4.9.4","Simulate the posting before sending it to ERP","Gap","Not modelled."],
 ["4.8.6, 4.9.5, 5.2.6.10–11","Simulate, create, cancel payment proposal (ใบสำคัญจ่าย) for approval","Gap","Payment request approval exists but no payment voucher document, no cancel in ERP."],

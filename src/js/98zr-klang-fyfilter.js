@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, 14 Nov 2569: the fiscal year works the same way on every budget page.
+// KlangFinance, 14 Nov 2569: the fiscal year works the same way on every budget page.
 // Asked for: "check the fiscal year so it is the same across the whole system, cut what is not used". Before this file there were three
 // year controls: a selector in the top bar (98w), a chip in the heading of the formulation pages (98zq) and a selector inside the request
 // page (98x). Now there is ONE: a year filter in the filter row of each budget page. It sets the same shared year (SEL_FY), so the choice

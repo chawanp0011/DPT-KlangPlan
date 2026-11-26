@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P21 (16 Nov 2569): the page "สรุปและส่ง สงป." (B6, submission) gets two new tabs at the front, on the user's brief:
+// KlangFinance, round P21 (16 Nov 2569): the page "สรุปและส่ง สงป." (B6, submission) gets two new tabs at the front, on the user's brief:
 //   1. ภาพรวมคำขอ  a dashboard of what has to be sent to the Budget Bureau, comparing ALL the requests with the requests that are APPROVED (the package):
 //                  counts and amounts, by agency unit and by status, and the readiness of the package
 //   2. รายการคำขอ  the requests that go to the Bureau, with the money columns: the request, the DRAFT BILL (ร่าง พ.ร.บ.) and the ACT (พ.ร.บ.); Planning can

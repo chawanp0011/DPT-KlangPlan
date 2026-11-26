@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P47 (20 Nov 2569): the first step of a procurement case, "กำหนดแผนงาน" (Planning), becomes "รายการงบประมาณ".
+// KlangFinance, round P47 (20 Nov 2569): the first step of a procurement case, "กำหนดแผนงาน" (Planning), becomes "รายการงบประมาณ".
 // Planning imports the budget items from a prepared file (the budget report with its monthly money plan), checks the list, and sends
 // the good items to the bureaus and divisions. Each item sent becomes an item of the procurement plan with its case file, so the
 // division raises the requisition from it as before. The sample file is fictional: ตัวอย่างเอกสารโครงการ/E_รายการงบประมาณ/.

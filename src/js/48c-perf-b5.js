@@ -1,4 +1,4 @@
-// Fisko Budget round B5: results (M08). Budget design chapter 6.5.
+// Budget round B5: results (M08). Budget design chapter 6.5.
 // - Quarterly reports with deadlines (FR-B-35, BR-18: 15 days after each quarter, annual report 45 days after
 //   the year), results with problems and fixes, evidence that the auditor certifies (FR-B-36).
 // - Cost per output against the plan and last year, the 3E view (FR-B-37).

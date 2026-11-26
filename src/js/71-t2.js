@@ -1,4 +1,4 @@
-// Fisko Procurement round 38 (T2 of design v0.3, chapter 18): bid security (FR-PR-71, R-20), samples and type tests
+// Procurement round 38 (T2 of design v0.3, chapter 18): bid security (FR-PR-71, R-20), samples and type tests
 // (FR-PR-72, R-21), SME and MiT preference with bidder details and supplier history (FR-PR-69, 70, 73, R-26),
 // appeals forwarded to the central body (FR-PR-74, R-22) and a supplier portal role (FR-PR-66, simulated).
 // Every part sits behind a profile switch from 70-profile.js. Sending and the supplier's own sign-in are simulated (D-P17).

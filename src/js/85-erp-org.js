@@ -1,6 +1,6 @@
-// Fisko-ERP-Gov, part 2: Fisko Organization (module 1). Units, positions and approval tiers.
+// ERP-Gov, part 2: Organization (module 1). Units, positions and approval tiers.
 // ERP-Government reference: operating_unit and hr_department_code (units), base_tier_validation (tiers).
-// Written new in the Fisko list + drawer pattern; the units themselves are the same S.units every Fisko app already uses.
+// Written new in the list + drawer pattern; the units themselves are the same S.units every app already uses.
 const ORG_ST = { live: [["ใช้งาน", "In use"], "p-ok"], vacant: [["ว่าง", "Vacant"], "p-warn"], filled: [["มีผู้ดำรงตำแหน่ง", "Filled"], "p-ok"] };
 const ORG_ROLES = ["admin", "exec", "plan", "fin", "audit", "div", "divhead", "proc", "prochead", "asset", "store", "hr"];
 const isOrgAdmin = () => ROLE === "admin";

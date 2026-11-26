@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P88b (25 Nov 2569): the organisation app gets the user management it lacked (asked for: "organization ขาด
+// KlangFinance, round P88b (25 Nov 2569): the organisation app gets the user management it lacked (asked for: "organization ขาด
 // ผู้ใช้งาน พร้อมรายละเอียด สิทธิ์ อื่นเตรียมให้ครบ เพื่อให้เห็นว่า สามารถจัดการระบบผู้ใช้งานทั้งหมด").
 //   O4 ผู้ใช้งาน: the register of users (filters), a user's details (contact, unit, position, main and extra roles, status, MFA, account
 //      expiry, last sign-in), what the role may open, the user's recent actions; the admin adds, edits, suspends/enables, resets the password

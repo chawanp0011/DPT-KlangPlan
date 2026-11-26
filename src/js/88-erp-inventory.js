@@ -1,4 +1,4 @@
-// Fisko-ERP-Gov, part 5: Fisko Inventory (module 7). Written new; Fisko had no stock app.
+// ERP-Gov, part 5: Inventory (module 7). Written new; had no stock app.
 // ERP-Government reference: stock_request, stock_request_tier_validation, stock_card_report, stock_no_negative,
 // l10n_th_gov_stock_request, purchase_stock. Rules kept: a request is approved by amount tier, stock can never go
 // negative, every change is a stock move shown on the stock card. Costing is a moving average.

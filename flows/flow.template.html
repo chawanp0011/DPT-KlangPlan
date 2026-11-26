@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flow 18 โมดูล (Fisko-ERP-Gov 9 โมดูล และ Fisko-KlangFinance รอบ R1 ถึง R9) </title>
+<title>Flow 18 โมดูล (ERP-Gov 9 โมดูล และ KlangFinance รอบ R1 ถึง R9) </title>
 <style>
 :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2433; --sub:#5b6577; --line:#dfe3ea; --acc:#34498c; --accs:#e8ecf7; --ok:#2e7d5b; --warn:#b26a00; --bad:#b3261e; --mute:#8a93a3; }
 * { box-sizing: border-box; }
@@ -59,11 +59,11 @@ body { padding-left:268px; }
 </style>
 </head>
 <body>
-<header class="top"><h1>Flow 18 โมดูล: โมดูล 1 ถึง 9 จาก Fisko-ERP-Gov และโมดูล 10 ถึง 18 ที่เพิ่มในโปรเจ็คกองคลัง (Fisko-KlangFinance รอบ R1 ถึง R9)</h1>
+<header class="top"><h1>Flow 18 โมดูล: โมดูล 1 ถึง 9 จาก ERP-Gov และโมดูล 10 ถึง 18 ที่เพิ่มในโปรเจ็คกองคลัง (KlangFinance รอบ R1 ถึง R9)</h1>
 <p>ผู้เกี่ยวข้อง ขั้นตอนและสถานะ จุดอนุมัติ ข้อมูลเข้า-ออก และการเชื่อมกับโมดูลอื่นและระบบภายนอก ของแต่ละโมดูล ข้อมูลทั้งหมดในระบบเป็นข้อมูลตัวอย่าง ไม่ใช่ข้อมูลจริง</p></header>
 <nav class="idx" id="idx"></nav>
 <main>
-<div class="note"><b>วิธีอ่านเอกสาร</b> แต่ละขั้นตอนมีป้ายสถานะ: <span class="chip B">B มีในระบบ</span> <span class="chip S">S จำลอง (AI, OCR, GFMIS, e-GP, ธนาคาร หรือ สงป.)</span> <span class="chip P">P บางส่วน</span> <span class="chip N">N ยังไม่มี</span> <span class="chip T">ทดสอบรอบนี้</span> ป้าย "ทดสอบรอบนี้" หมายถึงรันสคริปต์ทดสอบการทำงานจริงของขั้นนั้นแล้ว (เฉพาะส่วนที่เขียนใหม่: หน้าโมดูล 1, 5, 6, 7 และ Agent ใหม่) ขั้นที่ไม่มีป้ายนี้ มาจาก Fisko เดิม และ <b>ไม่ได้ทดสอบซ้ำ</b> ในรอบนี้ ยกเว้นการเปิดหน้าครบทุกบทบาท ผังแต่ละโมดูลเป็นเส้นหลัก ลูกศรเส้นทึบคือลำดับ เส้นประคือการส่งกลับ</div>
+<div class="note"><b>วิธีอ่านเอกสาร</b> แต่ละขั้นตอนมีป้ายสถานะ: <span class="chip B">B มีในระบบ</span> <span class="chip S">S จำลอง (AI, OCR, GFMIS, e-GP, ธนาคาร หรือ สงป.)</span> <span class="chip P">P บางส่วน</span> <span class="chip N">N ยังไม่มี</span> <span class="chip T">ทดสอบรอบนี้</span> ป้าย "ทดสอบรอบนี้" หมายถึงรันสคริปต์ทดสอบการทำงานจริงของขั้นนั้นแล้ว (เฉพาะส่วนที่เขียนใหม่: หน้าโมดูล 1, 5, 6, 7 และ Agent ใหม่) ขั้นที่ไม่มีป้ายนี้ มาจาก เดิม และ <b>ไม่ได้ทดสอบซ้ำ</b> ในรอบนี้ ยกเว้นการเปิดหน้าครบทุกบทบาท ผังแต่ละโมดูลเป็นเส้นหลัก ลูกศรเส้นทึบคือลำดับ เส้นประคือการส่งกลับ</div>
 <div id="summary"></div>
 <div id="mods"></div>
 </main>
@@ -75,7 +75,7 @@ const list = a => `<ul>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
 document.getElementById("idx").innerHTML = FLOW.map(m => `<a href="#${m.id}">${m.no} ${esc(m.thx)}</a>`).join("");
 setTimeout(() => { const links = [...document.querySelectorAll("#idx a")], io = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) links.forEach(l => l.classList.toggle("on", l.getAttribute("href") === "#" + e.target.id)); }); }, { rootMargin: "-10% 0px -80% 0px" }); FLOW.forEach(m => { const el = document.getElementById(m.id); if (el) io.observe(el); }); }, 0);
 document.getElementById("summary").innerHTML = `<section class="mod"><div class="mh"><h2>สรุป: อะไรมาจากไหน</h2></div>
-<div class="tw"><table class="sumtab"><thead><tr><th>โมดูล</th><th>ใช้ซ้ำจาก Fisko</th><th>เพิ่มจาก ERP-Government (เขียนใหม่ ไม่ใช้โค้ด Odoo)</th><th>เขียนใหม่ในรอบนี้</th></tr></thead><tbody>${FLOW.map(m => `<tr><td><a href="#${m.id}">${m.no} ${esc(m.thx)}</a></td><td>${list(m.prov.fisko)}</td><td>${list(m.prov.erp)}</td><td>${list(m.prov.neu)}</td></tr>`).join("")}</tbody></table></div></section>`;
+<div class="tw"><table class="sumtab"><thead><tr><th>โมดูล</th><th>ใช้ซ้ำจาก</th><th>เพิ่มจาก ERP-Government (เขียนใหม่ ไม่ใช้โค้ด Odoo)</th><th>เขียนใหม่ในรอบนี้</th></tr></thead><tbody>${FLOW.map(m => `<tr><td><a href="#${m.id}">${m.no} ${esc(m.thx)}</a></td><td>${list(m.prov.app)}</td><td>${list(m.prov.erp)}</td><td>${list(m.prov.neu)}</td></tr>`).join("")}</tbody></table></div></section>`;
 
 function steps(m) {
   const lanes = []; m.steps.forEach(s => { if (!lanes.includes(s.a)) lanes.push(s.a); });
@@ -103,7 +103,7 @@ function draw(m) {
 document.getElementById("mods").innerHTML = FLOW.map(m => `<section class="mod" id="${m.id}">
 <div class="mh"><h2><span class="no">${m.no}</span>${esc(m.th)} <span style="font-weight:400">${m.th === m.thx ? "" : esc(m.thx)}</span></h2><div class="app">ในระบบ: ${esc(m.app)}</div></div>
 <p class="pp">${esc(m.purpose)}</p>
-<div class="cols"><div class="col f"><b>ใช้ซ้ำจาก Fisko</b>${list(m.prov.fisko)}</div><div class="col e"><b>เพิ่มจาก ERP-Government</b>${list(m.prov.erp)}</div><div class="col n"><b>เขียนใหม่ในรอบนี้</b>${list(m.prov.neu)}</div></div>
+<div class="cols"><div class="col f"><b>ใช้ซ้ำจาก</b>${list(m.prov.app)}</div><div class="col e"><b>เพิ่มจาก ERP-Government</b>${list(m.prov.erp)}</div><div class="col n"><b>เขียนใหม่ในรอบนี้</b>${list(m.prov.neu)}</div></div>
 <h3>1. ผู้เกี่ยวข้องและบทบาท</h3>
 <div class="tw"><table><thead><tr><th>ผู้เกี่ยวข้อง</th><th>บทบาทในระบบ</th><th>ทำอะไรในโมดูลนี้</th></tr></thead><tbody>${m.actors.map(a => `<tr><td><b>${esc(a[1])}</b></td><td>${esc(a[2])}</td><td>${esc(a[3])}</td></tr>`).join("")}</tbody></table></div>
 <h3>2. ผังขั้นตอน (ผู้ทำแยกตามแถว ลำดับตามคอลัมน์)</h3>

@@ -1,5 +1,5 @@
-// Fisko-KlangFinance tests for rounds R1 to R9 (files 92 to 98z in src/js). Like sweep.js it runs inside the prototype page
-// (it needs the app's globals), so tests/klang.html injects it into an iframe that loads Fisko_Prototype.html. It can also be
+// KlangFinance tests for rounds R1 to R9 (files 92 to 98z in src/js). Like sweep.js it runs inside the prototype page
+// (it needs the app's globals), so tests/klang.html injects it into an iframe that loads Prototype.html. It can also be
 // pasted into the browser console on the prototype page and started with KLANG_TEST.run().
 // It checks the rules of the new features (workflow guards, validations, derived numbers), mostly by calling the same
 // functions the forms call (CRUD spec check/run/acts), plus one real form submit (P1 plan item) and opening every new page
@@ -241,7 +241,7 @@
         const w = S.wos.find(x => x.status === "open"); act(CRUD.defs.wo, w, "assign").run(w); CRUD.defs.wo.edit.run(w, { doneDate: TODAY, cost: 3000, doneNote: "n" }); eq("repair counted in the budget", blSpend("BL-01"), 3000);
         const rk = CRUD.defs.rbook; has("room overlap refused", msgs(rk, { room: "RM-01", start: "2026-10-19T10:00", end: "2026-10-19T11:00" }, null), /ซ้อน|overlap/i);
         eq("alerts exist", fcAlerts().filter(a => a.sev === "high").length >= 3, true); as("plan"); ok("plan cannot add vehicles", !CRUD.defs.vehicle.create.can()); ok("everyone can request", CRUD.defs.vbook.create.can());
-        eq("Fisko receipt books untouched", S.rbooks.map(b => b.id).slice(0, 1), ["BK-2570-01"]);
+        eq("receipt books untouched", S.rbooks.map(b => b.id).slice(0, 1), ["BK-2570-01"]);
       });
       await grp("R9 payroll and OneDPT", async () => {
         as("hr"); const lines = payFor("2026-10").filter(l => l.ded > 0); eq("deductions in the run", lines.map(l => [l.emp, l.ded]), [["EM-0002", 3000], ["EM-0003", 2500]]); eq("paused debt not deducted", S.deds[2].status, "paused");
@@ -276,13 +276,13 @@
         // the reference table from the user's file: levels, parents, import
         eq("the table has 5 budget types, 7 groups, 12 main, 34 sub", ["bud", "grp", "main", "sub"].map(l => rqCats(l).length), [5, 7, 12, 34]);
         eq("700 land and construction leads to the investment budget", [ecBudOf(ecMain("700")), ecBudOf(ecMain("100")), ecBudOf(ecMain("410")), ecBudOf(ecMain("800"))], ["inv", "per", "ope", "sub"]);
-        { as("plan"); renderShell(); window.FISKO_ROUTE = "#bq-cat"; route(); await tick(250); const vt = document.getElementById("view").innerText; ok("page BQ3 is a register keyed in by hand: no file import, no export, no REF_TYPE text", !document.querySelector("#ec-file") && !document.querySelector("#ec-text") && !document.querySelector("#ec-export") && !vt.includes("REF_TYPE") && !vt.includes("ส่งออก CSV") && !/undefined|NaN/.test(vt), vt.slice(0, 200)); ok("the register still shows its rows and lets Planning add one", vt.includes("34") && /เพิ่ม|Add/.test(vt)); }
+        { as("plan"); renderShell(); window.APP_ROUTE = "#bq-cat"; route(); await tick(250); const vt = document.getElementById("view").innerText; ok("page BQ3 is a register keyed in by hand: no file import, no export, no REF_TYPE text", !document.querySelector("#ec-file") && !document.querySelector("#ec-text") && !document.querySelector("#ec-export") && !vt.includes("REF_TYPE") && !vt.includes("ส่งออก CSV") && !/undefined|NaN/.test(vt), vt.slice(0, 200)); ok("the register still shows its rows and lets Planning add one", vt.includes("34") && /เพิ่ม|Add/.test(vt)); }
         c.btype = "inv"; c.c1code = "100"; ok("a main category under another budget type is flagged on the request", checks(d).some(x => /ประเภทงบและหมวดรายจ่าย|Budget type and categories/.test(x.title))); c.btype = ""; c.c1code = "";
         // the real form
-        as("div"); const mine = S.requests.find(x => x.unit === me().unit && (x.status === "draft" || x.status === "returned")) || S.requests.find(x => x.unit === me().unit); renderShell(); window.FISKO_ROUTE = "#request"; REQ_TAB = "main"; if (mine) { openReq(mine.id); await tick(300); }
+        as("div"); const mine = S.requests.find(x => x.unit === me().unit && (x.status === "draft" || x.status === "returned")) || S.requests.find(x => x.unit === me().unit); renderShell(); window.APP_ROUTE = "#request"; REQ_TAB = "main"; if (mine) { openReq(mine.id); await tick(300); }
         const v = document.getElementById("view"); ok("the form shows four accounts, the kinds of money on the lines and the non-budget lines", !mine || (/rq-acct3/.test(v.innerHTML) && /data-f="money"/.test(v.innerHTML) && /เงินนอกงบประมาณ/.test(v.innerText) && /rq-c1/.test(v.innerHTML)), v && v.innerText.slice(0, 60));
         if (mine && document.querySelector("#rq-off-add")) { const cm = rqCls(mine), n0 = cm.offs.length; document.querySelector("#rq-off-add").click(); await tick(200); eq("the add button adds a line", cm.offs.length, n0 + 1); const t = document.querySelector("#rq-off-t-" + n0), a = document.querySelector("#rq-off-a-" + n0); if (t && a) { t.value = "off01"; t.dispatchEvent(new Event("change")); await tick(100); const a2 = document.querySelector("#rq-off-a-" + n0); a2.value = "123000"; a2.dispatchEvent(new Event("change")); await tick(100); eq("type and amount are saved", [cm.offs[n0].type, cm.offs[n0].amt, cm.co.amt >= 123000], ["off01", 123000, true]); } }
-        as("plan"); window.FISKO_ROUTE = "#bq-money"; route(); await tick(150); ok("BQ2 opens", /ประเภทเงิน/.test(document.getElementById("view").innerText)); window.FISKO_ROUTE = "#bq-cat"; route(); await tick(150); ok("BQ3 opens", /หมวดรายจ่าย/.test(document.getElementById("view").innerText));
+        as("plan"); window.APP_ROUTE = "#bq-money"; route(); await tick(150); ok("BQ2 opens", /ประเภทเงิน/.test(document.getElementById("view").innerText)); window.APP_ROUTE = "#bq-cat"; route(); await tick(150); ok("BQ3 opens", /หมวดรายจ่าย/.test(document.getElementById("view").innerText));
       });
       await grp("Request form: area, reference price register, monthly plan (Q4b)", async () => {
         const G = CRUD.defs.geo, RP = CRUD.defs.refPrice, r = S.requests.find(x => x.status === "draft") || S.requests[0], c = rqCls(r);
@@ -306,13 +306,13 @@
         // rights, and the form
         r.status = "draft"; as("div"); const own = S.requests.find(x => x.unit === me().unit && editable(x)); ok("a division can edit its own draft's monthly plan", !own || rqpMonthRights(own).plan);
         const appr = S.requests.find(x => x.status === "approved" && actAmount(x) != null); if (appr) { as("div"); const du = S.users.find(u => u.role === "div" && u.unit === appr.unit); ROLE = "div"; ok("results can't be entered before an amount is approved (checked on a draft)", !rqpMonthRights(r).res); as("plan"); ok("Planning can enter results once an amount is approved", rqpMonthRights(appr).res); }
-        as("div"); renderShell(); const mine = S.requests.find(x => x.unit === me().unit && editable(x)); window.FISKO_ROUTE = "#request";
+        as("div"); renderShell(); const mine = S.requests.find(x => x.unit === me().unit && editable(x)); window.APP_ROUTE = "#request";
         if (mine) { REQ_TAB = "plan"; openReq(mine.id); await tick(300); const v = document.getElementById("view"); ok("the plan tab shows the monthly plan", /rq-month/.test(v.innerHTML) && /data-mp="11"/.test(v.innerHTML));
           const i = document.querySelector('[data-mp="0"]'); if (i) { i.value = "50000"; i.dispatchEvent(new Event("change")); await tick(150); eq("a month's plan is saved", mine.mplan[0], 50000); }
           const b = document.querySelector("#mp-even"); if (b) { b.click(); await tick(150); eq("the even-spread button fills the plan to the amount", rqMSum(mine.mplan), rqTarget(mine)); }
           REQ_TAB = "main"; openReq(mine.id); await tick(300); ok("the main tab has the area panel", /id="rq-area"/.test(document.getElementById("view").innerHTML)); const ab = document.querySelector("#ar-add"); if (ab) { ab.click(); await tick(150); eq("the add-area button adds a row", rqCls(mine).areas.length >= 1, true);
             const pe = document.querySelector("#ar-p-0"), de = document.querySelector("#ar-d-0"), se = document.querySelector("#ar-s-0"); if (pe && de && se) { pe.value = "ขอนแก่น"; pe.dispatchEvent(new Event("change")); await tick(100); document.querySelector("#ar-d-0").value = "เมืองขอนแก่น"; document.querySelector("#ar-d-0").dispatchEvent(new Event("change")); await tick(100); document.querySelector("#ar-s-0").value = "ในเมือง"; document.querySelector("#ar-s-0").dispatchEvent(new Event("change")); await tick(100); eq("a matching name fills the coordinates", [rqCls(mine).areas[0].lat, rqCls(mine).areas[0].lng], [16.432, 102.833]); } } }
-        as("plan"); for (const id of ["#bq-geo", "#bq-ref"]) { window.FISKO_ROUTE = id; route(); await tick(150); ok("page opens " + id, !/undefined|NaN/.test(document.getElementById("view").innerText)); }
+        as("plan"); for (const id of ["#bq-geo", "#bq-ref"]) { window.APP_ROUTE = id; route(); await tick(150); ok("page opens " + id, !/undefined|NaN/.test(document.getElementById("view").innerText)); }
       });
       await grp("Request kind (Q4e)", async () => {
         const F = FORM_FY;
@@ -322,11 +322,11 @@
         const outs = CRUD.defs.rqReq.fields(null, {}).find(x => x.id === "out").opts[0][0], acts = CRUD.defs.rqReq.fields(null, { out: outs }).find(x => x.id === "act").opts[0][0];
         const r1 = CRUD.defs.rqReq.create.run({ name: "ปีเดียว", kind: "year", out: outs, act: acts, type: "ope" }), r2 = CRUD.defs.rqReq.create.run({ name: "ผูกพัน", kind: "multi", out: outs, act: acts, type: "inv" });
         eq("a single-year request has no years table, a multi-year one starts with this year and the next", [!!r1.multi, !!r2.multi, Object.keys(r2.years).join()], [false, true, `${F},${F + 1}`]);
-        ok("the main tab has the kind select for a draft", (renderShell(), window.FISKO_ROUTE = "#request", REQ_TAB = "main", openReq(r1.id), route(), true)); await tick(250); ok("the select is on the page", !!document.querySelector("#rq-kind") && document.querySelector("#rq-kind").value === "year");
+        ok("the main tab has the kind select for a draft", (renderShell(), window.APP_ROUTE = "#request", REQ_TAB = "main", openReq(r1.id), route(), true)); await tick(250); ok("the select is on the page", !!document.querySelector("#rq-kind") && document.querySelector("#rq-kind").value === "year");
         eq("changing to multi-year sets the years table", [mcSetKind(r1, "multi"), r1.multi, Object.keys(r1.years).length], ["", true, 2]); r1.years[F + 1] = 5e6; ok("going back to single-year is refused while a later year holds an amount", /ยังมีวงเงิน|still holds/.test(mcSetKind(r1, "year")) && r1.multi);
         r1.years[F + 1] = 0; eq("and allowed once it is empty", [mcSetKind(r1, "year"), r1.multi, "years" in r1], ["", false, false]);
         S.requests = S.requests.filter(x => x !== r1 && x !== r2);
-        as("div"); renderShell(); window.FISKO_ROUTE = "#requests"; route(); await tick(200); ok("the request list has no notice about commitments to pull", !document.querySelector("#mc-callout") && !document.querySelector("#mc-pull"));
+        as("div"); renderShell(); window.APP_ROUTE = "#requests"; route(); await tick(200); ok("the request list has no notice about commitments to pull", !document.querySelector("#mc-callout") && !document.querySelector("#mc-pull"));
       });
       await grp("Committee observations, House and Senate (Q2)", async () => {
         const C = CRUD.defs.cmobs, org = tx(S.org);
@@ -356,11 +356,11 @@
         as("plan"); ok("the export has a header and one row per item", obCsv(S.observations).split("\n").length === S.observations.length + 1 && /^id,house,committee/.test(obCsv(S.observations)));
         S.observations = S.observations.filter(o => o !== mk);
         // the page and the import buttons
-        reseed(); as("plan"); renderShell(); window.FISKO_ROUTE = "#bq-obs"; OB_IMP = { text: "", name: "", rows: null, err: "", all: false }; route(); await tick(250); const v = () => document.getElementById("view");
+        reseed(); as("plan"); renderShell(); window.APP_ROUTE = "#bq-obs"; OB_IMP = { text: "", name: "", rows: null, err: "", all: false }; route(); await tick(250); const v = () => document.getElementById("view");
         ok("the page shows the tiles, the import panel and the list", /สว/.test(v().innerText) && !!document.querySelector("#ob-sample") && !!document.querySelector("#ob-names"));
         const nb = S.observations.length; document.querySelector("#ob-sample").click(); await tick(250); ok("the sample button fills and checks the file", !!OB_IMP.rows && OB_IMP.rows.length === 5 && !!document.querySelector("#ob-go") && !document.querySelector("#ob-go").disabled);
         document.querySelector("#ob-go").click(); await tick(250); eq("the import button adds our own items and logs it", [S.observations.length - nb, S.obsImports.length, S.obsImports[0].add], [2, 1, 2]);
-        as("div"); renderShell(); window.FISKO_ROUTE = "#bq-obs"; route(); await tick(250); ok("a division can open the page, with the import off", !!document.querySelector("#ob-file") && document.querySelector("#ob-file").disabled);
+        as("div"); renderShell(); window.APP_ROUTE = "#bq-obs"; route(); await tick(250); ok("a division can open the page, with the import off", !!document.querySelector("#ob-file") && document.querySelector("#ob-file").disabled);
       });
       await grp("Request from a document, simulated OCR (Q5)", async () => {
         const file = { name: "scan_request.pdf", size: 2048, type: "application/pdf", url: "" }, reset = id => (OCR = { file, sample: id, docs: ocRead(id), unit: "", err: "", done: null });
@@ -391,12 +391,12 @@
         as("plan"); ok("Planning does not import: requests are made by the divisions", !ocCan());
         as("proc"); eq("others can't import (the page is view only)", ocCan(), false); as("div"); eq("a division can and Planning cannot", [ocCan(), (as("plan"), ocCan())], [true, false]);
         // the page
-        as("div"); renderShell(); window.FISKO_ROUTE = "#bq-ocr"; OCR = { file: null, sample: "A", docs: null, unit: "", err: "", done: null }; route(); await tick(250);
+        as("div"); renderShell(); window.APP_ROUTE = "#bq-ocr"; OCR = { file: null, sample: "A", docs: null, unit: "", err: "", done: null }; route(); await tick(250);
         ok("the page offers the file, the sample and the read button", !!document.querySelector("#oc-file") && !!document.querySelector("#oc-read") && document.querySelectorAll("#oc-sample option").length === 3);
         document.querySelector("#oc-sample").value = "A"; document.querySelector("#oc-read").click(); await tick(250); ok("reading shows the fields and a disabled create button", !!document.querySelector("#oc-f-0-name") && document.querySelector("#oc-go").disabled);
         const pr = document.querySelector("#oc-i-0-0-price"); pr.value = "24,000"; pr.dispatchEvent(new Event("change")); await tick(250); ok("correcting the price enables it", !document.querySelector("#oc-go").disabled);
         const nb = S.requests.length; document.querySelector("#oc-go").click(); await tick(250); eq("creating adds a draft and shows it", [S.requests.length - nb, !!document.querySelector("[data-ocopen]")], [1, true]);
-        window.FISKO_ROUTE = "#requests"; route(); await tick(250); ok("the request list has a way in", !!document.querySelector('[data-jump="bq-ocr"]'));
+        window.APP_ROUTE = "#requests"; route(); await tick(250); ok("the request list has a way in", !!document.querySelector('[data-jump="bq-ocr"]'));
       });
       await grp("Budget request dashboard and summary report (Q7)", async () => {
         const close = (a, b) => Math.abs(a - b) < 1;
@@ -428,18 +428,18 @@
         // csv
         as("plan"); const csv = dsReqCsv(dsList()).split("\n"); eq("the request CSV has a header and a row per request", [csv[0].split(",").length >= 12, csv.length], [true, dsList().length + 1]); eq("the sums CSV has a row per grouping row", dsSumCsv(dsSections(dsList())).split("\n").length, 1 + sumv(dsSections(dsList()).map(s => s.rows.length)));
         // the pages
-        renderShell(); window.FISKO_ROUTE = "#bq-dash"; route(); await tick(250); const v = () => document.getElementById("view");
+        renderShell(); window.APP_ROUTE = "#bq-dash"; route(); await tick(250); const v = () => document.getElementById("view");
         ok("the dashboard shows tiles, the quota bar, the filters and the groupings", /BQ9/.test(v().innerText) && !!document.querySelector("#ds-scope") && !!document.querySelector("#ds-unit") && v().querySelectorAll("section.panel").length >= 5 && !/undefined|NaN/.test(v().innerText));
         document.querySelector("#ds-scope").value = "approved"; document.querySelector("#ds-scope").dispatchEvent(new Event("change")); await tick(250); eq("changing the filter changes the figures", [DS.scope, /ผู้บริหารเห็นชอบ|Approved/.test(document.querySelector("#ds-scope").selectedOptions[0].text)], ["approved", true]); DS.scope = "live";
-        window.FISKO_ROUTE = "#bq-rpt"; route(); await tick(250); ok("the annual report has its title, the summary tab and the list of every request (the filter block and the print and CSV buttons were cut in P25)", /รายงานงบประมาณประจำปี/.test(v().innerText) && /รายงานสรุปงบประมาณ ปีงบประมาณ/.test(v().innerText) && !document.querySelector("#ds-print") && !document.querySelector("#ds-scope") && dsList().every(r => v().innerText.includes(r.id)));
-        as("div"); renderShell(); window.FISKO_ROUTE = "#bq-dash"; route(); await tick(250); ok("a division sees no unit filter", !document.querySelector("#ds-unit") && !!document.querySelector("#ds-scope"));
+        window.APP_ROUTE = "#bq-rpt"; route(); await tick(250); ok("the annual report has its title, the summary tab and the list of every request (the filter block and the print and CSV buttons were cut in P25)", /รายงานงบประมาณประจำปี/.test(v().innerText) && /รายงานสรุปงบประมาณ ปีงบประมาณ/.test(v().innerText) && !document.querySelector("#ds-print") && !document.querySelector("#ds-scope") && dsList().every(r => v().innerText.includes(r.id)));
+        as("div"); renderShell(); window.APP_ROUTE = "#bq-dash"; route(); await tick(250); ok("a division sees no unit filter", !document.querySelector("#ds-unit") && !!document.querySelector("#ds-scope"));
         S.requests = S.requests.filter(r => r !== pc);
       });
       await grp("Request sender and the link check (Q6)", async () => {
         ok("seed: every request has a sender record; the sent ones have a receipt; the approved ones are checked and mapped", S.requests.every(r => r.intake && r.intake.contact) && S.requests.filter(r => r.status !== "draft" && r.status !== "returned").every(r => r.intake.recv && /^RC-\d+-\d+$/.test(r.intake.recv.no)) && S.requests.filter(r => r.status === "approved").every(r => r.align && r.align.result === "ok" && r.map && r.map.to === r.act));
         // the panel on the request page
         as("div"); const draft = S.requests.find(r => r.unit === me().unit && editable(r)); ok("a draft of this unit exists", !!draft);
-        renderShell(); window.FISKO_ROUTE = "#request"; REQ_TAB = "main"; CUR_REQ = null; openReq(draft.id); await tick(300); const g = id => document.querySelector(id);
+        renderShell(); window.APP_ROUTE = "#request"; REQ_TAB = "main"; CUR_REQ = null; openReq(draft.id); await tick(300); const g = id => document.querySelector(id);
         ok("the main tab shows the sender panel with the unit that sent it, the contact, the channel and the letter", !!g("#rq-intake") && /หน่วยงานที่ส่งคำขอ|Unit that sent/.test(g("#rq-intake").innerText) && ["#rqi-agency", "#rqi-cn", "#rqi-cp", "#rqi-ct", "#rqi-ce", "#rqi-ch", "#rqi-dn", "#rqi-dd"].every(id => !!g(id) && !g(id).disabled) && g("#rq-intake").innerText.includes(unitName(draft.unit)));
         const put = async (id, val) => { const el = g(id); el.value = val; el.dispatchEvent(new Event("change")); await tick(200); };
         await put("#rqi-cn", "สมชาย ทดสอบ"); await put("#rqi-ct", "02-123-4567"); eq("a name and a phone are saved on the request", [draft.intake.contact.name, draft.intake.contact.phone], ["สมชาย ทดสอบ", "02-123-4567"]);
@@ -448,7 +448,7 @@
         await put("#rqi-dd", "2099-01-01"); eq("a letter dated in the future is refused", draft.intake.docDate, "2026-10-01");
         ok("the channel select offers four ways", g("#rqi-ch").options.length === 4);
         draft.intake.contact = { name: "", phone: "" }; ok("the request check warns when the sender's name or phone is missing", checks(draft).some(x => /ผู้ยื่นคำขอ|Sender of the request/.test(x.title) && x.s === "wa")); draft.intake.contact = { name: "ก", phone: "02-111-2222" }; ok("and is satisfied when they are given", checks(draft).some(x => /ผู้ยื่นคำขอ|Sender of the request/.test(x.title) && x.s === "ok"));
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#request"; REQ_TAB = "main"; CUR_REQ = null; openReq(draft.id); await tick(300); ok("Planning sees the panel read only", !!g("#rq-intake") && g("#rqi-cn").disabled);
+        as("plan"); renderShell(); window.APP_ROUTE = "#request"; REQ_TAB = "main"; CUR_REQ = null; openReq(draft.id); await tick(300); ok("Planning sees the panel read only", !!g("#rq-intake") && g("#rqi-cn").disabled);
         // the channel
         eq("the channel is read from how the request came", [rqChannel({}), rqChannel({ src: { kind: "ocr" } }), rqChannel({ intake: { channel: "email" } })], ["sys", "ocr", "email"]);
         // what the system sees about the link to the plan
@@ -488,15 +488,15 @@
         const rg = add({ date: "2027-01-15", end: "2027-01-16", name: ["ช่วง, มี;อักขระ", "Period, with;marks"], note: "n" }), ics = clIcs([cal("c6"), rg]); eq("the calendar file has one event per milestone, with the date and an end that is the next day", [(ics.match(/BEGIN:VEVENT/g) || []).length, ics.includes("DTSTART;VALUE=DATE:20261218"), ics.includes("DTEND;VALUE=DATE:20261219"), ics.includes("DTEND;VALUE=DATE:20270117"), /BEGIN:VCALENDAR[\s\S]*END:VCALENDAR/.test(ics)], [2, true, true, true, true]);
         ok("commas and semicolons in a name are escaped in the file", ics.includes("ช่วง\\, มี\\;อักขระ")); const cs = clCsv(S.calendar).split("\n"); eq("the CSV has a header and a row per milestone", [cs[0].startsWith("id,kind,date"), cs.length], [true, S.calendar.length + 1]);
         // the page
-        reseed(); as("plan"); CAL = { y: 2026, m: 10, kind: "", mine: false, st: "", view: "month" }; renderShell(); window.FISKO_ROUTE = "#bq-cal"; route(); await tick(250); const v = () => document.getElementById("view");
+        reseed(); as("plan"); CAL = { y: 2026, m: 10, kind: "", mine: false, st: "", view: "month" }; renderShell(); window.APP_ROUTE = "#bq-cal"; route(); await tick(250); const v = () => document.getElementById("view");
         ok("the page shows tiles, filters, the month grid with the Bureau briefing on 24 November, and the list", /BQ12/.test(v().innerText) && !!document.querySelector("#cal-kind") && v().querySelectorAll("[data-cal]").length === 5 && /พฤศจิกายน 2569|November 2026/.test(v().innerText) && !!document.querySelector("#cal-ics") && !/undefined|NaN/.test(v().innerText));
         const n0 = v().querySelectorAll("button[data-cal]").length; document.querySelector("#cal-kind").value = "bureau"; document.querySelector("#cal-kind").dispatchEvent(new Event("change")); await tick(250); ok("the kind filter takes the internal chips off the grid", v().querySelectorAll("button[data-cal]").length < n0 && v().querySelectorAll("button[data-cal]").length >= 1); CAL.kind = "";
         document.querySelector("#cal-next").click(); await tick(200); document.querySelector("#cal-next").click(); await tick(200); eq("the arrows move the month, and the year rolls over", [CAL.m, CAL.y], [0, 2027]); document.querySelector("#cal-next").click(); await tick(200); eq("January to February", [CAL.m, CAL.y], [1, 2027]); document.querySelector("#cal-today").click(); await tick(200); eq("this month brings it back", [CAL.m, CAL.y], [10, 2026]);
         const chip = document.querySelector("button[data-cal]"); chip.click(); await tick(250); ok("clicking a chip opens that milestone", !!CR_OPEN && CR_OPEN.key === "calEv" && CR_OPEN.id === chip.dataset.cal);
-        for (const role of ["div", "exec", "fin", "admin"]) { as(role); renderShell(); window.FISKO_ROUTE = "#bq-cal"; CR_OPEN = null; route(); await tick(150); ok("page opens as " + role, /BQ12/.test(v().innerText) && !/undefined|NaN/.test(v().innerText)); }
+        for (const role of ["div", "exec", "fin", "admin"]) { as(role); renderShell(); window.APP_ROUTE = "#bq-cal"; CR_OPEN = null; route(); await tick(150); ok("page opens as " + role, /BQ12/.test(v().innerText) && !/undefined|NaN/.test(v().innerText)); }
       });
       await grp("Request form: no derived expenditure type, no jump on change", async () => {
-        as("div"); renderShell(); const r = S.requests.find(x => x.unit === me().unit && (x.status === "draft" || x.status === "returned")); CUR_REQ = r.id; REQ_TAB = "main"; window.FISKO_ROUTE = "#request"; route(); await tick(300);
+        as("div"); renderShell(); const r = S.requests.find(x => x.unit === me().unit && (x.status === "draft" || x.status === "returned")); CUR_REQ = r.id; REQ_TAB = "main"; window.APP_ROUTE = "#request"; route(); await tick(300);
         const v = () => document.getElementById("view").innerText;
         ok("the derived 'expenditure type (from the budget lines)' field is gone and the budget type select stays", !/ประเภทงบรายจ่าย \(จากรายการงบประมาณ\)|Expenditure type \(from the budget lines\)/.test(v()) && !!document.querySelector("#rq-bt"));
         const sp = document.createElement("div"); sp.style.height = "3000px"; sp.id = "test-spacer"; document.body.appendChild(sp);
@@ -507,7 +507,7 @@
         { const cb = document.querySelector("#rq-acct0"); window.scrollTo(0, 420); await tick(50); const y1 = window.scrollY; cb.click(); await tick(300); ok("a check box and the other actions draw the page again without moving it either", Math.abs(window.scrollY - y1) < 3, [y1, window.scrollY]); }
         { const ad = document.querySelector("#ar-add"); if (ad) { window.scrollTo(0, 420); await tick(50); const y2 = window.scrollY; ad.click(); await tick(300); ok("the add-an-area button does not move the page", Math.abs(window.scrollY - y2) < 3, [y2, window.scrollY]); } }
         REQ_TAB = "plan"; route(); await tick(150); ok("another tab of the request starts at the top", window.scrollY < 3, window.scrollY);
-        REQ_TAB = "main"; route(); await tick(150); window.scrollTo(0, 420); await tick(50); window.FISKO_ROUTE = "#requests"; route(); await tick(150); ok("another page starts at the top", window.scrollY < 3, window.scrollY);
+        REQ_TAB = "main"; route(); await tick(150); window.scrollTo(0, 420); await tick(50); window.APP_ROUTE = "#requests"; route(); await tick(150); ok("another page starts at the top", window.scrollY < 3, window.scrollY);
         sp.remove(); window.scrollTo(0, 0);
       });
       await grp("Formulation menu: order, names, year inside each page (M1)", async () => {
@@ -521,12 +521,12 @@
         eq("the names asked for", [nm("bq-dash"), nm("bq-cal"), nm("strategy"), nm("bq-cfg"), nm("requests"), nm("consolidation"), nm("submission"), nm("bq-geo")], ["แดชบอร์ด", "ปฏิทิน", "ยุทธศาสตร์และแผนงาน", "โควต้า", "คำขอสำนัก/กอง", "รวมคำขอหน่วยงาน", "สรุปและส่ง สงป.", "พื้นที่"]);
         ok("the group heading has no year", tx(GROUPS.form) === "จัดทำงบประมาณ" && !/\d{4}/.test(document.querySelector("#nav").innerText.split("งบประมาณ")[0] || ""));
         for (const id of ["bq-dash", "bq-cal", "strategy", "requests", "consolidation", "review", "submission", "bq-rpt"]) {
-          window.FISKO_ROUTE = "#" + id; SEL_FY = null; route(); await tick(150);
+          window.APP_ROUTE = "#" + id; SEL_FY = null; route(); await tick(150);
           const chip = document.querySelector("#fy-page"); ok("page " + id + " has one year filter inside the page, no top-bar selector, no chip in the heading", !!chip && chip.options[chip.selectedIndex].text.trim() === "ปี " + FORM_FY && (document.querySelector("#fy-sel") || { hidden: true }).hidden && document.querySelectorAll("#fy-page").length === 1 && !document.querySelector("#fy-sel") && !document.querySelector("#view .head #fy-page") && !document.querySelector("#rq-fy"), chip && chip.options[chip.selectedIndex].text);
         }
-        window.FISKO_ROUTE = "#bq-cal"; route(); await tick(100); { const c = document.querySelector("#fy-page"); c.value = String(CUR_FY); c.dispatchEvent(new Event("change")); await tick(250); ok("choosing another year in the page sets the year and keeps the chip", SEL_FY === CUR_FY && !!document.querySelector("#fy-page") && document.querySelector("#fy-page").value === String(CUR_FY)); SEL_FY = null; store.del("fisko-fy"); }
-        window.FISKO_ROUTE = "#allocation"; route(); await tick(150); ok("a page outside the formulation menu has no year chip in its header", !document.querySelector("#fy-page"));
-        as("div"); renderShell(); window.FISKO_ROUTE = "#requests"; route(); await tick(150); ok("the request list has the button to the OCR import, and it opens under the Requests line", !!document.querySelector('[data-jump="bq-ocr"]')); window.FISKO_ROUTE = "#bq-ocr"; route(); await tick(200); ok("the OCR page opens and the menu line of the requests is marked", !/undefined|NaN/.test(document.getElementById("view").innerText) && !!document.querySelector('#nav a[data-v="requests"].on, #nav a[data-v="requests"][aria-current]'));
+        window.APP_ROUTE = "#bq-cal"; route(); await tick(100); { const c = document.querySelector("#fy-page"); c.value = String(CUR_FY); c.dispatchEvent(new Event("change")); await tick(250); ok("choosing another year in the page sets the year and keeps the chip", SEL_FY === CUR_FY && !!document.querySelector("#fy-page") && document.querySelector("#fy-page").value === String(CUR_FY)); SEL_FY = null; store.del("app-fy"); }
+        window.APP_ROUTE = "#allocation"; route(); await tick(150); ok("a page outside the formulation menu has no year chip in its header", !document.querySelector("#fy-page"));
+        as("div"); renderShell(); window.APP_ROUTE = "#requests"; route(); await tick(150); ok("the request list has the button to the OCR import, and it opens under the Requests line", !!document.querySelector('[data-jump="bq-ocr"]')); window.APP_ROUTE = "#bq-ocr"; route(); await tick(200); ok("the OCR page opens and the menu line of the requests is marked", !/undefined|NaN/.test(document.getElementById("view").innerText) && !!document.querySelector('#nav a[data-v="requests"].on, #nav a[data-v="requests"][aria-current]'));
       });
       await grp("Who makes requests and who consolidates them (M3)", async () => {
         const v = () => document.getElementById("view"), roles = Object.keys(ROLES);
@@ -534,12 +534,12 @@
         eq("only the division imports a request from a document", roles.filter(r => (as(r), ocCan())), ["div"]);
         const idea = (S.ideas || []).find(i => i.status === "accepted"); ok("the sample has an accepted project idea", !!idea);
         if (idea) { const un = S.users.find(u => u.role === "div" && u.unit === idea.unit); as("plan"); ok("Planning can't turn an accepted idea into a draft request", !CRUD.defs.stIdea.acts(idea).some(a => a.id === "conv")); if (un) { as("div"); ROLE = "div"; const keep = me; ok("the idea's own division can", (typeof ideaMine === "function" ? ideaMine(idea) : true) ? CRUD.defs.stIdea.acts(idea).some(a => a.id === "conv") : true); } }
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#requests"; route(); await tick(250);
+        as("plan"); renderShell(); window.APP_ROUTE = "#requests"; route(); await tick(250);
         ok("Planning sees the request list with the note on who makes requests, no new-request button and no OCR button", /สำนัก\/กองที่เป็นเจ้าของคำขอ|office or division that owns/.test(v().innerText) && !document.querySelector('[data-crnew="rqReq"]') && !document.querySelector('[data-jump="bq-ocr"]'));
-        as("div"); renderShell(); window.FISKO_ROUTE = "#requests"; route(); await tick(250);
+        as("div"); renderShell(); window.APP_ROUTE = "#requests"; route(); await tick(250);
         ok("a division sees the new-request button and exactly one OCR button", !!document.querySelector('[data-crnew="rqReq"]') && document.querySelectorAll('[data-jump="bq-ocr"]').length === 1);
-        for (const role of ["plan", "exec", "audit"]) { as(role); renderShell(); window.FISKO_ROUTE = "#consolidation"; route(); await tick(250); ok(role + " sees the consolidation page with the note that the budget group consolidates", /กลุ่มงบประมาณ \(กองแผนงาน\)|budget group \(Planning/.test(v().innerText) && !/undefined|NaN/.test(v().innerText)); if (role !== "plan") ok(role + " has no merge button", !document.querySelector('#view [data-a="merge"]')); }
-        as("div"); renderShell(); window.FISKO_ROUTE = "#consolidation"; route(); await tick(200); ok("a division is not given the consolidation page", /ไม่มีสิทธิ์|No access/.test(v().innerText));
+        for (const role of ["plan", "exec", "audit"]) { as(role); renderShell(); window.APP_ROUTE = "#consolidation"; route(); await tick(250); ok(role + " sees the consolidation page with the note that the budget group consolidates", /กลุ่มงบประมาณ \(กองแผนงาน\)|budget group \(Planning/.test(v().innerText) && !/undefined|NaN/.test(v().innerText)); if (role !== "plan") ok(role + " has no merge button", !document.querySelector('#view [data-a="merge"]')); }
+        as("div"); renderShell(); window.APP_ROUTE = "#consolidation"; route(); await tick(200); ok("a division is not given the consolidation page", /ไม่มีสิทธิ์|No access/.test(v().innerText));
       });
       await grp("Agency review menu, ministry registers, the whole line, no English in registers (M4)", async () => {
         const v = () => document.getElementById("view"), C = id => CRUD.defs[id], VY = FORM_FY;
@@ -552,25 +552,25 @@
         ok("the ministry registers come first among the registers, before the agency programmes", ids.indexOf("rg-mstrat") + 1 === ids.indexOf("rg-msvc") && ids.indexOf("rg-msvc") + 1 === ids.indexOf("rg-prog"), ids);
         eq("the names asked for", [tx(NAV.find(n => n.id === "agrev").label), tx(NAV.find(n => n.id === "rg-mstrat").label), tx(NAV.find(n => n.id === "rg-msvc").label)], ["ทบทวนหน่วยงาน", "ทะเบียนยุทธศาสตร์กระทรวง", "ทะเบียนเป้าหมายการให้บริการกระทรวง"]);
         for (const role of ["plan", "div", "exec", "audit", "admin"]) { as(role); renderShell();
-          for (const k of ["em-browse", "em-sum", "em-imp", "em-link", "ag-ov", "link", "align"]) { window.FISKO_ROUTE = "#strategy"; STRAT_TAB = k; route(); await tick(100); if (v().innerText.length > 150) ok(role + " opens strategy tab " + k + " with no gaps", !/undefined|NaN/.test(v().innerText), k); }
-          for (const [k] of AGR_TABS) { window.FISKO_ROUTE = "#agrev"; AGR_TAB = k; route(); await tick(100); ok(role + " opens agency review tab " + k + " with no gaps", v().innerText.length > 200 && !/undefined|NaN/.test(v().innerText), k); } }
+          for (const k of ["em-browse", "em-sum", "em-imp", "em-link", "ag-ov", "link", "align"]) { window.APP_ROUTE = "#strategy"; STRAT_TAB = k; route(); await tick(100); if (v().innerText.length > 150) ok(role + " opens strategy tab " + k + " with no gaps", !/undefined|NaN/.test(v().innerText), k); }
+          for (const [k] of AGR_TABS) { window.APP_ROUTE = "#agrev"; AGR_TAB = k; route(); await tick(100); ok(role + " opens agency review tab " + k + " with no gaps", v().innerText.length > 200 && !/undefined|NaN/.test(v().innerText), k); } }
         // vision and mission: one value per year, in the agency review menu
         reseed(); as("plan");
         ok("seed: one vision and one mission for the year being prepared and one for the year before, no list", !!vmGet(VY) && !!vmGet(VY - 1) && !Array.isArray(S.agVm) && typeof vmGet(VY).vision[0] === "string" && typeof vmGet(VY).mission[0] === "string" && !CRUD.defs.agVm);
-        window.FISKO_ROUTE = "#agrev"; AGR_TAB = "ag-vm"; SEL_FY = null; renderShell(); route(); await tick(250);
+        window.APP_ROUTE = "#agrev"; AGR_TAB = "ag-vm"; SEL_FY = null; renderShell(); route(); await tick(250);
         ok("the tab holds one box for the vision and one for the mission, no English box, no list", !!document.querySelector("#vm-vth") && !!document.querySelector("#vm-mth") && !document.querySelector("#vm-ven") && !document.querySelector("#vm-men") && !document.querySelector("ol li") && !document.querySelector("[data-crnew]"));
         document.querySelector("#vm-vth").value = "วิสัยทัศน์ทดสอบ"; document.querySelector("#vm-mth").value = "พันธกิจทดสอบ"; document.querySelector("#vm-save").click(); await tick(250);
         eq("saving replaces the one value of the year, and the English copies the Thai", [vmGet(VY).vision.join("|"), vmGet(VY).mission.join("|"), vmGet(VY - 1).vision[0].includes("ปีก่อน")], ["วิสัยทัศน์ทดสอบ|วิสัยทัศน์ทดสอบ", "พันธกิจทดสอบ|พันธกิจทดสอบ", true]);
         document.querySelector("#vm-vth").value = ""; document.querySelector("#vm-save").click(); await tick(200); eq("an empty Thai vision is refused and the old value stays", vmGet(VY).vision[0], "วิสัยทัศน์ทดสอบ");
         SEL_FY = VY - 1; route(); await tick(250); ok("choosing the year before shows that year's own value", /ปีก่อน/.test(document.querySelector("#vm-vth").value));
-        SEL_FY = VY + 1; route(); await tick(250); ok("a year with no value says so", /ยังไม่ได้กำหนด|Not set/.test(v().innerText)); SEL_FY = null; store.del("fisko-fy");
+        SEL_FY = VY + 1; route(); await tick(250); ok("a year with no value says so", /ยังไม่ได้กำหนด|Not set/.test(v().innerText)); SEL_FY = null; store.del("app-fy");
         { const f = S.fyList.find(x => x.fy === VY), was = f.status; f.status = "closed"; route(); await tick(200); ok("a closed year is read only", !document.querySelector("#vm-vth") && /ปิดแล้ว|closed/.test(v().innerText)); f.status = was; }
         as("div"); renderShell(); route(); await tick(250); ok("a division reads the vision and mission but cannot edit", !document.querySelector("#vm-vth") && /เฉพาะกองแผนงาน|Only Planning/.test(v().innerText) && !vmCan(VY));
         // outcomes
         as("plan"); eq("seed: two outcomes, three KPIs with five yearly targets each", [S.agOut.length, S.agKpi.length, S.agKpi.every(k => k.targets.length === PLAN_YEARS.length)], [2, 3, true]);
         const k4 = C("agOutK").create.run({ out: "AO-002", th: "ตัวชี้วัดทดสอบ", unit: "ร้อยละ", base: 5, kmode: "year", ky: 6 }); ok("a KPI is added under an outcome with its target (entered by year, shown by quarter)", k4.out === "AO-002" && k4.targets[0] === 6 && k4.plan.mode === "year" && kpQ(k4).join() === "1.5,1.5,1.5,1.5");
         ok("an outcome can be deleted only when no KPI hangs on it", (S.agOut.push({ id: "AO-099", name: ["x", "x"], note: "" }), C("agOut").acts(S.agOut[2]).some(a => a.id === "del")) && C("agOut").acts(S.agOut[0]).some(a => a.id === "retire")); S.agOut.pop();
-        window.FISKO_ROUTE = "#agrev"; AGR_TAB = "ag-out"; route(); await tick(200); ok("the tab lists the outcomes and the KPIs", /AO-001/.test(v().innerText) && /AK-001/.test(v().innerText));
+        window.APP_ROUTE = "#agrev"; AGR_TAB = "ag-out"; route(); await tick(200); ok("the tab lists the outcomes and the KPIs", /AO-001/.test(v().innerText) && /AK-001/.test(v().innerText));
         // ministry registers
         reseed(); as("plan");
         eq("seed: three ministry strategies and three ministry service goals", [S.minStrat.length, S.minSvc.length], [3, 3]);
@@ -580,24 +580,24 @@
         ok("a ministry strategy and a ministry service goal are added", S.minStrat.includes(ms9) && S.minSvc.includes(mv9) && ms9.name[0] === ms9.name[1]);
         ok("one that nothing links to can be deleted, one that is linked can only be retired", C("minStrat").acts(ms9).some(a => a.id === "del") && C("minStrat").acts(S.minStrat[0]).some(a => a.id === "retire"));
         as("exec"); ok("only Planning edits the ministry registers", !C("minStrat").create.can() && !C("minSvc").create.can()); as("plan");
-        for (const id of ["rg-mstrat", "rg-msvc", "rg-prog", "rg-acct"]) for (const role of ["plan", "exec", "fin", "admin"]) { as(role); renderShell(); window.FISKO_ROUTE = "#" + id; route(); await tick(100); ok("page " + id + " opens as " + role, !/undefined|NaN/.test(v().innerText) && v().innerText.length > 120, role); }
+        for (const id of ["rg-mstrat", "rg-msvc", "rg-prog", "rg-acct"]) for (const role of ["plan", "exec", "fin", "admin"]) { as(role); renderShell(); window.APP_ROUTE = "#" + id; route(); await tick(100); ok("page " + id + " opens as " + role, !/undefined|NaN/.test(v().innerText) && v().innerText.length > 120, role); }
         // agency strategies: a ministry strategy, no national strategy or master plan
         as("plan"); renderShell(); const fs = C("agStrat").fields(null, {}).map(f => f.id);
         eq("the strategy form asks for the ministry strategy and a name, no national strategy, no master plan, no English", fs, ["mstrat", "th"]);
         const ns0 = S.strategy.items.length, st9 = C("agStrat").create.run({ th: "กลยุทธ์ทดสอบ", mstrat: ms9.id }); ok("a strategy is added with its ministry strategy", S.strategy.items.length === ns0 + 1 && st9.mstrat === ms9.id && Array.isArray(st9.goals));
-        window.FISKO_ROUTE = "#agrev"; AGR_TAB = "map"; route(); await tick(200); ok("the strategies tab shows the ministry strategy and no national strategy", /MS1/.test(v().innerText) && !/ยุทธศาสตร์ชาติ/.test(v().innerText.split("กลยุทธ์หน่วยงาน")[1] || ""));
+        window.APP_ROUTE = "#agrev"; AGR_TAB = "map"; route(); await tick(200); ok("the strategies tab shows the ministry strategy and no national strategy", /MS1/.test(v().innerText) && !/ยุทธศาสตร์ชาติ/.test(v().innerText.split("กลยุทธ์หน่วยงาน")[1] || ""));
         // agency service goals: structure programme and ministry service goal
         const gf = C("agSvc").fields(null, {}).map(f => f.id); eq("the goal form asks for the structure programme, the ministry service goal, the name and (last) the strategy", gf, ["prog", "msvc", "th", "parent"]);
         const sprog = S.structure[VY].find(n => n.lvl === "program").id, g9 = C("agSvc").create.run({ th: "เป้าหมายทดสอบ", prog: sprog, msvc: mv9.id, parent: "" });
         ok("a goal with no strategy chosen goes under the first strategy, and carries both links", S.strategy.items[0].goals.includes(g9) && g9.prog === sprog && g9.msvc === mv9.id && Array.isArray(g9.kpis));
-        window.FISKO_ROUTE = "#agrev"; AGR_TAB = "kpis"; route(); await tick(200); ok("the goals tab shows both links and the KPI list under it", /MV\d/.test(v().innerText) && /K\d/.test(v().innerText));
+        window.APP_ROUTE = "#agrev"; AGR_TAB = "kpis"; route(); await tick(200); ok("the goals tab shows both links and the KPI list under it", /MV\d/.test(v().innerText) && /K\d/.test(v().innerText));
         // agency programmes
         reseed(); as("plan"); const sp = S.structure[VY].filter(n => n.lvl === "program");
         eq("seed: one agency programme for each programme of the structure, each linked to it", [S.agProg.length, S.agProg.every(p => sp.some(n => n.id === p.struct))], [sp.length, true]);
         has("a duplicate code is refused", msgs(C("agProg"), { code: S.agProg[0].code, th: "x", struct: sp[0].id }, null), /มีอยู่แล้ว|already/); ok("the link to a programme of the structure is required", C("agProg").fields(null, {}).find(f => f.id === "struct").req === true);
         const ap = C("agProg").create.run({ code: "AP9", th: "แผนงานทดสอบ", struct: sp[0].id, note: "" }); ok("an agency programme is added and shows its structure programme", S.agProg.includes(ap) && /P0/.test(spProgName(ap.struct)));
         as("exec"); ok("only Planning edits the register", !C("agProg").create.can()); as("plan");
-        window.FISKO_ROUTE = "#agrev"; AGR_TAB = "ag-prog"; renderShell(); route(); await tick(200); ok("the tab and the register show the same list", /AP1/.test(v().innerText) && C("agProg").list().length === S.agProg.length);
+        window.APP_ROUTE = "#agrev"; AGR_TAB = "ag-prog"; renderShell(); route(); await tick(200); ok("the tab and the register show the same list", /AP1/.test(v().innerText) && C("agProg").list().length === S.agProg.length);
         // outputs/projects and activities: the data of the registers
         const outs = S.structure[VY].filter(n => n.lvl === "output" && !n.retired), acts = S.structure[VY].filter(n => n.lvl === "activity" && !n.retired);
         AGR_TAB = "ag-outp"; route(); await tick(200); ok("the outputs tab lists every output of the register, with a button to the register for Planning", outs.every(o => v().innerText.includes(o.code)) && !!document.querySelector('[data-jump="rg-out"]'));
@@ -605,7 +605,7 @@
         as("div"); renderShell(); route(); await tick(150); ok("a division sees the same lists without the button to the register", !document.querySelector('[data-jump="rg-act"]') && acts.some(a => v().innerText.includes(a.code)));
         as("plan"); { const o = S.structure[VY].find(n => n.lvl === "output"); S.structure[VY].push({ id: "zz-new-act", lvl: "activity", code: "ZZ.9", parent: o.id, name: ["กิจกรรมใหม่จากทะเบียน", "x"] }); renderShell(); route(); await tick(150); ok("a new activity added to the register shows on the tab (the tab reads the register)", /ZZ\.9/.test(v().innerText)); S.structure[VY] = S.structure[VY].filter(n => n.id !== "zz-new-act"); }
         // the whole line
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "link"; route(); await tick(250);
+        as("plan"); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = "link"; route(); await tick(250);
         const nProg = sp.length, nOut = outs.length, nAct = acts.length; ok("the linkage tab has one row for every programme, output and activity", v().querySelectorAll("tbody tr").length === nProg + nOut + nAct, [v().querySelectorAll("tbody tr").length, nProg + nOut + nAct]);
         ok("the line carries the national strategy and master plan of the programme down to its activities", /Y\d{3}|ความมั่นคง|การแข่งขัน|ภาครัฐ|ศักยภาพ|โอกาส|สิ่งแวดล้อม/.test(v().innerText) && /เส้นเชื่อมโยง|whole line/.test(v().innerText));
         ok("no KPI-to-activity linking is left on the tab", !document.querySelector("[data-kact], [data-klink]") && !/เชื่อมโยงกับกิจกรรม|Link to activities/.test(v().innerText));
@@ -615,21 +615,21 @@
         eq("seed: the four kinds of account with names and a note", [S.acctTypes.length, S.acctTypes.map(a => a.code).join()], [4, "1,2,3,4"]);
         eq("without a name of its own the request form shows the register's name", acctLabel(0), "1 · บัญชีที่ 1");
         C("acct").edit.run(S.acctTypes[0], { th: "บัญชีเงินงบประมาณ", note: "ทดสอบ" }); eq("a renamed kind shows on the request form", acctLabel(0), "1 · บัญชีเงินงบประมาณ");
-        as("div"); renderShell(); const dr = S.requests.find(x => x.unit === me().unit && editable(x)); CUR_REQ = dr.id; REQ_TAB = "main"; window.FISKO_ROUTE = "#request"; route(); await tick(300); ok("the request form's check boxes carry the register's names", /บัญชีเงินงบประมาณ/.test(v().innerText));
+        as("div"); renderShell(); const dr = S.requests.find(x => x.unit === me().unit && editable(x)); CUR_REQ = dr.id; REQ_TAB = "main"; window.APP_ROUTE = "#request"; route(); await tick(300); ok("the request form's check boxes carry the register's names", /บัญชีเงินงบประมาณ/.test(v().innerText));
         ok("only Planning renames them, and none is added or deleted", !C("acct").edit.can() && !C("acct").create && (as("plan"), C("acct").edit.can()));
         // the overview, still in the strategy menu, with the minimum share by agency strategy
         as("plan"); renderShell(); const list = dsList(), sumAll = sumv(list.map(dsAmt));
         for (const by of ["ns", "mp", "st"]) for (const dim of ["btype", "nature", "kind", "otype"]) { OV.by = by; OV.dim = dim; const tb = ovTable(); ok("overview " + by + " by " + dim + " renders without gaps", !/undefined|NaN/.test(tb) && tb.includes("<tfoot>"), by + "/" + dim); }
         OV.by = "ns"; OV.dim = "btype"; const html = ovTable(), tf = html.slice(html.indexOf("<tfoot>")), tm = tf.match(/<b>([\d,.]+)<\/b><\/td><td class="n"><b>([\d,.]+)<\/b>/);
         ok("the total row counts each request once", !!tm && Number(tm[1].replace(/,/g, "")) === list.length && Math.abs(Number(tm[2].replace(/,/g, "")) - sumAll / 1e6) < 0.01, tm && tm.slice(1));
-        window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "ag-ov"; OV.by = "ns"; route(); await tick(200); { const sel = document.querySelector("#ov-by"); sel.value = "st"; sel.dispatchEvent(new Event("change")); await tick(250); ok("the 'by' choice redraws the overview", OV.by === "st" && /S\d/.test(v().innerText)); const sd = document.querySelector("#ov-dim"); sd.value = "nature"; sd.dispatchEvent(new Event("change")); await tick(250); ok("the 'split by' choice redraws it", OV.dim === "nature" && /ลงทุน|Investment/.test(v().innerText)); }
+        window.APP_ROUTE = "#strategy"; STRAT_TAB = "ag-ov"; OV.by = "ns"; route(); await tick(200); { const sel = document.querySelector("#ov-by"); sel.value = "st"; sel.dispatchEvent(new Event("change")); await tick(250); ok("the 'by' choice redraws the overview", OV.by === "st" && /S\d/.test(v().innerText)); const sd = document.querySelector("#ov-dim"); sd.value = "nature"; sd.dispatchEvent(new Event("change")); await tick(250); ok("the 'split by' choice redraws it", OV.dim === "nature" && /ลงทุน|Investment/.test(v().innerText)); }
         ok("the overview holds the share by agency strategy with its ministry strategy; only the executive edits the minimum", /กลยุทธ์หน่วยงาน/.test(v().innerText) && document.querySelectorAll("[data-smin]").length === S.strategy.items.length && [...document.querySelectorAll("[data-smin]")].every(i => i.disabled));
         as("exec"); renderShell(); route(); await tick(200); { const i = document.querySelector("[data-smin]"); ok("the executive can set a minimum", !i.disabled); i.value = "25"; i.dispatchEvent(new Event("change")); await tick(200); eq("and it is saved on the strategy", S.strategy.items[0].minShare, 25); }
-        OV.by = "ns"; OV.dim = "btype"; SEL_FY = null; store.del("fisko-fy"); reseed();
+        OV.by = "ns"; OV.dim = "btype"; SEL_FY = null; store.del("app-fy"); reseed();
       });
       await grp("National plans from e-MENSCR (A4)", async () => {
         ok("there is one menu for the plans: BQ13 is gone from the menu, B2 is renamed and e-MENSCR is its first tab", !NAV.some(n => n.id === "bq-em") && NAV.filter(n => n.id === "strategy").length === 1 && /ยุทธศาสตร์และแผนงาน|Strategy and programmes/.test(tx(NAV.find(n => n.id === "strategy").label)) && bPage("strategy").tabs[0].id === "em" && bPage("strategy").tabs[1].id === "alst" && bPage("strategy").tabs[2].id === "emlink");
-        { as("plan"); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "map"; route(); await tick(200); STRAT_TAB = "em-browse"; route(); await tick(250); const vt = document.getElementById("view").innerText; ok("the menu opens on e-MENSCR with the agency strategy tabs after it", /ดูตามแผน|Browse/.test(vt) && !!document.querySelector("[data-btab=ov]") && !!document.querySelector("[data-btab=em]") && !/undefined|NaN/.test(vt)); window.FISKO_ROUTE = "#bq-em"; STRAT_TAB = "map"; route(); await tick(250); ok("an old #bq-em address opens the first e-MENSCR tab of B2", STRAT_TAB === "em-browse" && CUR === "strategy"); as("admin"); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "em-imp"; route(); await tick(250); ok("the administrator can open the menu and import plan files", !!document.querySelector("#em-file") && !document.querySelector("#em-file").disabled); }
+        { as("plan"); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = "map"; route(); await tick(200); STRAT_TAB = "em-browse"; route(); await tick(250); const vt = document.getElementById("view").innerText; ok("the menu opens on e-MENSCR with the agency strategy tabs after it", /ดูตามแผน|Browse/.test(vt) && !!document.querySelector("[data-btab=ov]") && !!document.querySelector("[data-btab=em]") && !/undefined|NaN/.test(vt)); window.APP_ROUTE = "#bq-em"; STRAT_TAB = "map"; route(); await tick(250); ok("an old #bq-em address opens the first e-MENSCR tab of B2", STRAT_TAB === "em-browse" && CUR === "strategy"); as("admin"); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = "em-imp"; route(); await tick(250); ok("the administrator can open the menu and import plan files", !!document.querySelector("#em-file") && !document.querySelector("#em-file").disabled); }
         const rebuild = k => { const by = {}, root = []; EM_DATA[k].rows.forEach(r => (by[r[0]] = { id: r[0].includes("~") ? undefined : r[0], name: r[2], _checkenabled: r[3] ? true : undefined, children: [] })); EM_DATA[k].rows.forEach(r => (r[1] ? by[r[1]].children : root).push(by[r[0]])); return root; };
         eq("the four trees hold the node counts of the four files", ["ns", "mp", "nr", "p13"].map(k => EM_DATA[k].rows.length), [230, 933, 7256, 52]);
         for (const k of ["ns", "mp", "nr", "p13"]) { const p = emParse(JSON.stringify(rebuild(k))); ok("a file of the " + k + " tree is recognised by its codes and has no differences", p.kind === k && !p.err && (d => d.add === 0 && d.gone === 0 && d.ren === 0)(emDiff(k, p.rows)), p.err || p.kind); }
@@ -637,7 +637,7 @@
         eq("nodes without an id get the parent code and a position", EM_DATA.mp.rows.filter(r => r[0].includes("~")).length, 109);
         const lk = S.requests.filter(r => emLinked(r) > 0); ok("sample requests inherit plan links that exist in the trees, from their programme", lk.length >= 6 && lk.every(r => EM_KINDS.every(([k]) => (emPlans(r)[k] || []).every(id => emIdx(k).by.has(id)))));
         ok("the links sit on programmes of the budget structure, not on the requests", S.structure[FORM_FY].some(n => n.lvl === "program" && emNodeCount(n) > 0) && S.requests.every(r => !(r.cls && r.cls.plans)));
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "em-browse"; EM = { tab: "browse", k: "ns", q: "", open: {}, lim: {} }; route(); await tick(250); const v = () => document.getElementById("view");
+        as("plan"); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = "em-browse"; EM = { tab: "browse", k: "ns", q: "", open: {}, lim: {} }; route(); await tick(250); const v = () => document.getElementById("view");
         ok("the first tab opens with tiles, the plan tabs and the six roots of the national strategy", /ดูตามแผน|Browse/.test(v().innerText) && /B2/.test(v().innerText) && v().querySelectorAll("[data-emt]").length === 6 && !/undefined|NaN/.test(v().innerText));
         v().querySelector("[data-emt]").click(); await tick(100); ok("expanding shows the children", v().querySelectorAll("[data-emt]").length > 6);
         const q = document.querySelector("#em-q"); q.value = "เกษตร"; q.dispatchEvent(new Event("input")); await tick(100); ok("search lists matches with their path", /เกษตร/.test(document.querySelector("#em-tree").innerText));
@@ -647,9 +647,9 @@
         STRAT_TAB = "em-imp"; route(); await tick(150); document.querySelector("#em-go").click(); await tick(300); ok("using the file replaces the tree and writes history", !!EM_OVER.p13 && !!emIdx("p13").by.get("P139999") && S.emImports.length === 1);
         document.querySelector("[data-emrev=p13]").click(); await tick(300); ok("back to the built-in set", !EM_OVER.p13 && !emIdx("p13").by.get("P139999"));
         as("div"); renderShell(); STRAT_TAB = "em-imp"; route(); await tick(150); ok("a division can see the import segment but cannot import", !!document.querySelector("#em-file") && document.querySelector("#em-file").disabled);
-        reseed(); as("div"); renderShell(); const r = S.requests.find(x => x.unit === me().unit && emLinked(x) > 0); CUR_REQ = r.id; REQ_TAB = "align"; window.FISKO_ROUTE = "#request"; route(); await tick(300);
+        reseed(); as("div"); renderShell(); const r = S.requests.find(x => x.unit === me().unit && emLinked(x) > 0); CUR_REQ = r.id; REQ_TAB = "align"; window.APP_ROUTE = "#request"; route(); await tick(300);
         ok("the alignment tab shows the inherited plans, with where they come from, and nothing to type into", !!document.querySelector("#rq-em") && /จาก|from/.test(document.querySelector("#rq-em").innerText) && !document.querySelector("#em-q-p13") && !document.querySelector("[data-emx]"));
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "em-link"; EM = { tab: "link", k: "ns", q: "", open: {}, lim: {}, node: "" }; route(); await tick(250);
+        as("plan"); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = "em-link"; EM = { tab: "link", k: "ns", q: "", open: {}, lim: {}, node: "" }; route(); await tick(250);
         ok("Planning sees the programmes and outputs with their link and request counts", document.querySelectorAll("[data-emnode]").length >= 3 && !/undefined|NaN/.test(document.getElementById("view").innerText));
         const prog = S.structure[FORM_FY].find(n => n.lvl === "program"), out = S.structure[FORM_FY].find(n => n.lvl === "output" && n.parent === prog.id), ract = S.requests.find(x => x.act && lineage(x.act).some(y => y.id === prog.id));
         prog.plans = {}; if (out) out.plans = {}; /* one link per kind: the picker shows only for a kind with nothing chosen */ EM.node = prog.id; route(); await tick(250); ok("choosing a programme opens its picker", !!document.querySelector("#em-q-p13"));
@@ -663,13 +663,13 @@
         reseed(); as("plan");
         eq("the six national strategies and 23 master plans come from the e-MENSCR trees", [NATIONAL.length, S.masterPlans.length, MASTER.length], [6, 23, 23]);
         ok("every master plan sits under a national strategy that exists, and a strategy's master plan belongs to its strategy", S.masterPlans.every(m => NATIONAL.some(n => n.id === m.nat)) && S.strategy.items.every(st => !st.mp || (S.masterPlans.find(m => m.id === st.mp) || {}).nat === st.nat));
-        ok("the strategy tab and the link tab show the new names with no gaps", (() => { as("plan"); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "map"; route(); const a = document.getElementById("view").innerText; STRAT_TAB = "link"; route(); const b = document.getElementById("view").innerText; STRAT_TAB = "map"; return !/undefined|NaN/.test(a + b) && /ความมั่นคง|ภาครัฐ|การพัฒนา/.test(a + b); })());
+        ok("the strategy tab and the link tab show the new names with no gaps", (() => { as("plan"); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = "map"; route(); const a = document.getElementById("view").innerText; STRAT_TAB = "link"; route(); const b = document.getElementById("view").innerText; STRAT_TAB = "map"; return !/undefined|NaN/.test(a + b) && /ความมั่นคง|ภาครัฐ|การพัฒนา/.test(a + b); })());
         { S.structure[FORM_FY].forEach(n => { n.plans = {}; }); const rr = S.requests[0]; ok("the check item is a warning, not a block, when no national plan is linked to the programme", (c => !!c && c.s === "wa")(checks(rr).find(x => /แผนระดับชาติ|national plans/.test(x.title)))); reseed(); }
       });
       await grp("Open the contract: the buttons go to the contract itself, not the list (13 Nov 2569)", async () => {
         const cs = S.cases.find(c => c.contract && famCon(c.contract)); ok("the sample has a case with a contract", !!cs); if (!cs) return;
         const conId = cs.contract, v = () => document.getElementById("view");
-        as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CON_OPEN = null; CASE_OPEN = cs.id; route(); await tick(500);
+        as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "cases"; CON_OPEN = null; CASE_OPEN = cs.id; route(); await tick(500);
         const b1 = document.querySelector("#case-gocon"); ok("the contract section of the case has the open button", !!b1); if (b1) { b1.click(); await tick(400); ok("the button opens that contract's own page (its back button is there), not the list", CON_OPEN === conId && !!document.querySelector("[data-conback]") && v().innerText.includes(conId), [CON_OPEN, conId]); }
         CON_OPEN = null; CASE_OPEN = cs.id; PROC_TAB = "cases"; route(); await tick(500);
         const bs = [...document.querySelectorAll("[data-cgocon]")]; ok("every open-the-contract button on the case page carries a contract", bs.every(b => b.dataset.cgocon === conId), bs.map(b => b.dataset.cgocon));
@@ -683,10 +683,10 @@
         // 1. the three tabs of "สรุปและส่ง สงป." are out
         eq("the submission page keeps the overview tab and the Bureau status tab only (the request list moved to the annual report, P25)", bPage("submission").tabs.map(t => t.id), ["sbov", "checks"]);
         ok("the pack, status and brief tabs (and the parliament keys) are gone", !["pack", "form", "export", "status", "parliament", "brief"].some(k => bPage("submission").tabs.some(t => t.keys.includes(k))));
-        for (const role of ["plan", "exec", "audit"]) { as(role); renderShell(); for (const k of ["sbov", "checks"]) { window.FISKO_ROUTE = "#submission"; SUB_TAB = k; route(); await tick(120); ok(role + " opens submission tab " + k + " with no gaps", !/undefined|NaN/.test(v().innerText) && v().innerText.length > 150, k); } }
+        for (const role of ["plan", "exec", "audit"]) { as(role); renderShell(); for (const k of ["sbov", "checks"]) { window.APP_ROUTE = "#submission"; SUB_TAB = k; route(); await tick(120); ok(role + " opens submission tab " + k + " with no gaps", !/undefined|NaN/.test(v().innerText) && v().innerText.length > 150, k); } }
         // 2. the act amounts from B6 in the allocation
         reseed(); as("fin"); renderShell(); const r0 = S.requests.find(r => r.status === "approved"), n0 = alActRows().length;
-        ALLOC_FY = CUR_FY; ALLOC_TAB = "appropriation"; window.FISKO_ROUTE = "#allocation"; route(); await tick(250);
+        ALLOC_FY = CUR_FY; ALLOC_TAB = "appropriation"; window.APP_ROUTE = "#allocation"; route(); await tick(250);
         ok("the allocation shows the panel of the act amounts, with the way to the annual report", !!document.querySelector("#al-act") && !!document.querySelector('#al-act [data-jump="bq-rpt"]'));
         (S.submission.manual = S.submission.manual || {})[r0.id] = { act: 7777000, t: nowIso(), by: "x" }; route(); await tick(250);
         ok("an act amount recorded in B6 shows in the allocation with the request and its amount", alActRows().length === n0 + 1 && actInForce() && document.querySelector("#al-act").innerText.includes(r0.id) && document.querySelector("#al-act").innerText.includes("7.78"));
@@ -695,7 +695,7 @@
         window.KX_OLDPAY = true; reseed(); const base = S.contracts[0], k = JSON.parse(JSON.stringify(base)); k.id = "CT-2570-TST2"; k.no = "CT-TEST/002"; k.vars = []; k.inspectors = []; k.cm = null; k.cms = [];
         k.phases = [1, 2, 3].map(n => ({ n, name: [`งวดที่ ${n}`, `Phase ${n}`], due: addDays(TODAY, -20 + n), amount: 100000, signs: [{ by: "zz1", t: addDays(TODAY, -10) + "T10:00:00" }, { by: "zz2", t: addDays(TODAY, -10) + "T11:00:00" }], result: "ok", okAmount: 100000, delivered: addDays(TODAY, -12), cert: { n: 2 }, release: { by: "zz3", reason: "ทดสอบ", t: nowIso() }, invoice: { no: "IV" + n, amount: 100000, date: TODAY, vendor: tx(base.vendor), contract: "CT-TEST/002", by: "zz1" } }));
         k.amount = 300000; S.contracts.push(k); S.payreqs = S.payreqs.filter(p => p.contract !== k.id); S.vouchers = (S.vouchers || []).filter(x => x.contract !== k.id);
-        as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = k.id; CON_TAB = "cxdl"; route(); await tick(450);
+        as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = k.id; CON_TAB = "cxdl"; route(); await tick(450);
         ok("the contract page has the block of payments by occasion, with the three accepted phases to choose from", !!document.querySelector("#pay-times-" + k.id) && document.querySelectorAll(`[data-paytimes2="${k.id}"] input[name=ph]`).length === 3);
         { const f = document.querySelector(`[data-paytimes2="${k.id}"]`), cb = f.querySelectorAll("input[name=ph]"); cb[0].checked = true; cb[1].checked = true; f.querySelector("[name=desc]").value = "เบิกค่างวด 1 และ 2"; f.querySelector("[name=due]").value = addDays(TODAY, 5); f.querySelector("[name=method]").value = "transfer"; f.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(500); }
         const v1 = (S.vouchers || []).filter(x => x.contract === k.id)[0];
@@ -704,10 +704,10 @@
         ok("the block lists it as occasion 1 with both phases, and the form now offers only the third phase", /ครั้งที่ 1/.test(document.querySelector("#pay-times-" + k.id).innerText) && document.querySelectorAll(`[data-paytimes2="${k.id}"] input[name=ph]`).length === 1);
         { const f = document.querySelector(`[data-paytimes2="${k.id}"]`); f.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(200); eq("a payment with no phase ticked makes nothing", (S.vouchers || []).filter(x => x.contract === k.id).length, 1); }
         as("fin"); renderShell(); route(); await tick(300); ok("finance sees the payments but cannot make one", !!document.querySelector("#pay-times-" + k.id) && !document.querySelector("[data-paytimes2]") && /ครั้งที่ 1/.test(document.querySelector("#pay-times-" + k.id).innerText));
-        { const cs = S.cases.find(c => c.contract && famCon(c.contract)); as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CON_OPEN = null; CASE_OPEN = cs.id; route(); await tick(450); ok("the case page has the same block in panel 6", !!document.getElementById("pay-times-" + cs.contract)); CASE_OPEN = null; }
+        { const cs = S.cases.find(c => c.contract && famCon(c.contract)); as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "cases"; CON_OPEN = null; CASE_OPEN = cs.id; route(); await tick(450); ok("the case page has the same block in panel 6", !!document.getElementById("pay-times-" + cs.contract)); CASE_OPEN = null; }
         // 5. the hand-over onward is for the whole project
         reseed(); ok("no phase carries a hand-over any more; a closed sample case has one on its contract", S.contracts.every(c => c.phases.every(ph => !ph.handover)) && S.cases.filter(c => c.close && c.contract).some(c => !!famCon(c.contract).handover));
-        { const cs = S.cases.find(c => c.close && c.contract), c = famCon(cs.contract); cs.close.t = addDays(TODAY, -2) + "T10:00:00"; ok("the contract with the hand-over counts as handed on (handAll)", handAll(c) === true); as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CON_OPEN = null; CASE_OPEN = cs.id; route(); await tick(450); document.querySelector('.cphase[data-cphase="7"]').click(); await tick(250);
+        { const cs = S.cases.find(c => c.close && c.contract), c = famCon(cs.contract); cs.close.t = addDays(TODAY, -2) + "T10:00:00"; ok("the contract with the hand-over counts as handed on (handAll)", handAll(c) === true); as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "cases"; CON_OPEN = null; CASE_OPEN = cs.id; route(); await tick(450); document.querySelector('.cphase[data-cphase="7"]').click(); await tick(250);
           ok("the close panel says the whole project is handed on and offers to undo it", /ส่งมอบต่อทั้งโครงการแล้ว/.test(v().innerText) && !!document.querySelector(`[data-hundo="handp|${c.id}"]`));
           document.querySelector(`[data-hundo="handp|${c.id}"]`).click(); await tick(300); ok("undoing it clears the contract's hand-over and the form comes back (all phases accepted, case closed)", !c.handover && handAll(c) === false);
           CASE_OPEN = cs.id; PROC_TAB = "cases"; route(); await tick(300); document.querySelector('.cphase[data-cphase="7"]').click(); await tick(250); const hf = document.querySelector(`[data-hhandp="${c.id}"]`); ok("one form for the project", !!hf && document.querySelectorAll("[data-hhandp]").length === 1);
@@ -716,7 +716,7 @@
         // 6. more committees on a contract
         reseed(); { const cs = S.cases.find(c => c.contract && famCon(c.contract)), c = famCon(cs.contract), free = S.users.find(u => !(c.inspectors || []).includes(u.id) && u.role === "div"), mk = (id, type, u) => { S.cmReg.push({ id, type, case: cs.id, order: "ที่ ทดสอบ/" + id, date: TODAY, doc: id + ".pdf", note: "", status: "live", by: "u10" }); S.cmMem.push({ id: "CMM-" + id, cm: id, kind: "user", role: "chair", slot: "SLT-001", tech: false, user: u, exp: "" }); };
           mk("CM-X1", "CTY-001", free.id); mk("CM-X2", "CTY-008", free.id); const insp0 = (c.inspectors || []).slice(), need0 = c.phases.map(ph => ph.need);
-          as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c.id; CON_TAB = "committees"; route(); await tick(450);
+          as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c.id; CON_TAB = "committees"; route(); await tick(450);
           ok("the contract page has the block of additional committees, offering the case's other committees but not the contract's own", !!document.querySelector("#con-cms-" + c.id) && [...document.querySelectorAll("#cmx-" + c.id + " option")].some(o => o.value === "CM-X1") && ![...document.querySelectorAll("#cmx-" + c.id + " option")].some(o => o.value === c.cm));
           document.querySelector("#cmx-" + c.id).value = "CM-X1"; document.querySelector(`[data-cmadd="${c.id}"]`).click(); await tick(300);
           ok("a committee of another kind is attached to the contract and takes no part in signing", (c.cms || []).includes("CM-X1") && JSON.stringify(c.inspectors) === JSON.stringify(insp0));
@@ -744,12 +744,12 @@
         RQ_FY = 2570; eq("year selector on another year", rqYear(), 2570); ok("other-year view renders allocation lines", rqYearView(2570).includes(S.allocs[2570].lines[0].id)); RQ_FY = 1999; eq("unknown year falls back", rqYear(), FORM_FY); RQ_FY = null;
       });
       await grp("Fiscal-year filter (one on every budget page)", async () => {
-        const mem = SEL_FY; SEL_FY = null; try { store.del("fisko-fy"); } catch (e) {}
-        ok("no selector in the top bar", !document.getElementById("fy-sel")); { window.FISKO_ROUTE = "#dashboard"; as("plan"); route(); const f = document.getElementById("fy-page"); eq("the page filter has one option for each year", f && f.options.length, S.fyList.length); }
+        const mem = SEL_FY; SEL_FY = null; try { store.del("app-fy"); } catch (e) {}
+        ok("no selector in the top bar", !document.getElementById("fy-sel")); { window.APP_ROUTE = "#dashboard"; as("plan"); route(); const f = document.getElementById("fy-page"); eq("the page filter has one option for each year", f && f.options.length, S.fyList.length); }
         eq("a form-year page belongs to the prepared year", [fyOfPage("requests"), fyOfPage("consolidation")], [FORM_FY, FORM_FY]); eq("other pages belong to the executing year", [fyOfPage("dashboard"), fyOfPage("pj-reg"), fyOfPage("fnc-pay")], [CUR_FY, CUR_FY, CUR_FY]);
         eq("year-free pages", [fyOfPage("home"), fyOfPage("admin"), fyOfPage("assistant")], [null, null, null]);
         ok("allocation has data only for years with lines", fyPageHas("allocation", CUR_FY) && !fyPageHas("allocation", FORM_FY) && !fyPageHas("allocation", 2569)); ok("request list has every year", S.fyList.every(y => fyPageHas("requests", y.fy)));
-        as("plan"); const view = id => { window.FISKO_ROUTE = "#" + id; route(); return document.getElementById("view").innerText; }, NOTICE = /หน้านี้ไม่มีข้อมูลของปี|has no data for/;
+        as("plan"); const view = id => { window.APP_ROUTE = "#" + id; route(); return document.getElementById("view").innerText; }, NOTICE = /หน้านี้ไม่มีข้อมูลของปี|has no data for/;
         setFy(null); ok("automatic leaves pages alone", !NOTICE.test(view("dashboard")) && !NOTICE.test(view("requests")));
         setFy(CUR_FY); ok("executing year: execution pages render", !NOTICE.test(view("dashboard")) && !NOTICE.test(view("pj-reg"))); ok("executing year: form pages show a notice", NOTICE.test(view("consolidation")) && NOTICE.test(view("strategy")));
         ok("year-free pages are never replaced", !NOTICE.test(view("home")) && !NOTICE.test(view("admin"))); eq("allocation follows the year", [ALLOC_FY = 0, (view("allocation"), ALLOC_FY)], [0, CUR_FY]);
@@ -757,11 +757,11 @@
         ok("the year filter shows on budget pages only", (view("dashboard"), !!document.getElementById("fy-page")) && (view("pj-reg"), !document.getElementById("fy-page")) && (view("fnc-pay"), !document.getElementById("fy-page")) && (view("rg-act"), !!document.getElementById("fy-page")) && (view("home"), !document.getElementById("fy-page")));
         ok("request list in the prepared year is the normal list, with the filter and without its old selector", (view("requests"), !!document.getElementById("fy-page") && !document.getElementById("rq-fy")));
         setFy(2569); ok("a closed year: request list shows its view", !NOTICE.test(view("requests")) && /2569/.test(document.getElementById("view").innerText)); ok("a closed year: allocation has no lines", NOTICE.test(view("allocation")));
-        view("dashboard"); ok("notice has a switch button", !!document.getElementById("fy-go")); document.getElementById("fy-go").click(); eq("the button switches to the page's year", SEL_FY, CUR_FY); setFy(null); eq("cleared", [SEL_FY, localStorage.getItem("fisko-fy")], [null, null]);
-        SEL_FY = mem; window.FISKO_ROUTE = undefined;
+        view("dashboard"); ok("notice has a switch button", !!document.getElementById("fy-go")); document.getElementById("fy-go").click(); eq("the button switches to the page's year", SEL_FY, CUR_FY); setFy(null); eq("cleared", [SEL_FY, localStorage.getItem("app-fy")], [null, null]);
+        SEL_FY = mem; window.APP_ROUTE = undefined;
       });
       await grp("Output/project and activity (form and registers)", async () => {
-        const mem = SEL_FY; SEL_FY = null; window.FISKO_ROUTE = undefined;
+        const mem = SEL_FY; SEL_FY = null; window.APP_ROUTE = undefined;
         const st = () => S.structure[FORM_FY];
         as("div"); const f0 = CRUD.defs.rqReq.fields(null, {}), ids = f0.map(f => f.id);
         eq("create form: name, kind, output/project, activity, budget type (one activity field)", ids, ["name", "kind", "out", "act", "type"]);
@@ -785,7 +785,7 @@
         eq("request created under the chosen activity", [q.act, rqCls(q).proj], [f1.find(f => f.id === "act").opts[0][0], o1]); S.requests = S.requests.filter(x => x !== q);
         const e0 = CRUD.defs.rqReq.fields(S.requests.find(x => x.act && st().find(n => n.id === x.act && n.parent)), {});
         ok("edit form: output starts from the saved activity", !!e0.find(f => f.id === "out").value && !!e0.find(f => f.id === "act").value);
-        ok("the request page has a single activity select", (as("div"), window.FISKO_ROUTE = "#request", REQ_TAB = "main", openReq(S.requests[0].id), route(), document.querySelectorAll("#view select#act, #view select#rq-act").length === 1));
+        ok("the request page has a single activity select", (as("div"), window.APP_ROUTE = "#request", REQ_TAB = "main", openReq(S.requests[0].id), route(), document.querySelectorAll("#view select#act, #view select#rq-act").length === 1));
         // registers
         as("div"); ok("units cannot open the registers", !NAV.find(n => n.id === "rg-out").roles.includes("div") && !NAV.find(n => n.id === "rg-act").roles.includes("divhead"));
         as("plan"); ok("planning can add", CRUD.defs.regOut.create.can() && CRUD.defs.regAct.create.can()); as("audit"); ok("others cannot add or edit", !CRUD.defs.regOut.create.can() && !CRUD.defs.regAct.edit.can(CRUD.defs.regAct.list()[0]));
@@ -796,7 +796,7 @@
         ok("unused node can be deleted, used one only retired", CRUD.defs.regAct.acts(pa)[0].id === "del" && CRUD.defs.regOut.acts(po)[0].id === "retire");
         CRUD.defs.regAct.acts(pa)[0].run(); ok("deleted", !st().some(n => n.id === pa.id)); CRUD.defs.regOut.acts(po)[0].run(); S.structure[FORM_FY] = st().filter(n => n !== po);
         ok("output list excludes retired from the form", (() => { const x = st().find(n => n.lvl === "output"); x.retired = { t: "", why: "t" }; const r = !CRUD.defs.rqReq.fields(null, {}).find(f => f.id === "out").opts.some(([id]) => id === x.id); delete x.retired; return r; })());
-        SEL_FY = mem; window.FISKO_ROUTE = undefined;
+        SEL_FY = mem; window.APP_ROUTE = undefined;
       });
       await grp("Plan item stage: the plan request of one item (P25)", async () => {
         const t = { id: "PP-TEST", status: "planned", name: ["ทดสอบ", "Test"], est: 1e6, month: TODAY, method: "specific", line: S.pplan[0].line }, stage = () => (planStage(t) || [null])[0], who = { by: me().id, t: nowIso() };
@@ -828,7 +828,7 @@
         S.quotas = []; has("with no quota a batch can't be made", msgs(B, { ["in_" + (ready[1] || ready[0]).id]: true }, null), /ยังไม่ได้ตั้งโควต้า|not set/);
         S.quotas = JSON.parse(keepQ);
         // the page
-        window.FISKO_ROUTE = "#bq-cfg"; route(); await tick(200); ok("the quota page shows the quota list", /โควต้า/.test(document.getElementById("view").innerText));
+        window.APP_ROUTE = "#bq-cfg"; route(); await tick(200); ok("the quota page shows the quota list", /โควต้า/.test(document.getElementById("view").innerText));
       });
       await grp("Committee types and case committees (P1)", async () => {
         const acc = S.cmTypes.find(t => t.kind === "accept"), evT = S.cmTypes.find(t => t.kind === "eval"), fails = (cm, ctx) => cmCheck(cm, ctx).filter(x => !x.ok), big = { amount: 5e6, kind: "goods" };
@@ -872,7 +872,7 @@
         has("a person already on the committee is refused", msgs(M, { cm: cm.id, slot: cmSlotsOf(acc.id)[1].id, kind: "user", user: free[1].id }, null), /สมาชิกอยู่แล้ว|Already/);
         const cmE = mk(acc.id, cs.id); has("a chair who also sits on the evaluation committee is refused when added", msgs(M, { cm: cmE.id, slot: cmSlotsOf(acc.id)[0].id, kind: "user", user: judges[0] }, null), /ประธาน|chair/);
         // the case page
-        reseed(); as("proc"); renderShell(); const cs2 = S.cases.find(c => c.committees.eval && !S.cmReg.some(x => x.case === c.id && cmKindOf(x) === "accept")); window.FISKO_ROUTE = "#procurement"; jump("case:" + cs2.id); await tick(300); document.querySelector('.cphase[data-cphase="2"]').click();
+        reseed(); as("proc"); renderShell(); const cs2 = S.cases.find(c => c.committees.eval && !S.cmReg.some(x => x.case === c.id && cmKindOf(x) === "accept")); window.APP_ROUTE = "#procurement"; jump("case:" + cs2.id); await tick(300); document.querySelector('.cphase[data-cphase="2"]').click();
         const txt = () => document.body.innerText; ok("the case page lists the acceptance type and the evaluation committee's positions", /คณะกรรมการตรวจรับพัสดุ/.test(txt()) && /กรรมการพิจารณาผล/.test(txt()) && /ประธาน/.test(txt()));
         const fn = document.querySelector("[data-cmnew$='" + acc.id + "']"); ok("the make-committee form is there", !!fn); const pick = (el, names) => { const dt = new DataTransfer(); names.forEach(n => dt.items.add(new File(["x"], n, { type: "application/pdf" }))); el.files = dt.files; };
         if (fn) { fn.querySelector("[name=order]").value = "ที่ 7/2570"; fn.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(200); eq("without the order file the committee is not made", S.cmReg.some(x => x.case === cs2.id && x.type === acc.id), false);
@@ -951,7 +951,7 @@
         as("div"); const other = S.cases.find(c => caseState(c) === 3 && cmCaseUnit(c) !== me().unit), mine = S.cases.find(c => caseState(c) === 3 && cmCaseUnit(c) === me().unit);
         if (other) eq("a division can't prepare another unit's case", casePrepOpen(other), false); if (mine) eq("a division can prepare its own case", casePrepOpen(mine), true);
         // the page
-        reseed(); as("proc"); renderShell(); const k3 = S.cases.find(c => caseState(c) === 3); window.FISKO_ROUTE = "#procurement"; jump("case:" + k3.id); await tick(300);
+        reseed(); as("proc"); renderShell(); const k3 = S.cases.find(c => caseState(c) === 3); window.APP_ROUTE = "#procurement"; jump("case:" + k3.id); await tick(300);
         eq("the case page shows the seven main panels", document.querySelectorAll(".cphase").length, 7);
         eq("phase 2 is the one in progress", (document.querySelector('.cphase[data-cphase="2"]') || {}).dataset && document.querySelector('.cphase[data-cphase="2"]').dataset.cstate, "now");
         ok("the hand-over panel is on the page", !!document.querySelector("[data-cprep]") && !!document.querySelector("[data-prepsend]"));
@@ -996,7 +996,7 @@
         for (const k of [4, 5, 7]) ok("main panel " + k + " has a sub-panel", heads(k).length >= 1, heads(k)); ok("panel 6 (payment) is merged into panel 5 (P46)", document.querySelector('.cmain[data-cmain="6"]').dataset.merged === "5" && /เบิกจ่ายตามงวด/.test(document.querySelector('.cmain[data-cmain="5"]').innerText + document.querySelector('.cmain[data-cmain="5"]').textContent));
       });
       await grp("Hearing and negotiation as status (P3)", async () => {
-        as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement";
+        as("proc"); renderShell(); window.APP_ROUTE = "#procurement";
         const g = S.cases.find(c => c.state === 4 && !c.cancelled && !c.hearing); g.method = "ebid"; g.ref = { amount: 6e6, basis: ["std"], by: "x", t: nowIso() };
         ok("an e-bidding case at 6 million needs the hearing even when the profile switch is off", hearReqNow(g) === true && hearingReq(g) === false);
         eq("the status starts as not started, and the R-25 check stops the case", [hearStatus(g), caseChecks(g).some(x => !x.ok && /R-25|รับฟังความคิดเห็นร่างประกาศใน e-GP/.test(x.label))], ["none", true]);
@@ -1026,7 +1026,7 @@
         ok("the e-GP steps table shows both statuses", /ต่อรองราคา/.test(document.querySelector('.cmain[data-cmain="3"]').textContent /* P76: the panel is hidden, still in the page */) && /รับฟังความคิดเห็น/.test(document.querySelector('.cmain[data-cmain="3"]').textContent /* P76: the panel is hidden, still in the page */) /* P44: the steps table became the seven step forms */);
       });
       await grp("Contract extension and amount change in four steps (P4)", async () => {
-        as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement";
+        as("proc"); renderShell(); window.APP_ROUTE = "#procurement";
         const c = S.contracts.find(k => conCase(k) && k.phases.some(p => !phaseAccepted(p) && !p.cancelled)), cs = conCase(c), ph = c.phases.find(p => !phaseAccepted(p) && !p.cancelled), sw = k => { document.querySelector('.cphase[data-cphase="4"]').click(); }, show = async () => { jump("case:" + cs.id); await tick(400); sw(); };
         eq("the old direct form on the contract page is off", canVary(), false);
         ok("procurement may prepare, a division of another unit may not", varCanPrep(c) && (as("div"), S.users.find(u => u.role === "div" && u.unit !== varUnit(c)) ? true : true)); as("proc");
@@ -1073,7 +1073,7 @@
         const ps = S.payreqs.filter(p => p.voucher === v.id);
         eq("approving the request makes a payment record per phase (its amount less its own penalty), tied to the request", [ps.map(p => p.phase), ps.map(p => p.amount), ps.every(p => p.batch === v.id && p.status === "approved"), v.pays.length], [[1, 2], v.parts.map(q => q.gross - q.penalty), true, 2]);
         eq("both phases count as paid", [phPaid(k, k.phases[0]), phPaid(k, k.phases[1]), phPaid(k, k.phases[2])], [true, true, false]);
-        as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; CASE_OPEN = null;
+        as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; CASE_OPEN = null;
         // the supplier-rating date
         eq("the rating is in force from 10 July 2569, 2026-07-10", [vendorRateFrom(), vendorRateOn("2026-07-09"), vendorRateOn("2026-07-10"), vendorRateOn()], ["2026-07-10", false, true, true]);
         const cs = S.cases.find(c => caseState(c) >= 9 && !c.close && caseCon(c)); if (cs) { const con = caseCon(cs);
@@ -1084,7 +1084,7 @@
       await grp("End to end: from the plan to the close of the project (P6)", async () => {
         const mains = c => casePhases(c).phases.map(p => p.state[0]).join(""), pick = (el, n) => { const dt = new DataTransfer(); dt.items.add(new File(["x"], n, { type: "application/pdf" })); el.files = dt.files; };
         as("div"); const unit = me().unit, p5 = S.pplan.find(x => x.status === "planned" && inPublishedPlan(x) && famLine(x.line).unit === unit); ok("a published plan item of the division's unit to start from", !!p5);
-        const cs = caseByPlan(p5.id); renderShell(); window.FISKO_ROUTE = "#procurement";
+        const cs = caseByPlan(p5.id); renderShell(); window.APP_ROUTE = "#procurement";
         eq("1 the plan is approved and published; the division prepares", [caseState(cs), mains(cs).slice(0, 2)], [1, "dn"]);
         // 2 the division raises the requisition on the case page (method, reference price, details), the authority approves it with the method
         jump("case:" + cs.id); await tick(400); document.querySelector('.cphase[data-cphase="2"]').click(); cs.method = "specific"; cs.methodApproval = { status: "with_request", t: nowIso(), by: "x" }; cs.methodAuto = false; cs.ref = { amount: 300000, basis: ["std"], by: "x", t: nowIso() }; route(); await tick(400);
@@ -1136,7 +1136,7 @@
         eq("27 handed on after the close: every main panel is done", [handAll(c), mains(cs)], [true, "ddddddd"]);
       });
       await grp("Case list in seven panels and the e-GP updates (P7)", async () => {
-        as("proc"); PROC_TAB = "cases"; CASE_OPEN = null; CASE_VIEW = "board"; renderShell(); window.FISKO_ROUTE = "#procurement"; route(); await tick(400);
+        as("proc"); PROC_TAB = "cases"; CASE_OPEN = null; CASE_VIEW = "board"; renderShell(); window.APP_ROUTE = "#procurement"; route(); await tick(400);
         const txt = document.querySelector("#view").innerText;
         ok("the list no longer shows the old twelve steps", !/\/12/.test(txt) && !/12 ขั้น/.test(txt) && !/ขั้น\s*\d+\/12/.test(txt));
         eq("the board has one column for each of the six main panels (contract management and payment are one, P49)", [...document.querySelectorAll(".board .col-h")].filter(h => /^\d\. /.test(h.textContent.trim())).length, 6);
@@ -1150,7 +1150,7 @@
         as("proc");
       });
       await grp("Procurement plan, item by item: only items that passed the act, a plan request and an approval for each (P8, P25)", async () => { window.PL_OLDTABS = true;
-        let PQ = ""; const at = async (r, fn) => { as(r); renderShell(); window.FISKO_ROUTE = "#procurement"; PLAN_ADD = false; PLAN_Q = PQ; PLAN_FS = ""; PLAN_PG = 1; jump("prc-plan"); await tick(400); return fn(); };
+        let PQ = ""; const at = async (r, fn) => { as(r); renderShell(); window.APP_ROUTE = "#procurement"; PLAN_ADD = false; PLAN_Q = PQ; PLAN_FS = ""; PLAN_PG = 1; jump("prc-plan"); await tick(400); return fn(); };
         // the Planning division
         await at("plan", async () => { ok("the Planning division has the add-item button", !!document.querySelector("#pp-toggle")); ok("there is no plan version panel any more", !document.querySelector("#pv-sub, #pv-ok, #pv-pub, #pv-ref") && !/ฉบับแผนจัดซื้อและการประกาศ|Plan versions and publication/.test(document.querySelector("#view").innerText)); ok("the table has a column for the status of the plan", /สถานะแผน|Plan status/.test(document.querySelector("#view").innerText)); ok("and the demand tab with add buttons or the empty list", /ความต้องการที่ยังไม่อยู่ในแผน|Demand not yet in the plan/.test(PROC.demand())); });
         // procurement officers
@@ -1182,14 +1182,14 @@
         { const other = S.users.find(x => x.role === "divhead" && x.unit !== planUnit()); SESSION = { user: other.id }; ROLE = "divhead"; ok("a division director of another unit is not a Planning director and can't approve", !isPlanHead()); noHead(); for (const r of ["exec", "plan", "admin", "fin", "proc", "div"]) { as(r); ok(r + " is not a Planning director", !isPlanHead()); } }
         await at("plan", async () => { ok("the waiting status shows the name of the director, and Planning has a button to act as the director", new RegExp(tx(head.name)).test(document.querySelector('[data-pap="PP-TEST9"]').innerText) && !!document.querySelector('[data-pswitch="' + head.id + '"]')); document.querySelector('[data-pswitch="' + head.id + '"]').click(); await tick(350);
           ok("the button signs in as the director: the role is divhead, the user is the director, and the approve and reject buttons are there", ROLE === "divhead" && me().id === head.id && isPlanHead() && !!document.querySelector('[data-pdec="PP-TEST9|ok"]')); noHead(); });
-        asHead(); renderShell(); window.FISKO_ROUTE = "#procurement"; PLAN_ADD = false; PLAN_Q = PQ; PLAN_FS = ""; PLAN_PG = 1; jump("prc-plan"); await tick(400);
+        asHead(); renderShell(); window.APP_ROUTE = "#procurement"; PLAN_ADD = false; PLAN_Q = PQ; PLAN_FS = ""; PLAN_PG = 1; jump("prc-plan"); await tick(400);
         { const tk = []; famTasks(a => tk.push(a)); ok("the Planning director gets a task for the item sent, and none for plan versions", tk.some(x => /อนุมัติแผนจัดซื้อรายการ PP-TEST9|Approve plan item PP-TEST9/.test(x)) && !tk.some(x => /^(อนุมัติแผนจัดซื้อ v|Approve the procurement plan v|ประกาศแผนจัดซื้อ)/.test(x))); ok("the director sees approve and reject on it", !!document.querySelector('[data-pdec="PP-TEST9|ok"]') && !!document.querySelector('[data-pdec="PP-TEST9|no"]'));
           document.querySelector('[data-pdec="PP-TEST9|no"]').click(); await tick(250); eq("rejecting without a reason is refused", X.ap.st, "asked");
           document.querySelector("#pwhy-PP-TEST9").value = "ประมาณการสูงเกินไป ปรับแล้วส่งใหม่"; document.querySelector('[data-pdec="PP-TEST9|no"]').click(); await tick(300); }
         noHead(); eq("rejected with the reason kept", [X.ap.st, X.ap.dec.why, planStage(X)[0]], ["rejected", "ประมาณการสูงเกินไป ปรับแล้วส่งใหม่", "rej"]);
         await at("plan", async () => { ok("Planning sees the reason and may send it again", /ประมาณการสูงเกินไป/.test(document.querySelector('[data-pap="PP-TEST9"]').innerText) && !!document.querySelector('[data-pask="PP-TEST9"]')); const tk = []; famTasks(a => tk.push(a)); ok("and has a task to adjust and send again", tk.some(x => /แผนไม่อนุมัติ ปรับและส่งใหม่ PP-TEST9|Plan not approved; send again PP-TEST9/.test(x))); document.querySelector('[data-pask="PP-TEST9"]').click(); await tick(300); });
         eq("sent again", X.ap.st, "asked");
-        asHead(); renderShell(); window.FISKO_ROUTE = "#procurement"; PLAN_ADD = false; PLAN_Q = PQ; PLAN_FS = ""; PLAN_PG = 1; jump("prc-plan"); await tick(400); document.querySelector('[data-pdec="PP-TEST9|ok"]').click(); await tick(300); const dBy = X.ap.dec.by; noHead();
+        asHead(); renderShell(); window.APP_ROUTE = "#procurement"; PLAN_ADD = false; PLAN_Q = PQ; PLAN_FS = ""; PLAN_PG = 1; jump("prc-plan"); await tick(400); document.querySelector('[data-pdec="PP-TEST9|ok"]').click(); await tick(300); const dBy = X.ap.dec.by; noHead();
         eq("approved by the director of Planning: the item is in the plan", [X.ap.st, dBy === head.id, inPublishedPlan(X), planStage(X), planTag(X)], ["approved", true, true, null, ""]);
         // picking the budget item: no form to fill, the item is made from the line (P28)
         await at("plan", async () => { PLAN_ADD = true; route(); await tick(300); ok("the add form has the choice of the budget item and nothing else to type: no name, estimate, quantity, unit, method, date or note", !!document.querySelector("#pp-line") && !!document.querySelector("#pp-form button[type=submit]") && !document.querySelector("#pp-name, #pp-est, #pp-qty, #pp-unit, #pp-method, #pp-month, #pp-dur, #pp-note, #pp-cat")); });
@@ -1204,23 +1204,23 @@
       });
       await grp("Quota page: the year is a list filter (P9)", async () => {
         as("plan"); renderShell(); (S.quotas = S.quotas || []); if (!S.quotas.some(q => q.fy === FORM_FY - 1)) S.quotas.push({ fy: FORM_FY - 1, base: 480e6, pct: 120, note: "", by: me().id, t: "2026-01-01T09:00" });
-        SEL_FY = FORM_FY - 1; window.FISKO_ROUTE = "#bq-cfg"; renderShell(); route(); await tick(400);
+        SEL_FY = FORM_FY - 1; window.APP_ROUTE = "#bq-cfg"; renderShell(); route(); await tick(400);
         ok("there is no top-bar selector and no second year control on the quota page", !document.querySelector("#fy-sel") && !document.querySelector("#fy-page"));
         ok("the page still shows its list while another year is chosen in the top bar", !!document.querySelector("#view table") && !/หน้านี้ไม่มีข้อมูลของปี|has no data for/.test(document.querySelector("#view").innerText));
         const f = document.querySelector('#view select[data-crf]'); ok("a year filter sits in the list's toolbar", !!f && /ปีงบประมาณ|Fiscal year/.test(f.getAttribute("aria-label")), f && f.id);
         const rows0 = document.querySelectorAll("#view tbody tr").length; ok("it lists every year's quota first", rows0 >= 2, rows0);
         if (f) { f.value = String(FORM_FY - 1); f.dispatchEvent(new Event("change", { bubbles: true })); await tick(300); const rows1 = [...document.querySelectorAll("#view tbody tr")]; ok("choosing a year keeps only that year", rows1.length === 1 && rows1[0].textContent.includes(String(FORM_FY - 1)), rows1.length); }
-        SEL_FY = null; window.FISKO_ROUTE = "#bq-dash"; route(); await tick(300); ok("the other budget pages have the year filter in the page", !!document.querySelector("#view #fy-page"));
+        SEL_FY = null; window.APP_ROUTE = "#bq-dash"; route(); await tick(300); ok("the other budget pages have the year filter in the page", !!document.querySelector("#view #fy-page"));
       });
       await grp("Division requests, consolidation, revenue estimate and review steps (B1 to B3)", async () => {
-        const at = async (r, id) => { as(r); renderShell(); window.FISKO_ROUTE = "#" + id; SEL_FY = null; route(); await tick(300); return document.querySelector("#view"); };
+        const at = async (r, id) => { as(r); renderShell(); window.APP_ROUTE = "#" + id; SEL_FY = null; route(); await tick(300); return document.querySelector("#view"); };
         const nm = id => tx(NAV.find(n => n.id === id).label);
         eq("the menu names", [nm("requests"), nm("consolidation"), nm("bq-rev")], ["คำขอสำนัก/กอง", "รวมคำขอหน่วยงาน", "ประมาณการรายได้หน่วยงาน"]);
         // B1: division requests and the MTEF
         let v = await at("div", "requests"); ok("the division page is called Division requests and has no ceiling panel", /คำขอสำนัก\/กอง/.test(v.querySelector("h1").textContent) && !v.querySelector("#ceil-panel"));
         ok("a division sees only its own requests", S.requests.filter(r => r.unit !== me().unit).every(r => !v.innerText.includes(r.id)) || true);
         const mine = S.requests.find(r => r.unit === me().unit && ["draft", "returned"].includes(r.status)); ok("a request of the division to edit", !!mine);
-        if (mine) { delete mine.mtef; delete mine.mt2; MT_D = null; CUR_REQ = mine.id; REQ_TAB = "mtef"; window.FISKO_ROUTE = "#request"; route(); await tick(300);
+        if (mine) { delete mine.mtef; delete mine.mt2; MT_D = null; CUR_REQ = mine.id; REQ_TAB = "mtef"; window.APP_ROUTE = "#request"; route(); await tick(300);
           const t = document.querySelector('[data-rtab="mtef"]'); ok("the request has an MTEF tab (with a warning until it is filled)", !!t && /⚠/.test(t.textContent));
           const fill = document.querySelector("#mt-save"); ok("the MTEF tab has defaults from this year and can be saved", !!fill); if (fill) { fill.click(); await tick(300); }
           eq("three years from the current fiscal year are saved", [FORM_FY, FORM_FY + 1, FORM_FY + 2].every(y => Number(mine.mtef && mine.mtef[y]) > 0), true); }
@@ -1256,7 +1256,7 @@
       });
       await grp("The division request: price register, ordered form, tabs, NBUD and hearing flow (P11)", async () => {
         as("div"); renderShell();
-        const open = async tab => { REQ_TAB = tab; window.FISKO_ROUTE = "#request"; route(); await tick(300); return document.querySelector("#view"); };
+        const open = async tab => { REQ_TAB = tab; window.APP_ROUTE = "#request"; route(); await tick(300); return document.querySelector("#view"); };
         const fire = (el, val) => { if (val !== undefined) el.value = val; el.dispatchEvent(new Event("change", { bubbles: true })); };
         const mine = S.requests.find(r => r.unit === me().unit && (r.status === "draft" || r.status === "returned") && !r.multi) || (() => { const x = S.requests.find(r => !r.multi && r.items.length > 1) || S.requests.find(r => !r.multi); x.unit = me().unit; x.status = "draft"; return x; })(); ok("a single-year draft of the division to edit", !!mine);
         CUR_REQ = mine.id; rqLineInit(mine);
@@ -1362,24 +1362,24 @@
         { const calc = nbCalc(nbMake(1, "x").v); eq("NBUD: row 5 of 2567 is total minus what joins the budget", calc["5|0"], -10412900); eq("NBUD: row 7 of 2568 and row 3", [calc["7|1"], calc["3|1"]], [-2700000, 1000000]); }
         { const buf = await (await fetch("../tests/sample_nbud.xlsx")).arrayBuffer(), p = nbParse(await xlsxRead(buf)); eq("NBUD file: six year columns", p.cols, [2567, 2568, 2569, 2570, 2571, 2572]); eq("NBUD file: own income by year", p.v["2.1"], [50, 1000000, 1200000, 1300000, 1400000, 1500000]); eq("NBUD file: investment joined to the budget", p.v["4.3"].slice(0, 2), [10513000, 900000]); eq("NBUD file: its totals match the sums", p.warn, []); }
         ok("the page BQ13 and its menu entry are gone", !NAV.some(n => n.id === "bq-nbplan") && !(typeof ROUTES !== "undefined" && ROUTES["bq-nbplan"]));
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#consolidation"; CN_TAB = "nonbudget"; route(); await tick(300); v = document.querySelector("#view");
+        as("plan"); renderShell(); window.APP_ROUTE = "#consolidation"; CN_TAB = "nonbudget"; route(); await tick(300); v = document.querySelector("#view");
         ok("Planning sees the department NBUD form in the tab, with cells to key in and no import or unit choice", !!v.querySelector("#nbud") && v.querySelectorAll("[data-nbc]").length > 10 && !v.querySelector("#nb-imp") && !v.querySelector("#nb-unit") && !v.querySelector("#nb-sample") && /แผนการใช้จ่ายเงินนอกงบประมาณ/.test(v.querySelector("#nbud").innerText));
         ok("the tab has no revenue estimate: no link to it, no estimate or difference column, and a heading without the form name", !/ประมาณการรายได้|Revenue estimate/.test((() => { let t = "", e = v.querySelector("#nbud"); while (e) { t += e.innerText; e = e.nextElementSibling; } return t; })()) && !v.querySelector("[data-jump=bq-rev]") && !/แบบ NBUD ระดับกรม/.test(v.querySelector("#nbud").innerText) && /เงินนอกงบประมาณที่ขอใช้ในคำขอ/.test(v.innerText));
         { const d0 = S.nbudDept; const before = nbCalc(d0.v)["3|1"]; fire(v.querySelector('[data-nbc="2.1|1"]'), "2000000"); await tick(300); eq("keying a cell changes the totals computed from it", [d0.v["2.1"][1], nbCalc(d0.v)["3|1"] - before], [2000000, 1000000]); ok("the edit is audited and dated", d0.date === TODAY && S.audit.some(x => /NBUD/.test(JSON.stringify(x.action)))); d0.v["2.1"][1] = 1000000; }
         // the "View" button opens the whole request, and its back button returns to the consolidation page
-        { as("plan"); renderShell(); CN_TAB = "list"; window.FISKO_ROUTE = "#consolidation"; route(); await tick(300); const b = document.querySelector("[data-cnopen]"); ok("the consolidation list has a View button for each request", !!b);
-          if (b) { const id = b.dataset.cnopen; b.click(); window.FISKO_ROUTE = "#request"; route(); await tick(400); eq("View opens that request on the request page", [CUR_REQ, REQ_BACK], [id, "consolidation"]); const back = [...document.querySelectorAll("#view button")].find(x => /กลับไปรวมคำขอหน่วยงาน|Back to the consolidation/.test(x.textContent)); ok("the page shows the whole request with a button back to the consolidation", !!back && !!document.querySelector("#view h1"));
-            if (back) { back.click(); window.FISKO_ROUTE = "#consolidation"; route(); await tick(400); ok("the back button returns to the consolidation page", /รวมคำขอหน่วยงาน|consolidation/i.test(document.querySelector("#view h1").textContent) && REQ_BACK === null); } } }
-        as("div"); renderShell(); window.FISKO_ROUTE = "#consolidation"; route(); await tick(300); ok("a division does not get the consolidation page with the form to edit", !document.querySelector("[data-nbc]"));
+        { as("plan"); renderShell(); CN_TAB = "list"; window.APP_ROUTE = "#consolidation"; route(); await tick(300); const b = document.querySelector("[data-cnopen]"); ok("the consolidation list has a View button for each request", !!b);
+          if (b) { const id = b.dataset.cnopen; b.click(); window.APP_ROUTE = "#request"; route(); await tick(400); eq("View opens that request on the request page", [CUR_REQ, REQ_BACK], [id, "consolidation"]); const back = [...document.querySelectorAll("#view button")].find(x => /กลับไปรวมคำขอหน่วยงาน|Back to the consolidation/.test(x.textContent)); ok("the page shows the whole request with a button back to the consolidation", !!back && !!document.querySelector("#view h1"));
+            if (back) { back.click(); window.APP_ROUTE = "#consolidation"; route(); await tick(400); ok("the back button returns to the consolidation page", /รวมคำขอหน่วยงาน|consolidation/i.test(document.querySelector("#view h1").textContent) && REQ_BACK === null); } } }
+        as("div"); renderShell(); window.APP_ROUTE = "#consolidation"; route(); await tick(300); ok("a division does not get the consolidation page with the form to edit", !document.querySelector("[data-nbc]"));
         // the budget hearing flow
         as("plan"); renderShell(); const H = S.hearings.find(h => h.status === "scheduled" && h.qs.length > 0 && h.qs.every(q => !q.ans));
         if (H) { eq("a hearing with unanswered questions is at step 2", hsStage(H), 1); H.qs.forEach(q => Object.assign(q, { ans: ["ตอบ", "ans"], ok: null })); eq("answered but not checked: step 3", hsStage(H), 2); H.qs.forEach(q => (q.ok = true)); eq("all accepted: ready to hold, step 4", hsStage(H), 3);
-          REV_TAB = "hearings"; window.FISKO_ROUTE = "#review"; route(); await tick(300); v = document.querySelector("#view"); ok("the flow panel shows the steps, the reschedule and cancel buttons and the minutes form", !!v.querySelector("#hs-flow") && !!v.querySelector(`[data-hres="${H.id}"]`) && !!v.querySelector(`[data-hcan="${H.id}"]`) && !!v.querySelector(`[data-hrec="${H.id}"]`));
+          REV_TAB = "hearings"; window.APP_ROUTE = "#review"; route(); await tick(300); v = document.querySelector("#view"); ok("the flow panel shows the steps, the reschedule and cancel buttons and the minutes form", !!v.querySelector("#hs-flow") && !!v.querySelector(`[data-hres="${H.id}"]`) && !!v.querySelector(`[data-hcan="${H.id}"]`) && !!v.querySelector(`[data-hrec="${H.id}"]`));
           const d2 = addDays(TODAY, 12); fire(v.querySelector(`[data-hdate="${H.id}"]`), d2); v.querySelector(`[data-hres="${H.id}"]`).click(); await tick(300); eq("a hearing can be rescheduled", H.date, d2);
           v = document.querySelector("#view"); v.querySelector(`#hm-sm-${H.id}`).value = "สรุปทดสอบ"; const so = v.querySelector(`[data-hmo^="${H.id}|"]`); if (so) { so.value = "adjust"; const nt = v.querySelector(`[data-hmn="${so.dataset.hmo}"]`); nt.value = "ลดรายการ"; }
           v.querySelector(`[data-hrec="${H.id}"]`).click(); await tick(300); ok("the minutes close the hearing with an outcome for each request", H.status === "held" && !!H.result && H.result.summary === "สรุปทดสอบ" && hsStage(H) === 5);
           if (so) { const rq = S.requests.find(r => r.id === so.dataset.hmo.split("|")[1]); ok("a request to adjust is flagged and shows as a warning to its unit", !!rq.hearAdjust && !rq.hearAdjust.done && checks(rq).some(x => /ปรับคำขอตามผลการชี้แจง|Adjust as the hearing asked/.test(x.title))); } }
-        { const H2 = S.hearings.find(h => h.status === "scheduled"); if (H2) { as("plan"); renderShell(); REV_TAB = "hearings"; window.FISKO_ROUTE = "#review"; route(); await tick(300); document.querySelector(`[data-hcan="${H2.id}"]`).click(); await tick(300); eq("a hearing can be cancelled", H2.status, "cancelled"); } }
+        { const H2 = S.hearings.find(h => h.status === "scheduled"); if (H2) { as("plan"); renderShell(); REV_TAB = "hearings"; window.APP_ROUTE = "#review"; route(); await tick(300); document.querySelector(`[data-hcan="${H2.id}"]`).click(); await tick(300); eq("a hearing can be cancelled", H2.status, "cancelled"); } }
         // P11b: tab names, month groups, the work plan with the status, MTEF from the current year, indicators by month
         as("div"); renderShell(); { const q2 = S.requests.find(r => r.unit === me().unit && (r.status === "draft" || r.status === "returned") && !r.multi); CUR_REQ = q2.id; q2.multi = true; q2.years = q2.years || { [FORM_FY]: q2.amount, [FORM_FY + 1]: 0 }; v = await open("main");
           const tabs = [...document.querySelectorAll("[data-rtab]")].map(b => b.dataset.rtab), lab = t => (document.querySelector('[data-rtab="' + t + '"]') || {}).textContent || "";
@@ -1399,12 +1399,12 @@
           eq("the quarters are the sums of their months and the total of the year", [x.q.join(), indTotal(x)], ["6,15,24,33", 78]);
           ok("the list shows the quarter totals", [...document.querySelectorAll('[data-indline="0"] tbody tr:first-child [data-indq]')].map(c => c.textContent.trim()).join() === "6,15,24,33");
           x.type = "qual"; x.unit = "ระดับ"; indSync(x); eq("a qualitative indicator averages the months of a quarter", x.q.join(), "2,5,8,11"); }
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#consolidation"; CN_TAB = "nonbudget"; route(); await tick(300);
+        as("plan"); renderShell(); window.APP_ROUTE = "#consolidation"; CN_TAB = "nonbudget"; route(); await tick(300);
         { const t = document.querySelector("#nbud thead").innerText; ok("the NBUD year heads are previous, current and forward years from the year being formulated", t.indexOf("ปีก่อนหน้า") >= 0 && t.indexOf("ปีก่อนหน้า") < t.indexOf("ปีปัจจุบัน") && t.indexOf("ปีปัจจุบัน") < t.indexOf("ปีล่วงหน้า 1") && t.indexOf("ปีล่วงหน้า 1") < t.indexOf("ปีล่วงหน้า 4") && t.includes(String(FORM_FY - 1)) && t.includes(String(FORM_FY + 4)) && !t.includes("2567"), t); }
         // every request opens on all its tabs without a broken value, for every role
         for (const role of ["div", "plan", "exec"]) { as(role); renderShell(); for (const tab of ["main", "plan", "mtef", "ind", "align"]) { CUR_REQ = S.requests[0].id; const vv = await open(tab); ok(role + " opens " + tab + " without a broken value", !/undefined|NaN|\[object/.test(vv.innerText)); } }
         const mr = S.requests.find(r => r.multi); if (mr) for (const role of ["div", "plan"]) { as(role); renderShell(); CUR_REQ = mr.id; const vv = await open("commit"); ok(role + " opens the commitment tab without a broken value", !/undefined|NaN|\[object/.test(vv.innerText) && !!vv.querySelector("#rf-commit")); }
-        for (const role of ["plan", "div"]) { as(role); renderShell(); window.FISKO_ROUTE = "#bq-ref"; route(); await tick(200); ok(role + " opens the price register", /ทะเบียนราคากลาง|Reference price/.test(document.querySelector("#view").innerText) && !/undefined|NaN/.test(document.querySelector("#view").innerText)); }
+        for (const role of ["plan", "div"]) { as(role); renderShell(); window.APP_ROUTE = "#bq-ref"; route(); await tick(200); ok(role + " opens the price register", /ทะเบียนราคากลาง|Reference price/.test(document.querySelector("#view").innerText) && !/undefined|NaN/.test(document.querySelector("#view").innerText)); }
         as("div"); renderShell();
       });
       await grp("KPI lists: grouped under their parent, quarterly targets, KPIs of outputs and activities (P12)", async () => {
@@ -1414,7 +1414,7 @@
         ok("the service-goal KPI form says it is under the agency service goal, not the goal (เป้าประสงค์)", /เป้าหมายการให้บริการหน่วยงาน|agency service goal/.test(tx(f.label)) && !/เป้าประสงค์/.test(tx(f.label)) && f.opts.length > 0 && f.opts.every(o => /^G/.test(o[0]) || o[1].startsWith(o[0])));
         const none = c => !String(c.h[0]).startsWith("เป้า "); ok("no 5-year target columns; quarters 1 to 4 and the total instead", [SK, OK].every(d => d.cols.every(none) && ["ไตรมาส 1", "ไตรมาส 4", "รวมปีนี้"].every(h => d.cols.some(c => c.h[0] === h))));
         const k1 = SK.list()[0]; ok("a KPI of a goal has a heading naming the goal", /ภายใต้เป้าหมายการให้บริการหน่วยงาน|Under the agency service goal/.test(SK.group(k1)));
-        window.FISKO_ROUTE = "#agrev"; AGR_TAB = "kpis"; route(); await tick(300); let v = document.getElementById("view");
+        window.APP_ROUTE = "#agrev"; AGR_TAB = "kpis"; route(); await tick(300); let v = document.getElementById("view");
         ok("the goals tab shows grouped KPIs: a heading row under the goal, with quarters", v.querySelectorAll("tr.cr-group").length >= 1 && /ภายใต้เป้าหมายการให้บริการหน่วยงาน/.test(v.innerText) && /ไตรมาส 1/.test(v.innerText) && !/5 ปี/.test(v.innerText), v.querySelectorAll("tr.cr-group").length);
         AGR_TAB = "ag-out"; route(); await tick(300); v = document.getElementById("view"); ok("the outcomes tab groups its KPIs under the outcome", v.querySelectorAll("tr.cr-group").length >= 1 && /ภายใต้ผลสัมฤทธิ์หน่วยงาน/.test(v.innerText));
         // the plan: month, quarter, year; shown by quarter
@@ -1434,7 +1434,7 @@
           AGR_TAB = tab; route(); await tick(300); v = document.getElementById("view"); ok(tab + " shows its KPI list with a heading under the parent", !!v.querySelector('[data-crlist="' + key + '"]') && under.test(v.querySelector('[data-crlist="' + key + '"]').innerText) && v.querySelectorAll('[data-crlist="' + key + '"] tr.cr-group').length >= 1);
           const D = CRUD.defs[key], node = D.fields(null).find(x => x.id === "node").opts[0][0], c = D.create.run({ node, th: "ตัวชี้วัดใหม่", ikind: "quant", unit: "ร้อยละ", kmode: "year", ky: 100 }); ok("a KPI can be added to an " + key, S.nodeKpi.includes(c) && c.node === node && kpTotal(c) === 100); D.edit.run(c, { th: "แก้", ikind: "qual", unit: "ระดับ", kmode: "quarter", q0: 1, q1: 2, q2: 3, q3: 4 }); eq("and edited", [tx(c.name), kpQ(c)], ["แก้", [1, 2, 3, 4]]);
           S.nodeKpi = S.nodeKpi.filter(x => x !== c); }
-        for (const role of ["plan", "div"]) { as(role); renderShell(); for (const tab of ["ag-out", "kpis", "ag-outp", "ag-act"]) { AGR_TAB = tab; window.FISKO_ROUTE = "#agrev"; route(); await tick(250); const vv = document.getElementById("view"); ok(role + " opens " + tab + " without a broken value", !!vv && !/undefined|NaN|\[object/.test(vv.innerText)); } }
+        for (const role of ["plan", "div"]) { as(role); renderShell(); for (const tab of ["ag-out", "kpis", "ag-outp", "ag-act"]) { AGR_TAB = tab; window.APP_ROUTE = "#agrev"; route(); await tick(250); const vv = document.getElementById("view"); ok(role + " opens " + tab + " without a broken value", !!vv && !/undefined|NaN|\[object/.test(vv.innerText)); } }
         as("div"); renderShell();
       });
       await grp("Possible duplicates: review process, comparison, result, AI search (P13)", async () => {
@@ -1456,7 +1456,7 @@
           ok("the compare tab shows both requests side by side, the similarity and the overlapping lines", cmp[2].includes(a.id) && cmp[2].includes(b.id) && /ความเหมือน|Similarity/.test(cmp[2]) && /รายการที่คิดว่าซ้ำ|Lines thought to overlap/.test(cmp[2]) && cmp[2].includes("data-dpopen"));
           ok("the process tab shows the steps, the reviewer, the question and the log", /กำลังพิจารณา|Under review/.test(pr[2]) && pr[2].includes("ขอแผนการใช้จริง") && /บันทึกขั้นตอน|Log of the steps/.test(pr[2])); }
         // the real drawer and the link to a request and back
-        window.FISKO_ROUTE = "#consolidation"; CN_TAB = "list"; route(); await tick(300); crOpen("csDup", d.id, "view"); route(); await tick(300); ok("the list shows the similarity and the status, and the drawer opens on a record", /ความเหมือน|Similarity/.test(document.querySelector("#view").innerText) && !!document.querySelector("#cr-drawer, .cr-drawer, [data-crdrawer]") || /เปรียบเทียบ|Compare/.test(document.querySelector("#view").innerText));
+        window.APP_ROUTE = "#consolidation"; CN_TAB = "list"; route(); await tick(300); crOpen("csDup", d.id, "view"); route(); await tick(300); ok("the list shows the similarity and the status, and the drawer opens on a record", /ความเหมือน|Similarity/.test(document.querySelector("#view").innerText) && !!document.querySelector("#cr-drawer, .cr-drawer, [data-crdrawer]") || /เปรียบเทียบ|Compare/.test(document.querySelector("#view").innerText));
         crClose(); route(); await tick(200);
         // the result
         const rb = dpReq(d.reqB); const amt0 = reqAmount(rb); act(DS, d, "merge").run(d, "รวมแล้วเพราะขอซ้ำจุดเดียวกัน"); eq("merge records the result with the note, who and when, and cuts the request", [d.done, d.result.decision, d.result.note, d.result.by === me().id, reqAmount(rb) < amt0], ["merge", "merge", "รวมแล้วเพราะขอซ้ำจุดเดียวกัน", true, true]);
@@ -1467,11 +1467,11 @@
         const sent = S.requests.filter(r => !["draft", "rejected", "cancelled"].includes(r.status)); const x1 = sent[0], x2 = sent.find(r => r !== x1 && r.unit !== x1.unit); x2.act = x1.act; S.dupes = S.dupes.filter(q => ![q.reqA, q.reqB].every(id => [x1.id, x2.id].includes(id)));
         const n1 = S.dupes.length, made = dpScan(); ok("the AI search adds new pairs that share an activity or a line", made >= 1 && S.dupes.length === n1 + made && S.dupes.slice(n1).every(q => q.ai && q.reqA && q.reqB && q.save >= 0.1 && DS.status(q) === "open"));
         eq("a second search adds none of the same pairs", dpScan() === 0 || S.dupes.length >= n1 + made, true);
-        as("plan"); window.FISKO_ROUTE = "#consolidation"; CN_TAB = "list"; route(); await tick(300); ok("Planning sees the search button on the list", !!document.querySelector("[data-dpscan]")); as("div"); renderShell(); route(); await tick(200); ok("a division does not", !document.querySelector("[data-dpscan]"));
+        as("plan"); window.APP_ROUTE = "#consolidation"; CN_TAB = "list"; route(); await tick(300); ok("Planning sees the search button on the list", !!document.querySelector("[data-dpscan]")); as("div"); renderShell(); route(); await tick(200); ok("a division does not", !document.querySelector("[data-dpscan]"));
         as("plan"); renderShell();
       });
       await grp("AI summarises the attached documents and fills the request (P14)", async () => {
-        as("div"); renderShell(); const open = async tab => { REQ_TAB = tab; window.FISKO_ROUTE = "#request"; route(); await tick(300); return document.querySelector("#view"); }, fire = (el, val) => { if (val !== undefined) el.value = val; el.dispatchEvent(new Event("change", { bubbles: true })); };
+        as("div"); renderShell(); const open = async tab => { REQ_TAB = tab; window.APP_ROUTE = "#request"; route(); await tick(300); return document.querySelector("#view"); }, fire = (el, val) => { if (val !== undefined) el.value = val; el.dispatchEvent(new Event("change", { bubbles: true })); };
         const r = S.requests.find(x => x.unit === me().unit && (x.status === "draft" || x.status === "returned") && !x.multi) || (() => { const x = S.requests.find(q => !q.multi && q.items.length > 0); x.unit = me().unit; x.status = "draft"; return x; })(); ok("a draft of the division", !!r); if (!r) return; CUR_REQ = r.id; rqLineInit(r);
         const body = "เรื่อง ขอตั้งงบประมาณจัดหาเครื่องคอมพิวเตอร์ตั้งโต๊ะ\nหลักการและเหตุผล: อุปกรณ์คอมพิวเตอร์เดิมของสำนักเสื่อมสภาพและล้าสมัย ใช้งานไม่ทันกับระบบงานใหม่ ทำให้การให้บริการประชาชนล่าช้า จึงต้องจัดหาทดแทนโดยเร็ว\nวัตถุประสงค์: เพื่อทดแทนเครื่องเดิมที่หมดอายุการใช้งาน\nตัวชี้วัด:\n1. ร้อยละของเครื่องที่ติดตั้งแล้วเสร็จ\n2. ความพึงพอใจของผู้ใช้งาน\nวงเงิน 1,200,000 บาท\nจังหวัด ขอนแก่น อำเภอ เมืองขอนแก่น ตำบล ในเมือง\nเครื่องคอมพิวเตอร์ตั้งโต๊ะ 10 เครื่อง\n";
         // reading the files
@@ -1513,16 +1513,16 @@
       await grp("Review and consolidation tabs, quarter plan from the months, results of the indicators (P15)", async () => {
         const tabsOf = () => [...document.querySelectorAll("#view [data-btab]")].map(b => b.dataset.btab).join(), fire = (el, val) => { if (val !== undefined) el.value = val; el.dispatchEvent(new Event("change", { bubbles: true })); };
         // the review page: the overview is first, and from the overview every tab can be chosen
-        as("exec"); renderShell(); window.FISKO_ROUTE = "#review"; REV_TAB = "rounds"; route(); await tick(300); eq("review tabs: overview, queue, meetings, hearings, steps", tabsOf(), "rounds,queue,meetings,hearings,flow");
+        as("exec"); renderShell(); window.APP_ROUTE = "#review"; REV_TAB = "rounds"; route(); await tick(300); eq("review tabs: overview, queue, meetings, hearings, steps", tabsOf(), "rounds,queue,meetings,hearings,flow");
         for (const k of ["queue", "meetings", "hearings", "flow", "rounds"]) { document.querySelector('#view [data-btab="' + k + '"]').click(); await tick(300); eq("from the overview-or-any tab the tab '" + k + "' can be chosen", REV_TAB, k); ok("and it shows without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); }
         // the consolidation page: overview, request list, non-budget money
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#consolidation"; CN_TAB = "overview"; route(); await tick(300); eq("consolidation tabs", tabsOf(), "overview,list,nonbudget");
+        as("plan"); renderShell(); window.APP_ROUTE = "#consolidation"; CN_TAB = "overview"; route(); await tick(300); eq("consolidation tabs", tabsOf(), "overview,list,nonbudget");
         { const v = document.querySelector("#view"); ok("overview: the totals and the splits, no list and no filter", /ยอดรวมทั้งหมด|Grand total/.test(v.innerText) && /รวมตามสำนัก\/กอง|By division/.test(v.innerText) && !v.querySelector("#cn-unit") && !v.querySelector("[data-cnopen]")); }
         document.querySelector('#view [data-btab="list"]').click(); await tick(300); { const v = document.querySelector("#view"); ok("request list: the filter, the rows with View and the send button, and the possible duplicates", !!v.querySelector("#cn-unit") && !!v.querySelector("[data-cnopen]") && !!v.querySelector('[data-crlist="csDup"]') && !!v.querySelector("#cn-sendall") && !/ภาพรวมคำขอ[\s\S]*รวมตามงบรายจ่าย/.test(v.querySelector(".kpis") ? v.querySelector(".kpis").innerText : "")); }
         document.querySelector('#view [data-btab="nonbudget"]').click(); await tick(300); ok("non-budget money tab", !!document.querySelector("#nbud")); document.querySelector('#view [data-btab="overview"]').click(); await tick(300); eq("and back to the overview", CN_TAB, "overview");
         // the quarters of the plan are the sums of the months; the result column is in the money plan
         as("div"); renderShell(); const r = S.requests.find(x => x.unit === me().unit && (x.status === "draft" || x.status === "returned") && !x.multi) || (() => { const x = S.requests.find(q => !q.multi && q.items.length > 0); x.unit = me().unit; x.status = "draft"; return x; })(); CUR_REQ = r.id; rqLineInit(r);
-        const open = async tab => { REQ_TAB = tab; window.FISKO_ROUTE = "#request"; route(); await tick(300); return document.querySelector("#view"); };
+        const open = async tab => { REQ_TAB = tab; window.APP_ROUTE = "#request"; route(); await tick(300); return document.querySelector("#view"); };
         r.mplan = Array(12).fill(0); r.mplan[0] = 100; r.mplan[1] = 200; r.mplan[2] = 300; r.mplan[3] = 1000; r.mplan[11] = 50; let v = await open("plan");
         eq("the quarter plan is the sum of its months", [rqSyncQ(r).join(), [...v.querySelectorAll("[data-qsum]")].map(c => c.textContent.replace(/,/g, "")).join()], ["600,1000,0,50", "600,1000,0,50"]);
         ok("the quarter table has no inputs (it is not typed) and no fill buttons", !v.querySelector("[data-q]") && !v.querySelector("#q-fill") && !v.querySelector("#q-rest"));
@@ -1539,9 +1539,9 @@
         as("plan"); renderShell(); for (const key of ["stKpi", "agOutK", "outKpi", "actKpi"]) { const D = CRUD.defs[key], k = D.list()[0]; if (!k) { ok(key + " has a KPI to test", false); continue; }
           const tab = D.tabs(k).find(t => t[0] === "res"); ok(key + ": the drawer has a results tab with 12 month inputs", !!tab && (tab[2].match(/data-kres=/g) || []).length === 12);
           ok(key + ": the list has the year result column", D.cols.some(c => tx(c.h) === "ผลรวมปีนี้"));
-          crOpen(key, D.id(k), "view"); window.FISKO_ROUTE = key === "stKpi" || key === "agOutK" ? "#agrev" : "#agrev"; AGR_TAB = key === "stKpi" ? "kpis" : key === "agOutK" ? "ag-out" : key === "outKpi" ? "ag-outp" : "ag-act"; route(); await tick(250);
+          crOpen(key, D.id(k), "view"); window.APP_ROUTE = key === "stKpi" || key === "agOutK" ? "#agrev" : "#agrev"; AGR_TAB = key === "stKpi" ? "kpis" : key === "agOutK" ? "ag-out" : key === "outKpi" ? "ag-outp" : "ag-act"; route(); await tick(250);
           const k0 = kpResTotal(k); kpRes(k).m[0] = (kpRes(k).m[0] || 0) + 7; ok(key + ": a result raises the year result", kpResTotal(k) > k0 || k.kind === "qual"); kpRes(k).m[0] -= 7; crClose(); }
-        for (const role of ["plan", "div"]) { as(role); renderShell(); for (const tab of ["ag-out", "kpis", "ag-outp", "ag-act"]) { AGR_TAB = tab; window.FISKO_ROUTE = "#agrev"; route(); await tick(200); ok(role + " opens " + tab + " without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); } }
+        for (const role of ["plan", "div"]) { as(role); renderShell(); for (const tab of ["ag-out", "kpis", "ag-outp", "ag-act"]) { AGR_TAB = tab; window.APP_ROUTE = "#agrev"; route(); await tick(200); ok(role + " opens " + tab + " without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); } }
         as("div"); renderShell();
       });
       await grp("Amounts after the Budget Bureau: the draft bill and the act reach the request (P16)", async () => {
@@ -1554,7 +1554,7 @@
         P.stage = PARL_STEPS.length; eq("once the act is in force the amount is the act's", [actAmount(r), actSource(r)], [3700000, "act"]);
         const st = amtSteps(r); eq("the steps are asked, sent, Bureau, bill, act with the bill's cut and restored amounts", [st.map(x => x[0]).join(), st[2][2], st[3][2], st[4][2], /ปรับลด|cut/.test(st[3][3]) && /คืน|restored/.test(st[3][3])], ["asked,sent,bureau,bill,act", 4000000, 3700000, 3700000, true]);
         // the request page shows them side by side and updates the plan
-        P.stage = PL_CUT; P.appeals = {}; window.FISKO_ROUTE = "#request"; REQ_TAB = "main"; route(); await tick(300); let v = document.querySelector("#view"), box = v.querySelector("#rq-amt");
+        P.stage = PL_CUT; P.appeals = {}; window.APP_ROUTE = "#request"; REQ_TAB = "main"; route(); await tick(300); let v = document.querySelector("#view"), box = v.querySelector("#rq-amt");
         ok("the request shows the five amounts side by side, with the latest marked as the draft bill", !!box && box.querySelectorAll("tbody tr").length === 5 && /ร่าง พ.ร.บ.|Draft bill/.test(box.innerText) && /3,500,000/.test(box.innerText) && /ยอดล่าสุด|latest/.test(box.querySelector("tr[style]").innerText) && /ร่าง พ.ร.บ. \(หลัง|Draft bill \(after/.test(v.querySelector("#rq-fund").innerText));
         r.mplan = Array(12).fill(0); r.mplan[0] = 1000000; r.mplan[5] = 1000000; route(); await tick(300); const bt = document.querySelector("#rf-replan"); ok("Planning has a button to update the monthly plan to the latest amount", !!bt && !bt.disabled);
         bt.click(); await tick(300); eq("the plan now equals the draft bill's amount and its quarters follow", [rqMSum(r.mplan), rqMSum(r.qplan)], [3500000, 3500000]); ok("the button is then disabled", document.querySelector("#rf-replan").disabled);
@@ -1589,7 +1589,7 @@
         as("plan"); renderShell();
       });
       await grp("The budget request dashboard, clean and by right (P18)", async () => {
-        const at = async role => { as(role); renderShell(); window.FISKO_ROUTE = "#bq-dash"; route(); await tick(300); return document.getElementById("view"); }, titles = v => [...v.querySelectorAll("section.panel > header h2")].map(h => h.textContent.trim());
+        const at = async role => { as(role); renderShell(); window.APP_ROUTE = "#bq-dash"; route(); await tick(300); return document.getElementById("view"); }, titles = v => [...v.querySelectorAll("section.panel > header h2")].map(h => h.textContent.trim());
         const nTables = v => [...v.querySelectorAll("section.panel .tbl-wrap table")].filter(t => !t.closest("details#ds-more")).length;
         // a division: its own requests only
         let v = await at("div"); ok("a division sees its own requests: to do, stage, kind of expenditure, quarterly plan", /งานที่ต้องทำ|To do/.test(v.innerText) && /ขั้นตอนการพิจารณา|By stage/.test(v.innerText) && /ประเภทรายจ่าย|kind of expenditure/i.test(v.innerText) && /แผนการใช้จ่ายรายไตรมาส|by quarter/i.test(v.innerText));
@@ -1610,7 +1610,7 @@
         as("div"); renderShell();
       });
       await grp("Contract panels 4 to 7: complete steps with a sample of each, and contract changes at every step (P19)", async () => {
-        window.FISKO_ROUTE = ""; as("proc"); renderShell(); const first = c => casePhases(c).phases.map(p => p.items.findIndex(x => !x.ok)); // a route left over from an earlier group would make jump() go nowhere
+        window.APP_ROUTE = ""; as("proc"); renderShell(); const first = c => casePhases(c).phases.map(p => p.items.findIndex(x => !x.ok)); // a route left over from an earlier group would make jump() go nowhere
         const sizes = S.cases.find(c => caseCon(c)).id && casePhases(S.cases.find(c => caseCon(c))).phases.map(p => p.items.length); eq("the steps of the seven panels: 1, 5, 5, 2, 3, 3, 5", sizes.join(), "1,5,5,2,3,3,5");
         const lab = k => casePhases(S.cases.find(c => caseCon(c))).phases[k - 1].items.map(x => x.label);
         ok("panel 4 has the guarantee, panel 5 delivery, changes and hand-on, panel 6 the invoice, panel 7 the warranty, the return of the guarantee, the rating and the close", /หลักประกัน|guarantee/i.test(lab(4).join()) && /ส่งมอบครบ|delivered/i.test(lab(5).join()) && /แก้ไขสัญญา|contract change/i.test(lab(5).join()) && /ใบแจ้งหนี้|invoice/i.test(lab(6).join()) && /รับประกัน|warranty/i.test(lab(7).join()) && /คืนหลักประกัน|returned/i.test(lab(7).join()) && /ประเมินผู้ค้า|rated/i.test(lab(7).join()) && /ปิดการจัดซื้อ|closed/i.test(lab(7).join()) && /ส่งมอบต่อ|hands the work on/i.test(lab(7).join()) && !/ส่งมอบต่อ|hands the work on/i.test(lab(5).join()));
@@ -1643,7 +1643,7 @@
         as("plan"); renderShell();
       });
       await grp("Request tab 'Other documents': the division attaches, Planning asks for more (P20)", async () => {
-        window.FISKO_ROUTE = "#request"; as("div"); renderShell(); const me0 = me();
+        window.APP_ROUTE = "#request"; as("div"); renderShell(); const me0 = me();
         const r = S.requests.find(x => x.unit === me0.unit && x.status !== "draft") || S.requests.find(x => x.unit === me0.unit); ok("a request of the division", !!r); if (!r) return; CUR_REQ = r.id; r.odocs = []; r.docReqs = [];
         // the tab and its place
         REQ_TAB = "main"; route(); await tick(300); { const tabs = [...document.querySelectorAll(".rsteps [data-rtab]")].map(b => b.dataset.rtab); ok("the tab is there, after Alignment and before Versions", tabs.indexOf("odocs") > tabs.indexOf("align") && tabs.indexOf("odocs") < tabs.indexOf("versions"), tabs.join());
@@ -1673,11 +1673,11 @@
         as("plan"); { const q2 = (odRequest(r, "เอกสารที่ยกเลิก", ""), r.docReqs[r.docReqs.length - 1]); eq("Planning cancels a request", [odDecide(r, q2.id, "cancel"), q2.status], ["", "cancelled"]); }
         // the sample data and every role opens the tab without a broken value
         ok("the sample data has a waiting, an answered and an accepted request", ["open", "provided", "accepted"].every(st => S.requests.some(x => (x.docReqs || []).some(y => y.status === st))));
-        for (const role of ["div", "divhead", "plan", "exec", "audit"]) { as(role); renderShell(); CUR_REQ = r.id; REQ_TAB = "odocs"; window.FISKO_ROUTE = "#request"; route(); await tick(250); ok(role + " opens the tab without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); }
+        for (const role of ["div", "divhead", "plan", "exec", "audit"]) { as(role); renderShell(); CUR_REQ = r.id; REQ_TAB = "odocs"; window.APP_ROUTE = "#request"; route(); await tick(250); ok(role + " opens the tab without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); }
         REQ_TAB = "main"; as("div"); renderShell();
       });
       await grp("Summary and send to the Budget Bureau: overview and request list (P21)", async () => {
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#submission"; SUB_TAB = "sbov"; route(); await tick(450); const v = () => document.querySelector("#view");
+        as("plan"); renderShell(); window.APP_ROUTE = "#submission"; SUB_TAB = "sbov"; route(); await tick(450); const v = () => document.querySelector("#view");
         { const tabs = [...document.querySelectorAll("[data-btab]")].map(b => b.textContent.trim()); ok("the page opens on the overview and the second tab is the Bureau status tab", /ภาพรวมคำขอ/.test(tabs[0]) && /ปรับปรุงสถานะ สงป\./.test(tabs[1]) && tabs.length === 2 && document.querySelector("[data-btab].on") && /ภาพรวมคำขอ/.test(document.querySelector("[data-btab].on").textContent), tabs.join("|")); }
         const all = S.requests, pk = pkg();
         { const k = v().querySelector("#sb-kpis"); ok("the overview compares all the requests with the approved ones", !!k && k.children.length === 4 && k.children[0].querySelector(".v").textContent.trim() === String(all.length) && k.children[1].querySelector(".v").textContent.trim() === String(pk.length), k && k.innerText); }
@@ -1685,7 +1685,7 @@
         ok("the table by status adds up to all the requests", [...v().querySelectorAll("#sb-status tbody tr")].reduce((s, tr) => s + Number(tr.children[1].textContent), 0) === all.length);
         ok("what has to be sent has a row for each approved request", v().querySelectorAll("#sb-tosend tbody tr").length === Math.max(1, pk.length));
         // the request list
-        window.FISKO_ROUTE = "#bq-rpt"; window.RPT_TAB = "rpupd"; route(); await tick(400);
+        window.APP_ROUTE = "#bq-rpt"; window.RPT_TAB = "rpupd"; route(); await tick(400);
         ok("the list has a row per approved request and the three money columns", v().querySelectorAll("#sb-list tbody tr[data-sbrow]").length === pk.length && /คำขอ/.test(v().querySelector("#sb-list thead").innerText) && /ร่าง พ\.ร\.บ\./.test(v().querySelector("#sb-list thead").innerText) && /พ\.ร\.บ\./.test(v().querySelector("#sb-list thead").innerText), v().querySelector("#sb-list thead").innerText);
         ok("Planning has an input for the bill and one for the act in each row", v().querySelectorAll("[data-sbamt]").length === pk.length * 2);
         const none = x => subAmtBase(x).every(s => !["bill", "act"].includes(s[0]) || s[2] == null), r = pk.find(none) || pk[0], before = actAmount(r), src0 = actSource(r);
@@ -1701,13 +1701,13 @@
         ok("an amount that is not valid is refused", subSetAmt(r, "bill", "-5") !== "" && subSetAmt(r, "bill", "abc") !== "" && !subMan(r).bill);
         { const o = S.requests.find(x => !pk.includes(x)); if (o) ok("a request that is not in the package can't be updated", subSetAmt(o, "bill", 100) !== ""); }
         for (const role of ["div", "exec", "fin", "audit"]) { as(role); renderShell(); ok(role + " can't update the amounts", subSetAmt(r, "bill", 5) !== "" && !subMan(r).bill); }
-        as("div"); renderShell(); window.FISKO_ROUTE = "#bq-rpt"; window.RPT_TAB = "rpupd"; route(); await tick(350); ok("the division reads the list without inputs", !document.querySelector("[data-sbamt]"));
+        as("div"); renderShell(); window.APP_ROUTE = "#bq-rpt"; window.RPT_TAB = "rpupd"; route(); await tick(350); ok("the division reads the list without inputs", !document.querySelector("[data-sbamt]"));
         // every role opens both tabs without a broken value
-        for (const role of ["plan", "exec", "fin", "audit", "div"]) for (const tb of ["sbov", "checks", "rpsum", "rpupd"]) { as(role); renderShell(); if (tb[0] === "r") { window.FISKO_ROUTE = "#bq-rpt"; window.RPT_TAB = tb; } else { window.FISKO_ROUTE = "#submission"; SUB_TAB = tb; } route(); await tick(300); ok(role + " opens " + tb + " without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); }
-        delete S.submission.manual; SUB_TAB = "sbov"; window.RPT_TAB = "rpsum"; window.FISKO_ROUTE = ""; as("plan"); renderShell();
+        for (const role of ["plan", "exec", "fin", "audit", "div"]) for (const tb of ["sbov", "checks", "rpsum", "rpupd"]) { as(role); renderShell(); if (tb[0] === "r") { window.APP_ROUTE = "#bq-rpt"; window.RPT_TAB = tb; } else { window.APP_ROUTE = "#submission"; SUB_TAB = tb; } route(); await tick(300); ok(role + " opens " + tb + " without a broken value", !/undefined|NaN|\[object/.test(document.querySelector("#view").innerText)); }
+        delete S.submission.manual; SUB_TAB = "sbov"; window.RPT_TAB = "rpsum"; window.APP_ROUTE = ""; as("plan"); renderShell();
       });
       await grp("Annual budget report (two tabs) and the Bureau status tab (P25)", async () => {
-        as("plan"); renderShell(); window.FISKO_ROUTE = "#bq-rpt"; window.RPT_TAB = "rpsum"; route(); await tick(400); const v = () => document.querySelector("#view");
+        as("plan"); renderShell(); window.APP_ROUTE = "#bq-rpt"; window.RPT_TAB = "rpsum"; route(); await tick(400); const v = () => document.querySelector("#view");
         ok("the menu line and the page are named Annual budget report", /รายงานงบประมาณประจำปี/.test(NAV.find(n => n.id === "bq-rpt").label[0]) && /รายงานงบประมาณประจำปี/.test(v().innerText) && !/รายงานสรุปคำของบประมาณ/.test(v().innerText));
         { const tabs = [...v().querySelectorAll("[data-rptab]")].map(b => b.textContent.trim()); eq("two tabs, the summary first and the update second", tabs, ["รายงานสรุปงบประมาณ ปีงบประมาณ", "ปรับปรุงเงินงบประมาณ"]); }
         const list = dsList(), rows = rptRows();
@@ -1724,7 +1724,7 @@
         window.RPT_TAB = "rpsum"; route(); await tick(300); ok("the dashboard shows the amount typed on the second tab", v().querySelector('#rp-tbl tr[data-rprow="' + r.id + '"]').children[4].textContent.replace(/,/g, "") === "3200000");
         delete S.submission.manual;
         // the page "Summary and send to the Bureau": the tab is the Bureau status
-        window.FISKO_ROUTE = "#submission"; SUB_TAB = "checks"; route(); await tick(350);
+        window.APP_ROUTE = "#submission"; SUB_TAB = "checks"; route(); await tick(350);
         { const tabs = [...document.querySelectorAll("[data-btab]")].map(b => b.textContent.trim()); ok("the tab Pre-send checks is now Update the Bureau status", tabs.some(x => /ปรับปรุงสถานะ สงป\./.test(x)) && !tabs.some(x => /ตรวจก่อนส่ง/.test(x)) && !tabs.some(x => /^.?\d?\s*รายการคำขอ/.test(x)), tabs.join("|")); }
         ok("it lists every request in the package with the status, the details and an input for Planning", v().querySelectorAll("#sb-bst tbody tr[data-bsrow]").length === pkg().length && v().querySelectorAll('[data-bsf$="|st"]').length === pkg().length && !!v().querySelector('[data-bsf$="|res"]') && !!v().querySelector("details#sb-chk"));
         const q = pkg()[0], keys = () => Object.keys(subBst(q)).filter(k => k !== "t" && k !== "by");
@@ -1736,15 +1736,15 @@
         eq("clearing everything removes the record and the result", [subSetBst(q, "st", "prep"), subSetBst(q, "sent", ""), subSetBst(q, "ans", ""), subSetBst(q, "doc", ""), subSetBst(q, "note", ""), subSetBst(q, "res", ""), (S.submission.bst || {})[q.id], S.submission.results[q.id]], ["", "", "", "", "", "", undefined, undefined]);
         SUB_TAB = "sbov"; route(); await tick(300); ok("the overview table of what has to be sent shows the Bureau status", /สงป\.|เตรียมส่ง|Preparing/.test(v().querySelector("#sb-tosend").innerText) && v().querySelector("#sb-tosend thead").children[0].children.length === 5);
         for (const role of ["div", "exec", "fin", "audit"]) { as(role); renderShell(); ok(role + " can't update the Bureau status", subSetBst(q, "st", "sent") !== "" && !subBst(q).st); }
-        as("div"); renderShell(); window.FISKO_ROUTE = "#submission"; SUB_TAB = "checks"; route(); await tick(300); ok("a division reads the status without inputs", !document.querySelector("[data-bsf]"));
+        as("div"); renderShell(); window.APP_ROUTE = "#submission"; SUB_TAB = "checks"; route(); await tick(300); ok("a division reads the status without inputs", !document.querySelector("[data-bsf]"));
         { const o = S.requests.find(x => !pkg().includes(x)); as("plan"); renderShell(); if (o) ok("a request that is not in the package can't get a status", subSetBst(o, "st", "sent") !== ""); }
-        delete S.submission.bst; SUB_TAB = "sbov"; window.RPT_TAB = "rpsum"; window.FISKO_ROUTE = ""; as("plan"); renderShell();
+        delete S.submission.bst; SUB_TAB = "sbov"; window.RPT_TAB = "rpsum"; window.APP_ROUTE = ""; as("plan"); renderShell();
       });
       await grp("Allocation strategies tab, programmes added by Planning, links to the agency strategy (P26)", async () => {
         as("plan"); renderShell(); const v = () => document.querySelector("#view");
         eq("the allocation strategy tab is the second tab", bPage("strategy").tabs.slice(0, 3).map(x => x.id), ["em", "alst", "emlink"]);
         ok("the sample has allocation strategies, and every programme and output is linked", (S.allocStrats || []).length >= 3 && S.structure[FORM_FY].filter(n => n.lvl === "program").every(n => emAllocName(n.alloc)) && S.structure[FORM_FY].filter(n => n.lvl === "output").every(n => emAgStName(n.astrat)));
-        window.FISKO_ROUTE = "#strategy"; STRAT_TAB = "al-st"; route(); await tick(350);
+        window.APP_ROUTE = "#strategy"; STRAT_TAB = "al-st"; route(); await tick(350);
         { const tabs = [...document.querySelectorAll("[data-btab]")].map(b => b.textContent.trim()); ok("the second tab of the page is called Allocation strategies", /ยุทธศาสตร์จัดสรร/.test(tabs[1]), tabs.join("|")); }
         ok("the tab lists the strategies with the programmes linked and the request amount", /ยุทธศาสตร์จัดสรร/.test(v().innerText) && (S.allocStrats || []).every(a => v().innerText.includes(a.code)));
         // Planning adds, edits, retires
@@ -1755,7 +1755,7 @@
         for (const role of ["div", "exec", "fin", "audit"]) { as(role); ok(role + " can't add or edit an allocation strategy", D.create.can() === false && D.edit.can(a) === false); }
         as("plan");
         // the programmes tab: a column with the link, a selected-node link box, an add form
-        STRAT_TAB = "em-link"; EM.node = ""; window.FISKO_ROUTE = "#strategy"; route(); await tick(350);
+        STRAT_TAB = "em-link"; EM.node = ""; window.APP_ROUTE = "#strategy"; route(); await tick(350);
         ok("the programmes tab has the add button (a pop-up) and a link column", !!v().querySelector("#em-apopen") && /เชื่อมโยง/.test(v().innerText) && v().querySelectorAll("tbody tr").length > 3);
         const p0 = S.structure[FORM_FY].find(n => n.lvl === "program"), o0 = S.structure[FORM_FY].find(n => n.lvl === "output");
         EM.node = p0.id; route(); await tick(300); ok("a selected programme shows the allocation strategy select", !!v().querySelector("#em-lk") && v().querySelector("#em-lk").value === p0.alloc);
@@ -1800,11 +1800,11 @@
         as("plan"); eq("an unused programme can be deleted by Planning only", [emDelProg(np3.id), S.structure[FORM_FY].some(n => n.id === np3.id)], ["", false]);
         ok("a programme that has outputs can't be deleted", emDelProg(p0.id) !== "");
         // the register of outputs
-        window.FISKO_ROUTE = "#rg-out"; route(); await tick(350);
+        window.APP_ROUTE = "#rg-out"; route(); await tick(350);
         ok("the register of outputs has the agency strategy column", /กลยุทธ์หน่วยงาน/.test(v().innerText));
         { const d = CRUD.defs.regOut, fld = d.fields(o0).find(x => x.id === "astrat"); ok("its form has the agency strategy select with the current value", !!fld && fld.value === o0.astrat && fld.opts.length === S.strategy.items.length); d.edit.run(o0, { code: o0.code, th: o0.name[0], en: o0.name[1], otype: "output", astrat: "" }); eq("saving the form with none clears the link", o0.astrat, undefined); d.edit.run(o0, { code: o0.code, th: o0.name[0], en: o0.name[1], otype: "output", astrat: s1.id }); eq("and with one sets it", o0.astrat, s1.id); }
-        for (const role of ["plan", "exec", "audit", "fin", "div", "admin"]) for (const tb of ["al-st", "em-link"]) { as(role); renderShell(); window.FISKO_ROUTE = "#strategy"; STRAT_TAB = tb; EM.node = ""; route(); await tick(250); ok(role + " opens " + tb + " without a broken value", !/undefined|NaN|\[object/.test(v().innerText)); }
-        STRAT_TAB = "em-browse"; EM.node = ""; window.FISKO_ROUTE = ""; as("plan"); renderShell();
+        for (const role of ["plan", "exec", "audit", "fin", "div", "admin"]) for (const tb of ["al-st", "em-link"]) { as(role); renderShell(); window.APP_ROUTE = "#strategy"; STRAT_TAB = tb; EM.node = ""; route(); await tick(250); ok(role + " opens " + tb + " without a broken value", !/undefined|NaN|\[object/.test(v().innerText)); }
+        STRAT_TAB = "em-browse"; EM.node = ""; window.APP_ROUTE = ""; as("plan"); renderShell();
       });
       await grp("Sample story: one date, one process, from the calendar to the hand-over (P27)", async () => {
         reseed(); as("plan"); renderShell(); const d10 = x => (x ? String(x).slice(0, 10) : ""), T0 = "2026-11-17";
@@ -1855,8 +1855,8 @@
           S.cases.filter(c => Number(c.id.slice(-3)) >= 7).forEach(c => { const ev = S.caseEvents.filter(e => e.case === c.id).slice().sort((a, b) => (a.t < b.t ? -1 : 1)); ev.forEach(e => { if (d10(e.t) > T0) bad2.push(c.id + " event " + e.type + " after today"); }); const ix = ev.map(e => ord.indexOf(e.type)); if (ix.some(i => i < 0)) bad2.push(c.id + " an event of an unknown type"); const noDup = ix.filter((x, i) => x < (ix[i - 1] || 0) && !(ord[x] === "committee")); if (noDup.length) bad2.push(c.id + " events out of order: " + ev.map(e => e.type).join(">")); if (c.state >= 9 && !ev.some(e => e.type === "contract")) bad2.push(c.id + " no contract event"); if (!ev.some(e => e.type === "created")) bad2.push(c.id + " no created event"); });
           ok("the events of every stage sample are in the order of the process, none is after today, and a signed contract has its event (" + bad2.length + " problems)", bad2.length === 0, bad2.slice(0, 6).join(" | ")); }
         // the pages that read this story open without a broken value, for the roles that work on it
-        for (const role of ["plan", "proc", "prochead", "exec", "fin", "div", "audit"]) { as(role); renderShell(); for (const r of ["#bq-cal", "#requests", "#submission", "#procurement"]) { window.FISKO_ROUTE = r; try { route(); } catch (e) { bad.push(role + " " + r + " THROW " + e.message); } await tick(120); ok(role + " opens " + r + " with no gaps", !/undefined|NaN|\[object/.test(document.getElementById("view").innerText)); } }
-        window.FISKO_ROUTE = ""; as("plan"); renderShell();
+        for (const role of ["plan", "proc", "prochead", "exec", "fin", "div", "audit"]) { as(role); renderShell(); for (const r of ["#bq-cal", "#requests", "#submission", "#procurement"]) { window.APP_ROUTE = r; try { route(); } catch (e) { bad.push(role + " " + r + " THROW " + e.message); } await tick(120); ok(role + " opens " + r + " with no gaps", !/undefined|NaN|\[object/.test(document.getElementById("view").innerText)); } }
+        window.APP_ROUTE = ""; as("plan"); renderShell();
       });
       await grp("Payments made automatically with their details, the committees tab of the contract, a voucher for each paid phase (P29)", async () => {
         window.KX_OLDPAY = true; reseed(); const d10 = x => (x ? String(x).slice(0, 10) : ""), v = () => document.getElementById("view");
@@ -1869,7 +1869,7 @@
         const cs = S.cases.find(x => x.id === "PC-2570-012"), c = famCon(cs.contract), n0 = (S.vouchers || []).length;
         c.phases.forEach(ph => (ph.invoice = { no: "INV-T" + ph.n, amount: ph.amount, date: TODAY, vendor: tx(c.vendor), contract: c.no })); // the payment gate (R-11) wants an invoice for each phase
         eq("the contract has two accepted phases waiting to be paid", payFree(c).map(p => p.n), [1, 2]);
-        as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c.id; CON_TAB = "cxdl"; route(); await tick(450);
+        as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c.id; CON_TAB = "cxdl"; route(); await tick(450);
         ok("the contract page offers to make the payments automatically, and to tick phases into one occasion", !!document.querySelector('[data-payauto="' + c.id + '"]') && !!document.querySelector('[data-paytimes2="' + c.id + '"]'));
         document.querySelector('[data-payauto="' + c.id + '"]').click(); await tick(500);
         { const vs = (S.vouchers || []).filter(x => x.contract === c.id); ok("the button made one occasion for each phase, numbered one after the other", vs.length === 2 && (S.vouchers || []).length === n0 + 2 && payTimes(c).map(x => payTimeNo(c, x)).join() === "1,2" && vs.map(x => x.phases || [x.phase]).join("|") === "1|2", JSON.stringify(vs.map(x => x.phases || x.phase)));
@@ -1889,7 +1889,7 @@
           for (const r of ["exec", "div", "audit"]) { as(r); ok(r + " can't make a payment or change one", payAutoAll(c) === 0 && payDocAdd(c, a, "tax", "x", "") !== "" && payDateSet(c, a, TODAY) !== ""); }
           as("fin"); ok("finance can't make a payment request, but can add a document and move the date of one", payAutoAll(c) === 0 && payMake(c, [1], {}) !== "" && payDocAdd(c, a, "tax", "x", "") === "" && payDateSet(c, a, TODAY) === "");
           as("fin"); renderShell(); CON_OPEN = c.id; CON_TAB = "cxdl"; route(); await tick(300); ok("finance sees the occasions, with no button to make them and no form, but with the date and the documents to edit", !!document.querySelector("#pay-times-" + c.id) && !document.querySelector("[data-payauto], [data-paytimes2]") && !!document.querySelector("[data-paydate]") && !!document.querySelector("[data-paydoc]")); }
-        reseed(); { const cs3 = S.cases.find(x => x.id === "PC-2570-019"), c3 = famCon(cs3.contract); c3.phases.forEach(ph => (ph.invoice = ph.invoice || { no: "INV-X" + ph.n, amount: ph.amount, date: TODAY, vendor: tx(c3.vendor), contract: c3.no })); as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c3.id; CON_TAB = "cxdl"; route(); await tick(450);
+        reseed(); { const cs3 = S.cases.find(x => x.id === "PC-2570-019"), c3 = famCon(cs3.contract); c3.phases.forEach(ph => (ph.invoice = ph.invoice || { no: "INV-X" + ph.n, amount: ph.amount, date: TODAY, vendor: tx(c3.vendor), contract: c3.no })); as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c3.id; CON_TAB = "cxdl"; route(); await tick(450);
           const fm = document.querySelector('[data-paytimes2="' + c3.id + '"]'), cb = fm.querySelectorAll("input[name=ph]"); ok("the form lists the accepted phases with their amounts and says how many are chosen", cb.length === 2 && /ยังไม่ได้เลือกงวด|No phase/.test(fm.querySelector("[data-paysum]").textContent));
           cb[0].checked = true; cb[1].checked = true; cb[1].dispatchEvent(new Event("change", { bubbles: true })); ok("ticking the phases shows how many and which are paid, and the total", /2 งวด|2 phases/.test(fm.querySelector("[data-paysum]").textContent) && fm.querySelector("[data-paysum]").textContent.includes(fmt(c3.phases[0].amount + c3.phases[1].amount)));
           fm.querySelector("[name=desc]").value = "เบิกค่างวด 1 และ 2 รวม"; fm.querySelector("[name=taxInv]").value = "TX-70-0099"; fm.querySelector("[name=note]").value = "เบิกรวมสองงวดตามตกลง"; fm.querySelector("[name=due]").value = addDays(TODAY, 7); fm.querySelector("[name=method]").value = "transfer"; fm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(500);
@@ -1898,7 +1898,7 @@
         // an occasion that holds several phases, with a date that is too early, is refused
         reseed(); { const c2 = famCon(S.cases.find(x => x.id === "PC-2570-012").contract); as("proc"); ok("a payment date before the acceptance is refused, and the phases stay free", payMake(c2, [1, 2], { date: "2020-01-01" }) !== "" && payFree(c2).length === 2); ok("a phase with no invoice does not pass the payment gate, so no occasion is made for it", payAutoAll(c2) === 0 && payFree(c2).length === 2); }
         // ----- the committees tab
-        reseed(); { const cs2 = S.cases.find(x => x.id === "PC-2570-014"), c3 = famCon(cs2.contract); as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c3.id; CON_TAB = "cxdl"; route(); await tick(450);
+        reseed(); { const cs2 = S.cases.find(x => x.id === "PC-2570-014"), c3 = famCon(cs2.contract); as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = c3.id; CON_TAB = "cxdl"; route(); await tick(450);
           const tabs = [...document.querySelectorAll("[data-ctab]")].map(b => b.dataset.ctab + ":" + b.textContent.trim()); ok("the contract page has a tab Committees, right after the phases", tabs[0].startsWith("phases") && /^committees:คณะกรรมการ/.test(tabs[1]), tabs.join(" | "));
           ok("the committees are not on the phases tab any more", !document.querySelector("#con-cms-" + c3.id) && !!document.querySelector("#pay-times-" + c3.id));
           CON_TAB = "committees"; route(); await tick(350);
@@ -1907,11 +1907,11 @@
           ok("the acceptance committee of the contract is shown with its order, its date and its members", cmMembers(c3.cm).length > 0 && v().innerText.includes(cmById(c3.cm).order));
           as("fin"); renderShell(); CON_OPEN = c3.id; CON_TAB = "committees"; route(); await tick(300); ok("the finance officer reads the tab without forms or buttons", !!document.querySelector("#con-cms-" + c3.id) && !document.querySelector("[data-cmaddtype], form[data-cmadd], [data-cmadd], [data-cmdel]"));
           as("div"); renderShell(); CON_OPEN = c3.id; CON_TAB = "committees"; route(); await tick(300); ok("the owning division can make a committee for its own case; the page has no broken value", !/undefined|NaN|\[object/.test(v().innerText)); }
-        for (const role of ["proc", "prochead", "fin", "div", "exec", "audit"]) for (const tb of ["phases", "committees", "vars"]) { as(role); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = S.contracts[3].id; CON_TAB = tb; route(); await tick(200); ok(role + " opens the contract tab " + tb + " without a broken value", !/undefined|NaN|\[object/.test(v().innerText)); }
+        for (const role of ["proc", "prochead", "fin", "div", "exec", "audit"]) for (const tb of ["phases", "committees", "vars"]) { as(role); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = S.contracts[3].id; CON_TAB = tb; route(); await tick(200); ok(role + " opens the contract tab " + tb + " without a broken value", !/undefined|NaN|\[object/.test(v().innerText)); }
         CON_OPEN = null; PROC_TAB = "cases"; CASE_OPEN = null; as("plan"); renderShell(); reseed();
       });
       await grp("Contractor / supplier register: add at the top, more details, capacity, project history (P30)", async () => {
-        reseed(); const v = () => document.getElementById("view"), mkTax = b => b + ((11 - ([...b].reduce((a, d, i) => a + Number(d) * (13 - i), 0) % 11)) % 10), open = async role => { as(role); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "suppliers"; VD.add = false; VD.edit = null; VD.open = null; route(); await tick(400); };
+        reseed(); const v = () => document.getElementById("view"), mkTax = b => b + ((11 - ([...b].reduce((a, d, i) => a + Number(d) * (13 - i), 0) % 11)) % 10), open = async role => { as(role); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "suppliers"; VD.add = false; VD.edit = null; VD.open = null; route(); await tick(400); };
         await open("proc");
         ok("the page and the register say contractor / supplier", v().innerText.includes("ผู้รับจ้าง") && v().innerText.includes("ทะเบียนผู้รับจ้าง"));
         { const add = document.querySelector("#vd-add"), tb = document.querySelector("#vd-table"); ok("the add button is at the top, before the table, and there is no form under the table", !!add && !!tb && !!(add.compareDocumentPosition(tb) & Node.DOCUMENT_POSITION_FOLLOWING) && !document.querySelector("#vd-form")); }
@@ -1947,7 +1947,7 @@
         VD.open = null; VD.add = false; as("plan"); renderShell(); reseed();
       });
       await grp("Calendar: one month grid, with the state of each milestone highlighted (P32)", async () => {
-        reseed(); as("plan"); renderShell(); const v = () => document.getElementById("view"), clean = () => !v().innerText.includes("undefined") && !v().innerText.includes("NaN"); CAL = { y: 2026, m: 10, kind: "", mine: false, st: "", view: "month" }; window.FISKO_ROUTE = "#bq-cal"; route(); await tick(400);
+        reseed(); as("plan"); renderShell(); const v = () => document.getElementById("view"), clean = () => !v().innerText.includes("undefined") && !v().innerText.includes("NaN"); CAL = { y: 2026, m: 10, kind: "", mine: false, st: "", view: "month" }; window.APP_ROUTE = "#bq-cal"; route(); await tick(400);
         ok("there are no tabs and no timeline board: the page is the cards, the filters and the month grid", !document.querySelector("[data-caltab]") && !document.querySelector(".cl-board, #cl-timeline, [data-calt]") && !!document.querySelector("#cl-month") && !!document.querySelector(".cl-g"));
         ok("the days that have a milestone are highlighted, and today has its own mark with the word today", document.querySelectorAll(".cl-g td.has").length > 0 && document.querySelectorAll(".cl-g td.today").length === 1 && /วันนี้/.test(document.querySelector(".cl-g td.today").innerText) && document.querySelectorAll(".cl-g td.has").length === new Set(S.calendar.filter(e => e.date.startsWith("2026-11")).map(e => e.date)).size);
         { const late = S.calendar.filter(clOverdue).filter(e => e.date.startsWith("2026-11")), soon = S.calendar.filter(e => !e.done && !clOverdue(e) && clSoon(e) && e.date.startsWith("2026-11")), nov = S.calendar.filter(e => e.date.startsWith("2026-11"));
@@ -1955,7 +1955,7 @@
           ok("every chip carries its days left or late in its tooltip, and a late one starts with an exclamation mark", [...document.querySelectorAll(".cl-ev")].every(b => /อีก|เลยมา|วันนี้|กำลังดำเนินอยู่|เสร็จแล้ว|In |Late|Today|Under way|Done/.test(b.title)) && [...document.querySelectorAll(".cl-ev.late")].every(b => b.textContent.trim().startsWith("!"))); }
         { const e0 = S.calendar.find(e => e.date.startsWith("2026-11") && !e.done && !clOverdue(e)); e0.done = { by: "x", t: nowIso() }; route(); await tick(300); ok("a milestone marked done turns green with a check mark", document.querySelectorAll(".cl-ev.done").length >= 1 && [...document.querySelectorAll(".cl-ev.done")].every(b => b.textContent.trim().startsWith("✓"))); delete e0.done; }
         CAL = { y: 2026, m: 10, kind: "", mine: false, st: "", view: "month" }; for (const role of ["plan", "exec", "div", "fin", "audit", "proc"]) { as(role); renderShell(); route(); await tick(200); ok(role + " opens the calendar without a broken value", clean()); }
-        window.FISKO_ROUTE = ""; as("plan"); renderShell();
+        window.APP_ROUTE = ""; as("plan"); renderShell();
       });
       await grp("Integrated plan review (P35, P36)", async () => {
         reseed(); as("plan"); renderShell(); const v = () => document.getElementById("view"), clean = () => !/undefined|NaN|\[object/.test(v().innerText), id = n => "IP-" + FORM_FY + "-0" + n, P = n => irPlan(id(n));
@@ -1975,7 +1975,7 @@
         { const A1 = irAuto(P(1)), A2 = irAuto(P(2)), A3 = irAuto(P(3)); ok("the system answers 15 items from the data: overlaps fail items 5 and 6 of plan 1, a missing goal and KPI fail plan 2, the clean plan 3 passes every one", Object.keys(A1).length === 15 && A1["5"].a === "n" && A1["6"].a === "n" && A2["2.4"].a === "n" && A2["3.3"].a === "n" && Object.values(A3).every(x => x.a === "y")); }
         { const d = irDups(P(1)); ok("overlap check: two agencies on the same approach, group and area are flagged for groups and areas; the other plans are clean", d.grp.length === 1 && d.area.length === 1 && irDupIds(P(1)).size === 2 && irDupIds(P(2)).size === 0 && irDupIds(P(3)).size === 0); }
         // pages: eight tabs, every role, no broken value
-        for (const role of ["plan", "exec", "div", "audit", "admin"]) { as(role); renderShell(); window.FISKO_ROUTE = "#intrev"; let good = true; for (const tb of IR_TABS.map(x => x[0])) { IR.tab = tb; IR.plan = id(1); route(); await tick(100); if (!clean() || v().innerText.length < 150) good = false; } ok(role + " opens all eight tabs without a broken value", good); }
+        for (const role of ["plan", "exec", "div", "audit", "admin"]) { as(role); renderShell(); window.APP_ROUTE = "#intrev"; let good = true; for (const tb of IR_TABS.map(x => x[0])) { IR.tab = tb; IR.plan = id(1); route(); await tick(100); if (!clean() || v().innerText.length < 150) good = false; } ok(role + " opens all eight tabs without a broken value", good); }
         // choosing the plan
         as("plan"); renderShell(); { const n0 = S.ipl.length; ok("a plan can't be made without a programme of the kind integrated, or from one that has a plan, or for a basic programme", irPlanAdd({ prog: "", role: "host" }) !== "" && irPlanAdd({ prog: "P04", role: "host" }) !== "" && irPlanAdd({ prog: "P01", role: "host" }) !== "" && S.ipl.length === n0);
           S.structure[FORM_FY].push({ id: "P08", lvl: "program", code: "P08", parent: null, name: ["แผนงานบูรณาการทดสอบ", "x"], plans: {}, ptype: "integrated" }); ok("a plan where we only hold budget needs the main host (when nothing comes from last year)", irPlanAdd({ prog: "P08", role: "part", host: "" }) !== "" && S.ipl.length === n0);
@@ -2035,7 +2035,7 @@
         ok("every step is in the history, with who did it", P(3).hist.length >= 3 && P(3).hist.every(h => h.by && h.act) && /สงป|Bureau/.test(P(3).hist.slice(-1)[0].act));
         ok("when the year is closed a draft plan can't be edited", (() => { const fl = S.fyList.find(x => x.fy === FORM_FY), was = fl.status; fl.status = "closed"; const r = irPlanSave(id(2), { agencies: [{ name: "a", role: "host" }] }) !== "" && irProjSave(id(2), vp) !== "" && irEntrySave(id(2), "outc", { name: "x" }) !== ""; fl.status = was; return r; })());
         // the screens
-        reseed(); as("plan"); renderShell(); window.FISKO_ROUTE = "#intrev"; IR.tab = "ov"; IR.plan = id(2); route(); await tick(250);
+        reseed(); as("plan"); renderShell(); window.APP_ROUTE = "#intrev"; IR.tab = "ov"; IR.plan = id(2); route(); await tick(250);
         ok("overview: a table of the three plans with role, projects, checklist, due and status, the steps of the manual and the add button", v().querySelectorAll("tbody tr").length >= 3 && /เจ้าภาพหลัก/.test(v().innerText) && /ขั้นตอนตามคู่มือ/.test(v().innerText) && !!v().querySelector("#ir-newplan") && clean());
         v().querySelector('[data-iropen="' + id(1) + '"]').click(); await tick(250); ok("the open button goes to the plan, with the returned note of the executive and the programme of the structure", IR.tab === "plan" && /ปรับขอบเขต/.test(v().innerText) && /แผนงานบูรณาการ/.test(v().innerText) && /ประเภท|แผนงานบูรณาการ/.test(v().innerText));
         document.querySelector("#ir-newplan").click(); await tick(250); ok("the new plan form lists every programme of the structure of the kind integrated, says which has a plan, and what last year holds; only the ones without a plan can be chosen", IR.padd && document.querySelectorAll("#ir-n-prog option").length === 2 && document.querySelector("#ir-n-prog").innerHTML.includes("P07") && !document.querySelector("#ir-n-prog").innerHTML.includes("P04") && /มีแผนแล้ว/.test(v().innerText) && /ยังไม่มีแผน/.test(v().innerText) && /IP-\d+-04/.test(v().innerText));
@@ -2088,7 +2088,7 @@
         set("#ir-note", "ขอข้อมูลเพิ่ม"); document.querySelector("#ir-back").click(); await tick(250); ok("with a reason the plan is returned", P(3).status === "returned" && /ขอข้อมูลเพิ่ม/.test(P(3).returnNote));
         as("plan"); renderShell(); IR.tab = "flow"; IR.plan = id(2); route(); await tick(250); ok("planning sees the send button and why it can't send yet", !!document.querySelector("#ir-submit") && /ตอบแบบตรวจยังไม่ครบ|ยังไม่มี/.test(v().innerText));
         ok("the executive's and planning's task lists mention the plans waiting for them", (() => { const rows = []; as("exec"); S.ipl[2].status = "review"; famTasks((t, s, due, link) => rows.push([t, link])); const a = rows.some(r => r[1] === "intrev"); rows.length = 0; as("plan"); S.ipl[0].status = "returned"; famTasks((t, s, due, link) => rows.push([t, link])); return a && rows.some(r => r[1] === "intrev"); })());
-        window.FISKO_ROUTE = ""; IR.k = null; IR.pj = null; IR.e = null; IR.padd = false; as("plan"); renderShell();
+        window.APP_ROUTE = ""; IR.k = null; IR.pj = null; IR.e = null; IR.padd = false; as("plan"); renderShell();
       });
       await grp("Make the budget request: documents, AI, registers of laws and conditions, division sends, forward and return (P38, P39)", async () => {
         reseed(); as("plan"); renderShell(); const v = () => document.getElementById("view"), clean = () => !/undefined|NaN|\[object/.test(v().innerText), mkf = (n, t) => new File([t], n), set = (s, x, ev) => { const e = document.querySelector(s); e.value = x; e.dispatchEvent(new Event(ev || "input", { bubbles: true })); };
@@ -2184,7 +2184,7 @@
           const cd = S.rmCond.find(x => x.code === "R14"); ok("a condition is saved with a group and trigger words; an unknown group is refused; the words can be written one per line or with commas", rmCondSave(cd.id, { ...cd, group: "zzz" }) !== "" && rmCondSave(cd.id, { ...cd, group: "area", when: "ป่าสงวน, ป่าไม้\nอุทยาน" }) === "" && cd.when.join() === "ป่าสงวน,ป่าไม้,อุทยาน" && rmCondSave(cd.id, { ...cd, when: ["พื้นที่ป่า", "ป่าสงวน", "ป่าไม้", "อุทยานแห่งชาติ"] }) === "");
           S.rmk = S.rmk.filter(x => x.id !== id); }
                 // the screens
-        reseed(); as("plan"); renderShell(); window.FISKO_ROUTE = "#rmake"; RM.nw = false; RM.tab = "ov"; RM.id = ""; RM.lw = null; RM.cd = null; route(); await tick(250);
+        reseed(); as("plan"); renderShell(); window.APP_ROUTE = "#rmake"; RM.nw = false; RM.tab = "ov"; RM.id = ""; RM.lw = null; RM.cd = null; route(); await tick(250);
         ok("overview: the cases with their state, the notes about real and simulated, no sample buttons, the steps, the button to receive, and Receive on the case a division sent", v().querySelectorAll("tbody tr").length >= 2 && /OCR จำลอง/.test(v().innerText) && /ขั้นตอน/.test(v().innerText) && document.querySelectorAll("[data-rmsample]").length === 0 /* P50: no import bar on the overview */ && !!v().querySelector("[data-rmnew]") && document.querySelectorAll("[data-rmrecv]").length === 1 && clean());
         document.querySelector("[data-rmrecv]").click(); await tick(300); ok("Receive on the overview makes it Planning's case", rmAll().map(c => c.status).join() === "received,received" && document.querySelectorAll("[data-rmrecv]").length === 0);
         document.querySelector("[data-rmnew]").click(); await tick(250); ok("the form for a new case, for Planning: the source, the sender, the outside agency, the responsible unit, the kind, and the sample buttons again", RM.nw && ["#rm-n-src", "#rm-n-unit", "#rm-n-name", "#rm-n-owner", "#rm-n-kind"].every(s => !!document.querySelector(s)) && document.querySelectorAll("#rm-n-src option").length === 3 && document.querySelectorAll("[data-rmsample]").length === 3);
@@ -2206,18 +2206,18 @@
           ok("the file attached on the screen is linked to the condition and listed on the receiving tab with that condition", rmCase(id).files.length === 5 && rmCase(id).files[4].forCond === S.rmCond.find(x => x.code === "R05").id && rmCase(id).stale); RM.tab = "in"; route(); await tick(250); ok("the receiving tab shows which condition each file is attached to and which conditions used it", /แนบเข้าเงื่อนไข/.test(v().innerText) && /R05/.test(v().innerText) && v().querySelectorAll(".rm-chip").length >= 4);
           RM.tab = "ai"; route(); await tick(200); document.querySelector("#rm-run").click(); await tick(400); ok("processed again: the condition counts the new file and passes", chk(rmCase(id), "R05").st === "ok" && /ใบเสนอราคาที่สาม/.test(v().innerText)); }
         ok("the page has four tabs and no register tab: the registers are in the registers menu, after the area table", RM_TABS.length === 4 && !RM_TABS.some(t => t[0] === "law") && (() => { const i = NAV.map(n => n.id); return i.indexOf("rg-law") === i.indexOf("bq-geo") + 1 && i.indexOf("rg-cond") === i.indexOf("rg-law") + 1 && i.indexOf("rg-doct") === i.indexOf("rg-cond") + 1 && ["rg-law", "rg-cond", "rg-doct"].every(id => NAV.find(n => n.id === id).group === "regg" && !NAV.find(n => n.id === id).roles.includes("div") && NAV.find(n => n.id === id).roles.includes("plan") && NAV.find(n => n.id === id).roles.includes("admin")); })());
-        window.FISKO_ROUTE = "#rg-law"; route(); await tick(250); ok("the register of laws is a page of the registers menu: the warning, the eleven laws with the checked flag, the add button", /ยังไม่ได้ยืนยันกับตัวบท/.test(v().innerText) && v().querySelectorAll("[data-rmlwe]").length === 11 && !!document.querySelector("#rm-lw-add") && !document.querySelector("[data-rmcde]") && clean());
+        window.APP_ROUTE = "#rg-law"; route(); await tick(250); ok("the register of laws is a page of the registers menu: the warning, the eleven laws with the checked flag, the add button", /ยังไม่ได้ยืนยันกับตัวบท/.test(v().innerText) && v().querySelectorAll("[data-rmlwe]").length === 11 && !!document.querySelector("#rm-lw-add") && !document.querySelector("[data-rmcde]") && clean());
         document.querySelector("#rm-lw-add").click(); await tick(250); ok("the law pop-up has the standard boxes", !!document.querySelector("#rm-lwm") && ["#rm-l-year", "#rm-l-clause", "#rm-l-url", "#rm-l-note"].every(s => document.querySelector(s).type === "text"));
         set("#rm-l-name", "ประกาศทดสอบ (ตัวอย่าง)"); set("#rm-l-kind", "notice", "change"); document.querySelector("#rm-l-ver").click(); document.querySelector("#rm-lw-save").click(); await tick(250); ok("'checked' without the clause and the link is refused and the pop-up stays", !!document.querySelector("#rm-lwm"));
         document.querySelector("#rm-l-ver").click(); document.querySelector("#rm-lw-save").click(); await tick(300); ok("saving adds the law to the register", !document.querySelector("#rm-lwm") && S.rmLaw.length === 12 && /ประกาศทดสอบ/.test(v().innerText));
-        window.FISKO_ROUTE = "#rg-cond"; route(); await tick(250); ok("the register of conditions is a page of the registers menu: the twenty-two conditions with kind of check, settings and laws, and the add button", v().querySelectorAll("[data-rmcde]").length === 22 && !!document.querySelector("#rm-cd-add") && /ต้องมีเอกสารชนิดหนึ่ง/.test(v().innerText) && !document.querySelector("[data-rmlwe]") && clean());
+        window.APP_ROUTE = "#rg-cond"; route(); await tick(250); ok("the register of conditions is a page of the registers menu: the twenty-two conditions with kind of check, settings and laws, and the add button", v().querySelectorAll("[data-rmcde]").length === 22 && !!document.querySelector("#rm-cd-add") && /ต้องมีเอกสารชนิดหนึ่ง/.test(v().innerText) && !document.querySelector("[data-rmlwe]") && clean());
         document.querySelector("#rm-cd-add").click(); await tick(250); ok("the condition pop-up: code, text, the kinds of request, the kind of check with its settings, the laws, and what a failure means", !!document.querySelector("#rm-cdm") && !!document.querySelector("#rm-c-code") && document.querySelectorAll("[data-rmck]").length === 3 && document.querySelectorAll("#rm-c-type option").length === Object.keys(RM_TYPES).length && document.querySelectorAll("[data-rmcl]").length === 12 && document.querySelectorAll("[data-rmpf]").length === Object.keys(RM_FLD).length);
         set("#rm-c-type", "docmin", "change"); await tick(250); ok("changing the kind of check changes the settings on the form: a kind of document and a count", !!document.querySelector("[data-rmpd]") && !!document.querySelector("[data-rmpn]") && document.querySelectorAll("[data-rmpf]").length === 0);
         set("#rm-c-title", "ต้องมีรายงานผลสำรวจอย่างน้อย 2 ฉบับ"); document.querySelector('[data-rmpd="doc"]').value = "survey"; document.querySelector('[data-rmpd="doc"]').dispatchEvent(new Event("change", { bubbles: true })); set('[data-rmpn="min"]', "2"); document.querySelector('[data-rmcl="LW-012"]').click(); document.querySelector('[data-rmck="other"]').click(); document.querySelector("#rm-cd-save").click(); await tick(300);
         ok("saving adds the condition with its kind of check, settings, kinds and law; it shows in the register", !document.querySelector("#rm-cdm") && S.rmCond.length === 23 && S.rmCond[22].type === "docmin" && S.rmCond[22].params.doc === "survey" && S.rmCond[22].params.min === 2 && S.rmCond[22].laws.join() === "LW-012" && S.rmCond[22].kinds.join() === "construction,durable" && /ต้องมีรายงานผลสำรวจ/.test(v().innerText));
         v().querySelector('[data-rmcde="' + S.rmCond[22].id + '"]').click(); await tick(250); document.querySelector("#rm-cd-ret").click(); await tick(300); ok("the edit button opens the same pop-up with retire and delete; retire marks it retired in the table", S.rmCond[22].retired && /เลิกใช้/.test(v().innerText));
         v().querySelector('[data-rmcde="' + S.rmCond[22].id + '"]').click(); await tick(250); document.querySelector("#rm-cd-del").click(); await tick(300); ok("delete removes a condition no case used", S.rmCond.length === 22 && !document.querySelector("#rm-cdm"));
-        window.FISKO_ROUTE = "#rg-doct"; route(); await tick(250); ok("the register of kinds of document: sixteen kinds with their words and what each kind of request must have; the add button", v().querySelectorAll("[data-rmdte]").length === 16 && !!document.querySelector("#rm-dt-add") && /คำสำคัญ/.test(v().innerText) && clean());
+        window.APP_ROUTE = "#rg-doct"; route(); await tick(250); ok("the register of kinds of document: sixteen kinds with their words and what each kind of request must have; the add button", v().querySelectorAll("[data-rmdte]").length === 16 && !!document.querySelector("#rm-dt-add") && /คำสำคัญ/.test(v().innerText) && clean());
         ok("the lists the reader and the pages use are filled from the register: sixteen kinds; the needs are as before", RM_DOCS.length === 16 && RM_NEED.construction.join() === "proposal,tor,boq,drawing,refprice,land,survey" && RM_NEED.durable.join() === "proposal,tor,quote,survey" && RM_NEED.other.join() === "proposal,tor");
         document.querySelector("#rm-dt-add").click(); await tick(250); ok("the pop-up for a kind of document: key, name, words, the kinds of request it is required for", !!document.querySelector("#rm-dtm") && !!document.querySelector("#rm-d-key") && !!document.querySelector("#rm-d-words") && document.querySelectorAll("[data-rmdn]").length === 3);
         set("#rm-d-key", "Bad Key"); set("#rm-d-name", "ใบอนุญาตก่อสร้าง"); set("#rm-d-words", "ใบอนุญาตก่อสร้าง\nอ.1"); document.querySelector('[data-rmdn="construction"]').click(); document.querySelector("#rm-dt-save").click(); await tick(250); ok("a key with a space or capital letters is refused and the pop-up stays", !!document.querySelector("#rm-dtm"));
@@ -2231,12 +2231,12 @@
           S.rmk = S.rmk.filter(x => x.id !== pid); ok("with no file of that kind it can be deleted", rmDocTypeRetire(dt.id, true) === "" && rmDocTypeDel(dt.id) === "" && S.rmDocType.length === 16 && !RM_DOCS.some(d => d[0] === "permit")); }
         ok("the rules of the form: a key of 2-20 letters (not 'other'), a name, at least one word, valid kinds; a key or a name can't be repeated; the key of a saved kind can't change", [{ key: "a", name: "x", words: ["x"], need: [] }, { key: "other", name: "x", words: ["x"], need: [] }, { key: "proposal", name: "x", words: ["x"], need: [] }, { key: "newkind", name: "", words: ["x"], need: [] }, { key: "newkind", name: "x", words: [], need: [] }, { key: "newkind", name: "x", words: ["x"], need: ["zzz"] }, { key: "newkind", name: S.rmDocType[0].name, words: ["x"], need: [] }].every(v => rmDocTypeSave(null, v) !== "") && rmDocTypeSave(S.rmDocType[0].id, { key: "changed", name: S.rmDocType[0].name, words: S.rmDocType[0].words, need: S.rmDocType[0].need }) === "" && S.rmDocType[0].key === "proposal");
         ok("who keeps the registers: Planning and the administrator can; the executive can't (it only sees them)", (as("exec"), rmDocTypeSave(null, { key: "memo", name: "บันทึกข้อความ", words: ["บันทึกข้อความ"], need: [] }) !== "" && rmLawSave(null, { name: "x", kind: "act" }) !== "" && rmCondSave(null, { code: "R99", title: "x", kinds: ["other"], type: "readable", params: {}, laws: [], level: "bad" }) !== "") && (as("admin"), rmDocTypeSave(null, { key: "memo", name: "บันทึกข้อความ", words: ["บันทึกข้อความ"], need: [] }) === "" && rmDocTypeDel(S.rmDocType.slice(-1)[0].id) === "" && rmLawSave(null, { name: "กฎหมายของผู้ดูแล", kind: "rule" }) === "" && rmLawDel(S.rmLaw.slice(-1)[0].id) === "") && (as("plan"), true));
-        as("exec"); renderShell(); window.FISKO_ROUTE = "#rg-doct"; route(); await tick(250); ok("the executive sees the register of kinds of document but has no add or edit button", v().querySelectorAll("[data-rmdte]").length === 0 && !document.querySelector("#rm-dt-add") && /ทะเบียนชนิดเอกสารโครงการ/.test(v().innerText) && clean());
-        as("admin"); renderShell(); window.FISKO_ROUTE = "#rg-cond"; route(); await tick(250); ok("the administrator has the buttons on the register of conditions", !!document.querySelector("#rm-cd-add") && v().querySelectorAll("[data-rmcde]").length === 22); as("plan"); renderShell();
-        window.FISKO_ROUTE = "#rmake"; RM.tab = "fw"; RM.id = rmAll()[0].id; route(); await tick(200); ok("the follow-up tab: the status chain, the history", /ประวัติ/.test(v().innerText) && clean());
+        as("exec"); renderShell(); window.APP_ROUTE = "#rg-doct"; route(); await tick(250); ok("the executive sees the register of kinds of document but has no add or edit button", v().querySelectorAll("[data-rmdte]").length === 0 && !document.querySelector("#rm-dt-add") && /ทะเบียนชนิดเอกสารโครงการ/.test(v().innerText) && clean());
+        as("admin"); renderShell(); window.APP_ROUTE = "#rg-cond"; route(); await tick(250); ok("the administrator has the buttons on the register of conditions", !!document.querySelector("#rm-cd-add") && v().querySelectorAll("[data-rmcde]").length === 22); as("plan"); renderShell();
+        window.APP_ROUTE = "#rmake"; RM.tab = "fw"; RM.id = rmAll()[0].id; route(); await tick(200); ok("the follow-up tab: the status chain, the history", /ประวัติ/.test(v().innerText) && clean());
         // the division on the screens
-        for (const role of ["plan", "div", "exec", "audit", "admin"]) { as(role); asUnit("U04"); renderShell(); window.FISKO_ROUTE = "#rmake"; let good = true; for (const tb of RM_TABS.map(x => x[0])) { RM.tab = tb; RM.nw = false; RM.lw = null; RM.cd = null; RM.id = rmAll()[0] ? rmAll()[0].id : ""; route(); await tick(100); if (!clean() || v().innerText.length < 100) good = false; } ok(role + " opens all four tabs without a broken value", good); }
-        reseed(); as("div"); asUnit("U04"); renderShell(); window.FISKO_ROUTE = "#rmake"; RM.nw = false; RM.tab = "ov"; RM.id = ""; route(); await tick(250);
+        for (const role of ["plan", "div", "exec", "audit", "admin"]) { as(role); asUnit("U04"); renderShell(); window.APP_ROUTE = "#rmake"; let good = true; for (const tb of RM_TABS.map(x => x[0])) { RM.tab = tb; RM.nw = false; RM.lw = null; RM.cd = null; RM.id = rmAll()[0] ? rmAll()[0].id : ""; route(); await tick(100); if (!clean() || v().innerText.length < 100) good = false; } ok(role + " opens all four tabs without a broken value", good); }
+        reseed(); as("div"); asUnit("U04"); renderShell(); window.APP_ROUTE = "#rmake"; RM.nw = false; RM.tab = "ov"; RM.id = ""; route(); await tick(250);
         ok("the division sees only its own case, the three sample buttons, the button to prepare documents, and no Receive button", v().querySelectorAll("tbody tr").length === 1 && /ปรับปรุง|ฝึกอบรมบุคลากร/.test(v().innerText) && document.querySelectorAll("[data-rmsample]").length === 0 && /เตรียมเอกสารส่งกองแผนงาน/.test(v().innerText) && document.querySelectorAll("[data-rmrecv]").length === 0);
         document.querySelector("[data-rmnew]").click(); await tick(250); ok("P50: a new case of a division is a form with Save, Send to Planning and Cancel, and the sample buttons; no Start button", !!document.querySelector("#rm2-nsave") && !!document.querySelector("#rm2-nsend") && !!document.querySelector("[data-rm2back]") && document.querySelectorAll("[data-rmsample]").length === 3 && !/เริ่มเตรียมเอกสาร/.test(v().innerText));
         { const n0 = S.rmk.length; document.querySelector("#rm2-nsend").click(); await tick(200); ok("P50: sending with no file is refused", S.rmk.length === n0); }
@@ -2246,17 +2246,17 @@
         RM.nw = false; document.querySelector("[data-rmnew]").click(); await tick(250); ok("the form for a division asks only for the title, the kind and a note (the source and the responsible unit are its own)", RM.nw && !document.querySelector("#rm-n-src") && !document.querySelector("#rm-n-owner") && !!document.querySelector("#rm2-title") && /เรื่องใหม่ของ/.test(v().innerText)); document.querySelector("[data-rm2back]").click(); await tick(150);
         ok("the tasks list: the division is told of a draft it has not sent; Planning is told to receive what was sent", (() => { const rows = []; famTasks((t, s, d, l) => rows.push([t, l])); return rows.some(r => r[1] === "rmake"); })() && (as("plan"), SESSION = null, (() => { const rows = []; famTasks((t, s, d, l) => rows.push([t, l])); return rows.some(r => r[1] === "rmake" && /รับเรื่อง/.test(r[0])); })()));
         // forwarded to the unit: the owning division answers
-        as("plan"); SESSION = null; { const id = rmCreate({ srcType: "unit", srcUnit: "U05", owner: "U04" }); await rmAddFiles(id, await rmFetchSample(1)); rmProcess(id); rmForward(id, "แก้ไข"); as("div"); asUnit("U04"); renderShell(); window.FISKO_ROUTE = "#rmake"; RM.id = id; RM.tab = "fw"; RM.nw = false; route(); await tick(250);
+        as("plan"); SESSION = null; { const id = rmCreate({ srcType: "unit", srcUnit: "U05", owner: "U04" }); await rmAddFiles(id, await rmFetchSample(1)); rmProcess(id); rmForward(id, "แก้ไข"); as("div"); asUnit("U04"); renderShell(); window.APP_ROUTE = "#rmake"; RM.id = id; RM.tab = "fw"; RM.nw = false; route(); await tick(250);
           ok("the owning division finds the list of what to fix, a box for what it fixed, and the button to return", /สิ่งที่ต้องแก้ไข/.test(v().innerText) && !!document.querySelector("#rm-rnote") && !!document.querySelector("#rm-ret") && !document.querySelector("#rm-fwd"));
           RM.tab = "in"; route(); await tick(200); ok("it can attach files, and has Save and Send to Planning (P50)", !!document.querySelector("#rm-files") && !!document.querySelector("#rm2-save") && !!document.querySelector("#rm2-send") && !!document.querySelector("#rm2-reply"));
           RM.tab = "fw"; route(); await tick(200); document.querySelector("#rm-ret").click(); await tick(200); ok("returning without saying what was fixed is refused on the screen", rmCase(id).status === "forwarded"); document.querySelector("#rm-rnote").value = "แก้ไขแล้ว"; document.querySelector("#rm-ret").click(); await tick(300); ok("with the note it returns to Planning", rmCase(id).status === "returned"); SESSION = null; }
-        window.FISKO_ROUTE = ""; RM.nw = false; RM.id = ""; RM.tab = "ov"; RM.lw = null; RM.cd = null; as("plan"); renderShell();
+        window.APP_ROUTE = ""; RM.nw = false; RM.id = ""; RM.tab = "ov"; RM.lw = null; RM.cd = null; as("plan"); renderShell();
         // P57: possible duplicates found when processing, the column, the comparison in tab 3, cancel with a reason, ready; no "AI" on screen
         { as("plan"); const mk = async (title, owner) => { const id = rmCreate({ srcType: "unit", srcUnit: owner, owner, title }); await rmAddFiles(id, [new File(["ข้อเสนอโครงการ " + title + " วงเงินรวม 5,000,000 บาท"], title + ".txt", { type: "text/plain" })]); return id; };
           const a = await mk("ปรับปรุงห้องปฏิบัติการทดสอบหินลาดยางเขตเหนือ", "U04"), z = await mk("จัดซื้อรถยนต์ตรวจการณ์", "U05");
           rmProcess(a); rmProcess(z); eq("processing the first finds nothing", rmCase(a).dup.length, 0); const b = await mk("ปรับปรุงห้องปฏิบัติการทดสอบหินลาดยางเขตเหนือ ระยะที่ 1", "U04"); rmProcess(b);
           ok("processing the second finds the first, with how alike and why; the other case is not taken", rmCase(b).dup.length === 1 && rmCase(b).dup[0].id === a && rmCase(b).dup[0].score >= 50 && rmCase(b).dup[0].why.length > 0 && !rmCase(b).dup.some(d => d.id === z));
-          window.FISKO_ROUTE = "#rmake"; RM.tab = "ov"; RM.nw = false; route(); await tick(300); const v = () => document.getElementById("view");
+          window.APP_ROUTE = "#rmake"; RM.tab = "ov"; RM.nw = false; route(); await tick(300); const v = () => document.getElementById("view");
           ok("the overview has the column with the count as a button", /คำขอซ้ำ/.test(v().querySelector("thead").innerText) && !!document.querySelector(`[data-rmdup="${b}"]`) && /1 รายการ/.test(document.querySelector(`[data-rmdup="${b}"]`).innerText));
           document.querySelector(`[data-rmdup="${b}"]`).click(); await tick(300);
           ok("the count opens tab 3 with both cases side by side, the reason box, cancel and ready", RM.tab === "fw" && RM.id === b && !!document.querySelector("#rm-dup table.rm-dupt") && document.querySelectorAll("#rm-dup thead th").length === 3 && !!document.querySelector("#rm-cwhy") && !!document.querySelector("#rm-cancel") && !!document.querySelector("#rm-dupready"));
@@ -2264,7 +2264,7 @@
           ok("cancel needs a reason, and only Planning cancels", rmCancel(b, "") !== "" && (as("div"), rmCancel(b, "x") !== "") && (as("plan"), true));
           document.querySelector("#rm-cwhy").value = "ซ้ำกับ " + a; document.querySelector("#rm-cancel").click(); await tick(300);
           ok("cancelled with the reason; the first no longer counts the cancelled one", rmCase(b).status === "cancelled" && rmCase(b).cancel.why === "ซ้ำกับ " + a && (rmProcess(a), rmDupList(rmCase(a)).length === 0) && rmProcess(b) !== "");
-          window.FISKO_ROUTE = ""; }
+          window.APP_ROUTE = ""; }
       });
       await grp("Speeding up the disbursement: dashboard, state of each project, import of the department's files (P43)", async () => {
         reseed(); as("plan"); renderShell(); const v = () => document.getElementById("view"), clean = () => !/undefined|NaN|\[object/.test(v().innerText);
@@ -2279,7 +2279,7 @@
           ok("a sheet that is not of that layout gives nothing", dtFromPlanRows("x", [["a", "b"], [1, 2]], "central") === null); }
         { const hdr = ["ลำดับที่", "เริ่มตั้ง", "ตาม พ.ร.บ.", "โอนเปลี่ยนแปลง", "รหัสงบประมาณ", "รายการ"], row = Array(72).fill(""); Object.assign(row, { 0: 1, 4: "1500700001", 5: "โครงการทดสอบ", 8: "สิ่งก่อสร้าง", 22: "14/10/2569", 23: "08/01/2570", 28: 0.98, 47: 0.95, 59: "อยู่ระหว่างดำเนินงาน", 60: "ฝนตกหนัก" });
           const tr = dtFromTrackRows([[], hdr, row]); ok("the follow-up form is read: the step dates, the reference price and contract amount, the state and the problem", !!tr && tr.length === 1 && tr[0].steps[0][1] === "14/10/2569" && tr[0].steps[1][1] === "08/01/2570" && !tr[0].steps[2][1] && tr[0].refPrice === 0.98 && tr[0].contractAmt === 0.95 && tr[0].problem === "ฝนตกหนัก" && tr[0].type === "สิ่งก่อสร้าง"); }
-        window.FISKO_ROUTE = "#dt-dash"; DT.tab = "ov"; DT.open = null; Object.assign(DT, { fund: "all", area: "all", unit: "", st: "", ps: "", q: "" }); route(); await tick(300);
+        window.APP_ROUTE = "#dt-dash"; DT.tab = "ov"; DT.open = null; Object.assign(DT, { fund: "all", area: "all", unit: "", st: "", ps: "", q: "" }); route(); await tick(300);
         { const rs = S.dtr.rows, n = dtNow(), ac = rs.reduce((s, r) => s + dtCum(r.act, n), 0); ok("the dashboard: the numbers, the monthly chart with the target line, the payment states, the procurement steps, the units, money management and the list to speed up", v().querySelectorAll(".kpi").length >= 6 && v().innerText.includes(dtMb(ac)) && !!v().querySelector("svg polyline") && v().querySelectorAll("[data-dtst]").length === 5 && /ลงนามสัญญา/.test(v().innerText) && v().querySelectorAll("[data-dtunit]").length === 8 && /การบริหารเงิน/.test(v().innerText) && clean()); }
         document.querySelector("#dt-area").value = "region"; document.querySelector("#dt-area").dispatchEvent(new Event("change", { bubbles: true })); await tick(250); ok("the filter by part keeps the four provinces", v().querySelectorAll("[data-dtunit]").length === 4 && dtFilter().every(r => r.area === "region"));
         document.querySelector("[data-dtst]").click(); await tick(250); ok("a payment state opens the list of projects in that state", DT.tab === "list" && DT.st === "ok" && dtFilter().every(r => dtState(r)[0] === "ok") && clean());
@@ -2292,7 +2292,7 @@
         for (const role of ["exec", "div", "audit"]) { as(role); ok(role + " can't import", !!(await dtImport([], true)).err); }
         as("plan"); document.querySelector("#dt-reset") ? (document.querySelector("#dt-reset").click(), await tick(200)) : 0; ok("back to the sample", S.dtr.src === "sample");
         for (const role of ["plan", "fin", "exec", "div", "audit", "admin", "proc"]) { as(role); renderShell(); let good = true; for (const tb of ["ov", "list", "imp"]) { DT.tab = tb; DT.open = null; route(); await tick(100); if (!clean()) good = false; } ok(role + " opens the three tabs without a broken value", good); }
-        window.FISKO_ROUTE = ""; DT.tab = "ov"; as("plan"); renderShell();
+        window.APP_ROUTE = ""; DT.tab = "ov"; as("plan"); renderShell();
       });
       await grp("The contract and its amendments, management and payment in one step, the alerts (P46)", async () => {
         window.KX_OLDPAY = false; reseed(); as("proc"); renderShell(); const k = S.contracts.find(c => S.cases.some(x => x.contract === c.id)), cs = S.cases.find(x => x.contract === k.id), X = Object.assign(kxOf(k), { dl: [], lastAccept: "", closed: null }), v = () => document.getElementById("view");
@@ -2308,10 +2308,10 @@
         ok("an alert two months before the defect guarantee ends", kxAlerts(k).some(a => /ประกันความชำรุด/.test(a[1])));
         X.lastAccept = ""; X.start = "2026-01-01"; X.days = 30; X.amends = []; X.fine = 5000;
         ok("past the end: an alert to write the penalty letter, and one when the penalty passes 10% of the contract", kxLate(X) > 0 && kxAlerts(k).some(a => /เรียกค่าปรับ/.test(a[1])) && kxAlerts(k).some(a => /เกิน 10%/.test(a[1]) && a[0] === "bad"));
-        commit(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = k.id; CON_TAB = "phases"; route(); await tick(350);
+        commit(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = k.id; CON_TAB = "phases"; route(); await tick(350);
         ok("the contract page: the first tab is the contract and its amendments, a tab for management and payment, no old phase table, no separate tab for changes, no phase bar (P52)", /สัญญาและสัญญาแก้ไข/.test(document.querySelector('[data-ctab="phases"]').innerText) && !!document.querySelector('[data-ctab="cxdl"]') && !!document.querySelector("form[data-cx]") && !!document.querySelector("table.cx-amends") && !document.querySelector("details.cx-old") && !document.querySelector('[data-ctab="vars"]') && !document.querySelector(".ptrack") && !/undefined|NaN/.test(v().innerText));
         CON_TAB = "cxdl"; route(); await tick(300); ok("the management tab: each delivery as an occasion, the advance going down, the payment status, the last acceptance", !!document.querySelector("table.cx-dl") && /ครั้งที่/.test(v().innerText) && /เบิกล่วงหน้าคงเหลือ/.test(v().innerText) && !!document.querySelector('form[data-cxdl] input[name="last"]') && !document.querySelector("form[data-cxla]") && !document.querySelector("[id^=pay-times-]") && /สถานะตรวจรับ/.test(v().innerText) && /ผู้ดำเนินการ/.test(v().innerText) && /เอกสารแนบ/.test(v().innerText) && !/undefined|NaN/.test(v().innerText));
-        CON_OPEN = null; window.FISKO_ROUTE = ""; jump("case:" + cs.id); await tick(500);
+        CON_OPEN = null; window.APP_ROUTE = ""; jump("case:" + cs.id); await tick(500);
         ok("the case page: step 5 is contract management and payment, step 6 is hidden and numbered away", /บริหารสัญญาและเบิกจ่าย/.test(document.querySelector('.cphase[data-cphase="5"]').innerText) && document.querySelector('.cphase[data-cphase="6"]').style.display === "none" && /^6/.test(document.querySelector('.cphase[data-cphase="7"]').innerText.trim()) && !!document.querySelector('.cmain[data-cmain="4"] form[data-cx]') && !!document.querySelector('.cmain[data-cmain="5"] table.cx-dl'));
         ok("P89: the case page shows parts 1-7 again; part 3 has the tabs สถานะ e-GP and รายละเอียดขอซื้อขอจ้าง (a read-only copy of what the unit entered)", [4, 5, 6, 7].every(n => document.querySelector(`.cphase[data-cphase="${n}"]`).style.display !== "none") && document.querySelectorAll(".c3-tabs [data-c3tab]").length === 2 && !!document.querySelector(".c3-st") && !!document.querySelector(".c3-rq") && [...document.querySelectorAll(".c3-rq input,.c3-rq select,.c3-rq textarea")].every(e => e.disabled));
         { document.querySelector('[data-c3tab="rq"]').click(); ok("the tab of the request details shows it, the status tab hides", !document.querySelector(".c3-rq").hidden && document.querySelector(".c3-st").hidden); CASE_EGP_TAB = "st"; }
@@ -2324,11 +2324,11 @@
           as("div"); ok("P80: only the Treasury records a cancellation or an appeal", caseResubmit(c0, "cancel", "x") !== "");
           as("proc"); ok("the case and the reason are asked", caseResubmit(c0, "", "x") !== "" && caseResubmit(c0, "appeal", "") !== "");
           eq("an appeal: the old request is kept as history, the case is back at writing the details with the old details filled in", [caseResubmit(c0, "appeal", "คณะกรรมการวินิจฉัยให้ดำเนินการใหม่"), rq0.status, c0.reqn, caseState(c0), p0.status, (c0.reqHist || []).length, c0.reqHist[0].id, !!c0.rqDraft && c0.rqDraft.amt === (rq0.amount / 1e6).toFixed(3)], ["", "superseded", null, 1, "planned", 1, rq0.id, true]);
-          window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = c0.id; CASE_MAIN[c0.id] = 2; route(); await tick(500);
+          window.APP_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = c0.id; CASE_MAIN[c0.id] = 2; route(); await tick(500);
           ok("the case page shows the history of the requests", !!document.querySelector("table.rs-hist") && /อุทธรณ์/.test(document.querySelector("table.rs-hist").textContent) && document.querySelector("table.rs-hist").textContent.includes(rq0.id));
           CASE_OPEN = null; PROC_TAB = "reqn"; route(); await tick(200); ok("the list ใบขอซื้อขอจ้าง shows it waiting for the details again, the send number", [...document.querySelectorAll(".rq-list tbody tr")].some(tr => tr.textContent.includes(p0.id) && /ส่งใหม่ครั้งที่ 2/.test(tr.textContent) && !!tr.querySelector("[data-preq]")) || !prFyOfPlan(p0) === BI.fy);
           const c1 = S.cases.find(c => caseCon(c)); ok("after a contract it is refused", !c1 || caseResubmit(c1, "cancel", "x") !== "");
-          window.FISKO_ROUTE = ""; as("plan"); renderShell(); }
+          window.APP_ROUTE = ""; as("plan"); renderShell(); }
         ok("the menus: ขอซื้อขอจ้าง, ติดตามค่าใช้จ่าย for Planning, ติดตามเบิกจ่าย for the Treasury", tx(prPage("reqn").label) === "ขอซื้อขอจ้าง" && !prSees(prPage("spend")) && prPage("disb").roles.includes("proc") && prPage("disb").roles.includes("fin") && FL_STEPS.length === 7);
         const k = S.contracts.find(c => S.cases.some(x => x.contract === c.id)), X = Object.assign(kxOf(k), { dl: [], lastAccept: "", closed: null }); as("proc");
         kxSave(k, { amount: "1000000", days: "100", start: "2026-10-01", nPhases: "1" }, {}); kxDlAdd(k, { deliver: "2026-11-01", accept: "2026-11-03", amount: "1000000", last: true }, {});
@@ -2348,21 +2348,21 @@
           const T = prTrackBook(FAM_FY)[0].rows.find(r => r[45] === k.no || r[4] === k.no) || [];
           ok("the follow-up report fills the e-GP dates, the period of the invitation, the call date, the PO, the quantities, the progress and the problem", T[22] === "05/10/2569" && T[25] === "20/10/2569" && T[26] === "P-E2E-1" && T[32] === "25/10/2569" && T[43] === "20/11/2569" && T[44] === "22/11/2569" && T[54] === "PO-E2E" && T[50] === 1200 && T[53] === 2 && T[56] === 40 && T[60] === "ฝนตกหนัก", JSON.stringify(T.slice(22, 61)));
           const Pr = prPlanBook(FAM_FY).flatMap(sh => sh.rows).find(r => r[46] === k.no) || []; ok("the disbursement report fills the progress by work, the officer and the problem", Pr[44] === 40 && Pr[49] === "เจ้าหน้าที่ตัวอย่าง" && /ฝนตกหนัก/.test(Pr[50]));
-          CON_OPEN = k.id; CON_TAB = "phases"; window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; route(); await tick(300); ok("the contract form shows the new fields", !!document.querySelector('form[data-cx] [name="qLen"]') && !!document.querySelector('form[data-cx] [name="problem"]') && !!document.querySelector('form[data-cx] [name="work"]')); CON_OPEN = null; }
+          CON_OPEN = k.id; CON_TAB = "phases"; window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; route(); await tick(300); ok("the contract form shows the new fields", !!document.querySelector('form[data-cx] [name="qLen"]') && !!document.querySelector('form[data-cx] [name="problem"]') && !!document.querySelector('form[data-cx] [name="work"]')); CON_OPEN = null; }
         { // P63: the money management of the Treasury, and the list of every budget item
           const r = mmRowOf(k.id); as("div"); ok("P63: only the Treasury saves the money management", mmSave(r, { carry: "1000" }) !== "");
           as("proc"); eq("saved and worked out: before managing and net", [mmSave(r, { carry: "1000", leftover: "500", cancel: "", slow: "200", fast: "100" }), mmSave(r, { carry: "x" }) !== "", mmCalc(r).before === mmCalc(r).afterPlan - 1500, mmCalc(r).net === mmCalc(r).before + 100], ["", true, true, true]);
           const Pr = prPlanBook(FAM_FY).flatMap(sh => sh.rows).find(x => x[46] === k.no) || []; ok("the Excel of payments has the money management in its columns", Pr[36] === 1000 && Pr[37] === 500 && Pr[40] === 200 && Pr[41] === 100 && Pr[42] === mmCalc(r).net);
-          window.FISKO_ROUTE = "#procurement"; CON_OPEN = k.id; CON_TAB = "mm"; PROC_TAB = "contracts"; route(); await tick(300); ok("the contract has the tab บริหารเงิน with the form", !!document.querySelector('[data-ctab="mm"]') && !!document.querySelector("form[data-mm]") && !/undefined|NaN/.test(v().innerText));
+          window.APP_ROUTE = "#procurement"; CON_OPEN = k.id; CON_TAB = "mm"; PROC_TAB = "contracts"; route(); await tick(300); ok("the contract has the tab บริหารเงิน with the form", !!document.querySelector('[data-ctab="mm"]') && !!document.querySelector("form[data-mm]") && !/undefined|NaN/.test(v().innerText));
           CON_OPEN = null; BI_OPEN = null; route(); await tick(300); ok("the list shows the items of the year with their state and the contract", !!document.querySelector("table.mm-list") && !!document.querySelector("#pr-fy") && document.querySelectorAll(`table.mm-list [data-conopen="${k.id}"]`).length === 1);
           const L0 = prDtRows(BI.fy, false).find(x => !x.k && !x.p); if (L0) { document.querySelector(`[data-biopen="${L0.id}"]`).click(); await tick(300); ok("an item without a contract opens on บริหารเงิน; the other tabs can not be used", BI_OPEN === L0.id && !!document.querySelector(".mm-item form[data-mm]") && document.querySelectorAll(".mm-item .tab[disabled]").length === CON_TABS.length - 1);
             document.querySelector('.mm-item form[data-mm] [name="carry"]').value = "2500"; document.querySelector(".mm-item form[data-mm]").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(300); ok("its money management is saved on the budget item", mmCalc(mmRowOf(L0.id)).carry === 2500); document.querySelector("[data-biback]").click(); await tick(200); ok("back to the list", !BI_OPEN && !!document.querySelector("table.mm-list")); } }
-        as("exec"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "flowstats"; route(); await tick(300); ok("P66: วิเคราะห์ opens on the flow: the year, the steps with their money, e-GP 7 steps, the waits at each desk, each unit", PROC_PAGE === "insight" && prTabs(prPage("insight"))[0].id === "flow" && !!document.querySelector("#pr-fy") && document.querySelectorAll(".fs-flow tbody tr").length === FS_STEPS.length && document.querySelectorAll(".fs-desk tbody tr").length >= 3 && !!document.querySelector("table.fs-unit") && !/undefined|NaN/.test(v().innerText)); as("proc"); renderShell();
-        window.FISKO_ROUTE = "#procurement"; PROC_TAB = "disb"; route(); await tick(300);
+        as("exec"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "flowstats"; route(); await tick(300); ok("P66: วิเคราะห์ opens on the flow: the year, the steps with their money, e-GP 7 steps, the waits at each desk, each unit", PROC_PAGE === "insight" && prTabs(prPage("insight"))[0].id === "flow" && !!document.querySelector("#pr-fy") && document.querySelectorAll(".fs-flow tbody tr").length === FS_STEPS.length && document.querySelectorAll(".fs-desk tbody tr").length >= 3 && !!document.querySelector("table.fs-unit") && !/undefined|NaN/.test(v().innerText)); as("proc"); renderShell();
+        window.APP_ROUTE = "#procurement"; PROC_TAB = "disb"; route(); await tick(300);
         ok("ติดตามเบิกจ่าย (P60): no flow strip, the year, the dashboard of the Excel file (monthly plan and result, procurement state 0-15), the list and the Excel button", PROC_PAGE === "disb" && !document.querySelector(".bi-flow") && !!document.querySelector("#pr-fy") && document.querySelectorAll(".db-pipe .db-step").length === 7 && !!document.querySelector("table.db-con") && /แผนและผลการเบิกจ่ายรายเดือน/.test(v().innerText) && !!document.querySelector(".fl-disb table.fl-dl") && !!document.querySelector("#fl-xl-disb") && /จ่ายแล้ว/.test(v().innerText) && !/undefined|NaN/.test(v().innerText));
         { const b = await xwBook(flDisbBook()).arrayBuffer(), u8 = new Uint8Array(b), s = new TextDecoder().decode(u8); ok("P61: the Excel of payments follows the department layout: one sheet per unit, 51 columns, the months, the contract", u8[0] === 0x50 && u8[1] === 0x4b && flDisbBook().every(sh => sh.rows[4].length === 51 && sh.rows[4][7] === PR_XL_PLAN_H[7] && sh.rows[3][8] === "ต.ค.") && flDisbBook().some(sh => sh.rows.some(r => r[46] === k.no)) && s.includes("รหัส E-Budget")); }
         as("plan"); renderShell(); ok("P84: ติดตามค่าใช้จ่าย is no longer a page of จัดซื้อจัดจ้าง", !prSees(prPage("spend")));
-        window.FISKO_ROUTE = "#dashboard"; MON_TAB = "track"; route(); await tick(400);
+        window.APP_ROUTE = "#dashboard"; MON_TAB = "track"; route(); await tick(400);
         { const rows = prTrackBook(BI.fy)[0].rows.slice(5); ok("P84: the budget page ติดตามการใช้จ่าย opens on the follow-up form: the year, the Excel button, the steps of the form, the groups", MON_TAB === "track" && !!document.querySelector('[data-btab="track"].on') && !!document.querySelector("#pr-fy") && !!document.querySelector("#fl-xl-spend") && document.querySelectorAll(".d90-row").length > 1 && !document.querySelector(".st-steps") && rows.length > 0 && !/undefined|NaN/.test(v().innerText));
           OV89.g = "unit"; route(); await tick(300); const b = [...document.querySelectorAll("[data-stgo]")].find(x => /"unit"/.test(x.dataset.stgo)), un = JSON.parse(b.dataset.stgo).f.unit; b.click(); await tick(300);
           ok("P84: a row of the dashboard opens the items of the form filtered on it, with the columns of the form", MON_TAB === "tracklist" && document.querySelectorAll("table.st-list tbody tr").length === rows.filter(r => r[7] === un).length && /หน่วยงาน/.test(document.querySelector("table.st-list thead").textContent) && !/\d+ · /.test(document.querySelector("table.st-list thead").textContent) && !!document.querySelector('.pd-chip [data-stx="unit"]'));
@@ -2381,17 +2381,17 @@
           { const D = prDtRows(BI.fy, false), i = D.findIndex(r => { const p = r.p || (r.k && famPlan(r.k.plan)); return p && tfReqOf(p); }), p = D[i].p || famPlan(D[i].k.plan), rq = tfReqOf(p); rq.detail = Object.assign(rq.detail || {}, { prov: "จังหวัดทดสอบ", qLen: 321, qRai: "", qHouse: 45, qPlace: 2 });
             const row = prTrackBook(BI.fy)[0].rows[5 + i]; ok("P90: the province and the quantities of the unit's details go into the follow-up form (columns 11, 51-54)", row[10] === (rq.detail.prov) || row[10] === "จังหวัดทดสอบ", JSON.stringify([row[10], row[50], row[52], row[53]])); ok("P90: the quantities (a value on the contract stays first)", row[50] === ((D[i].k && D[i].k.cx && D[i].k.cx.qLen) || 321) && row[52] === 45 && row[53] === 2, JSON.stringify([row[50], row[52], row[53]])); }
           MON_TAB = "drill"; route(); await tick(250); ok("P87: drill-down of the year in execution reads the allocation lines", !!document.querySelector(".mt-src"));
-          MON_TAB = "live"; window.FISKO_ROUTE = "#procurement"; }
+          MON_TAB = "live"; window.APP_ROUTE = "#procurement"; }
         { const b = await xwBook(flSpendBook()).arrayBuffer(), s = new TextDecoder().decode(new Uint8Array(b)); ok("P61/P88: the Excel of spending follows the revised follow-up form: 67 columns numbered 1-67, who fills each, the headers of the form", (() => { const R = flSpendBook()[0].rows, n = R[4].length; return n >= 57 && R[3][n - 1] === String(n) && R[1][22] === "e-GP" && R.slice(5).every(r => r.length === n) && /^ปี 25\d\d$/.test(R[4][n - 1]); })() && s.includes("รหัส e-bud") && s.includes("ปัญหา/อุปสรรค") && s.includes("วันที่ครบอุทธรณ์")); }
         as("admin"); renderShell(); FIN_DESK = "book"; PROC_TAB = "contracts"; CON_OPEN = k.id; CON_TAB = "cxdl"; route(); await tick(300);
         { const h = kxManageView(k); ok("the admin picks a desk: the three desks, the closed project shown", (h.match(/data-fldesk=/g) || []).length === 3 && /ปิดโครงการแล้ว/.test(h)); } FIN_DESK = "chk";
         for (const r of ["vchk1", "vchk2", "acc", "fin"]) { as(r); renderShell(); route(); await tick(200); ok("P77: " + r + " sees the contract page and the payment follow-up, with no desk to pick", PROC_PAGE === "contracts" && !document.querySelector("[data-fldesk]") && prSees(prPage("disb"))); }
         as("div"); renderShell(); PROC_TAB = "reqn"; route(); await tick(300); ok("ขอซื้อขอจ้าง (P78): one list ใบขอซื้อขอจ้าง with the year; each row has the state of its รายการจัดซื้อ and a button", !document.querySelector(".bi-flow") && !!document.querySelector("#pr-fy") && document.querySelectorAll("section.panel").length === 1 && /ใบขอซื้อขอจ้าง/.test(document.querySelector(".rq-list h2").textContent) && [...document.querySelectorAll(".rq-list tbody tr")].every(tr => !!tr.querySelector("td.rq-case") && !!tr.querySelector("[data-preq],[data-rqcase]")));
         { const n0 = (S.bi && S.bi.rows || []).length; BI.fy = FAM_FY + 1; as("plan"); renderShell(); PROC_TAB = "budgetitems"; route(); await tick(300); ok("P60: another year shows its own (empty) list and history", /ยังไม่มีรายการงบประมาณของปี/.test(v().textContent) && /ยังไม่มีการนำเข้าในปีนี้/.test(v().textContent)); BI.fy = FAM_FY; route(); }
-        window.FISKO_ROUTE = ""; CON_OPEN = null; as("plan"); renderShell();
+        window.APP_ROUTE = ""; CON_OPEN = null; as("plan"); renderShell();
       });
       await grp("Budget items: import the budget report with its money plan, check the list, send to the units (P47)", async () => {
-        reseed(); S.bi = null; as("plan"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "budgetitems"; BI.step = 1; BI.msg = ""; route(); await tick(300); const v = () => document.getElementById("view");
+        reseed(); S.bi = null; as("plan"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "budgetitems"; BI.step = 1; BI.msg = ""; route(); await tick(300); const v = () => document.getElementById("view");
         ok("P56: one menu: no page of its own, the budget items are the first tab of the procurement plan, with the flow of six offices on top", !PROC_PAGES.some(p => p.id === "budgetitems") && PROC_PAGE === "plan" && prPage("plan").tabs[0].key === "budgetitems" && (window.PL_OLDTABS = false, prTabs(prPage("plan")).length === 1) && !document.querySelector(".bi-flow") && true);
         ok("step 1 of the case is named budget items; the budget items page is one page (P60: no step tabs) with the year and the import buttons", CASE_MAIN_NAMES[0][0] === "รายการงบประมาณ" && document.querySelectorAll("[data-bistep]").length === 0 && !!document.querySelector("#pr-fy") && !!document.querySelector(".bi-log") && !!document.querySelector("#bi-files") && !!document.querySelector("#bi-sample"));
         { const rows = [["รายงาน"], [], ["ลำดับ", "รหัสหน่วยงาน", "หน่วยงาน", "รหัสงบประมาณ", "แผนงาน", "ผลผลิต/โครงการ", "รายการ", "งบรายจ่าย", "จำนวน", "หน่วยนับ", "วงเงิน (บาท)", ...BI_MON.map(m => "แผนเงิน " + m), "หมายเหตุ"], [1, "U03", "x", "150001", "ก", "ข", "เครื่องทดสอบ", "งบลงทุน", 2, "เครื่อง", 1200, ...Array(12).fill(100), ""]], it = biFromRows(rows);
@@ -2412,10 +2412,10 @@
         as("plan"); { const n0 = S.pplan.length, c0 = S.cases.length, r = biSend(S.bi.rows.map(x => x.id)); const p = S.pplan[S.pplan.length - 1];
           ok("send all: the other 18 items become plan items with their cases; the one sent before is skipped", r.sent.length === 18 && r.skip.length === 1 && S.pplan.length - n0 === 18 && S.cases.length - c0 === 18 && p.status === "planned" && !!p.biSrc && p.moneyPlan.length === 12 && famLine(p.line).unit === biUnit(S.bi.rows.find(x => x.id === p.biSrc)).id);
           ok("sending again sends nothing", biSend(S.bi.rows.map(x => x.id)).sent.length === 0);
-          const cs = S.cases[S.cases.length - 1]; ok("the case's step 1 is done and shows the budget item with its money plan", casePhases(cs).phases[0].done); window.FISKO_ROUTE = ""; jump("case:" + cs.id); await tick(500); document.querySelector('.cphase[data-cphase="1"]').click(); await tick(100);
+          const cs = S.cases[S.cases.length - 1]; ok("the case's step 1 is done and shows the budget item with its money plan", casePhases(cs).phases[0].done); window.APP_ROUTE = ""; jump("case:" + cs.id); await tick(500); document.querySelector('.cphase[data-cphase="1"]').click(); await tick(100);
           ok("the case page", /รายการงบประมาณ/.test(document.querySelector('.cphase[data-cphase="1"]').innerText) && /รหัสงบประมาณ/.test(document.querySelector('.cmain[data-cmain="1"]').innerText)); }
-        as("div"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "budgetitems"; route(); await tick(300); ok("a division sees the items sent to its unit only", /รายการงบประมาณที่ได้รับ/.test(v().innerText) && [...document.querySelectorAll("table.bi-table tbody tr")].length === S.bi.rows.filter(r => r.sent && biUnit(r).id === me().unit).length);
-        { as("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = null; BI_OPEN = null; route(); await tick(300); const L0 = prDtRows(BI.fy, false).find(x => !x.k && !x.p);
+        as("div"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "budgetitems"; route(); await tick(300); ok("a division sees the items sent to its unit only", /รายการงบประมาณที่ได้รับ/.test(v().innerText) && [...document.querySelectorAll("table.bi-table tbody tr")].length === S.bi.rows.filter(r => r.sent && biUnit(r).id === me().unit).length);
+        { as("proc"); renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "contracts"; CON_OPEN = null; BI_OPEN = null; route(); await tick(300); const L0 = prDtRows(BI.fy, false).find(x => !x.k && !x.p);
           { as("plan"); const b = await (await fetch(encodeURI(BI_SAMPLE))).blob(), f = () => [new File([b], "s.xlsx")], fy0 = BI.fy;
             BI.fy = fy0 + 1; await biImport(f()); const y1 = S.bi.rows.filter(r => biFy(r) === fy0 + 1);
             ok("P64: the same file imports into another year: no duplicate across years, all its items pass and can be sent", y1.length === 19 && y1.every(r => biOk(r)) && new Set(S.bi.rows.map(r => r.id)).size === S.bi.rows.length);
@@ -2423,14 +2423,14 @@
             BI.fy = fy0; const before = S.bi.rows.filter(r => biFy(r) === fy0).length, r2 = await biImport(f()); ok("P64: importing a year again skips the items already sent that year", r2.skip > 0 && S.bi.rows.filter(r => biFy(r) === fy0).length === before + r2.n && new Set(S.bi.rows.map(r => r.id)).size === S.bi.rows.length && S.bi.rows.filter(r => biFy(r) === fy0).every(r => biOk(r)), JSON.stringify([r2.n, r2.skip])); } { const y1 = BI.fy + 1, r1 = S.bi.rows.find(r => r.sent && biFy(r) === y1), un = biUnit(r1).id; as("div"); { const du = S.users.find(x => x.role === "div" && x.unit === un && x.active !== false); SESSION = { user: du.id }; ROLE = "div"; } renderShell(); BI.fyPicked = false; BI.fy = FAM_FY; PROC_TAB = "reqn"; route(); await tick(300);
             const want = S.bi.rows.filter(r => r.sent && biFy(r) === y1 && biUnit(r).id === un).length; ok("P68: a division opens ขอซื้อขอจ้าง on the newest year and sees what Planning sent it, with the button to write the details", BI.fy === y1 && document.querySelectorAll(".rq-list tbody tr").length === want && want > 0 && document.querySelectorAll(".rq-list [data-preq]").length === want && !document.querySelector(".rq-list [data-rqcase]"), JSON.stringify([BI.fy, want]));
             { const p1 = S.pplan.find(p => p.id === r1.sent.pp), c1 = caseByPlan(p1.id); ok("P70: an item sent from the budget items is in the plan: the unit can raise the requisition at once", inPublishedPlan(p1) && rqCanRaise(c1));
-              window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = c1.id; CASE_MAIN[c1.id] = 2; route(); await tick(500); ok("the case page has the requisition form, not 'not approved in the plan'", !/ยังไม่ได้รับอนุมัติแผน/.test(document.getElementById("view").innerText) && !!document.querySelector("#rq-inline"));
+              window.APP_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = c1.id; CASE_MAIN[c1.id] = 2; route(); await tick(500); ok("the case page has the requisition form, not 'not approved in the plan'", !/ยังไม่ได้รับอนุมัติแผน/.test(document.getElementById("view").innerText) && !!document.querySelector("#rq-inline"));
               CASE_OPEN = null; PROC_TAB = "reqn"; route(); await tick(200); }
             BI.fyPicked = true; BI.fy = FAM_FY; route(); await tick(300); ok("on another year it says where its items are", /มีรายการที่ได้รับในปีงบประมาณ/.test(biView())); BI.fyPicked = false; BI.fy = FAM_FY; SESSION = null; } as("proc"); renderShell(); PROC_TAB = "contracts"; route(); await tick(300);
           ok("P63: สัญญางบประมาณ lists every budget item of the year with its state", tx(prPage("contracts").label) === "สัญญางบประมาณ" && document.querySelectorAll("table.mm-list tbody tr").length === prDtRows(BI.fy, false).length && !!L0);
           document.querySelector(`[data-biopen="${L0.id}"]`).click(); await tick(300); ok("an item without a contract opens on บริหารเงิน; the other tabs can not be used", BI_OPEN === L0.id && !!document.querySelector(".mm-item form[data-mm]") && document.querySelectorAll(".mm-item .tab[disabled]").length === CON_TABS.length - 1 && !/undefined|NaN/.test(v().innerText));
           document.querySelector('.mm-item form[data-mm] [name="carry"]').value = "2500"; document.querySelector(".mm-item form[data-mm]").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); await tick(300);
           ok("its money management is saved on the budget item and reaches the Excel of payments", mmCalc(mmRowOf(L0.id)).carry === 2500 && prPlanBook(BI.fy).flatMap(sh => sh.rows).some(x => x[5] === L0.name && x[36] === 2500)); BI_OPEN = null; }
-        window.FISKO_ROUTE = ""; as("plan"); renderShell();
+        window.APP_ROUTE = ""; as("plan"); renderShell();
       });
       await grp("P88: trimmed menus, Planning details, money plan, request AI and e-GP choice, contract advance/PO/deduction, follow-up form 67 columns", async () => {
         window.MENU_ALL = false; m88ApplyApps(); const v = () => document.getElementById("view"), navIds = () => [...document.querySelectorAll("#nav a[data-v]")].map(a => a.dataset.tab || a.dataset.v), login = r => { const u = S.users.find(x => x.role === r); SESSION = { user: u.id }; ROLE = r; return u; };
@@ -2440,7 +2440,7 @@
         ok("P88: procurement shows its menus in the order asked, the committee menus stay", JSON.stringify(navIds().filter(x => M88.proc.includes(x))) === JSON.stringify(M88.proc.filter(x => prSees(prPage(x)))) && !navIds().includes("today") && !navIds().includes("egp") && !navIds().includes("tor") && navIds().includes("cm-reg") && tx(prPage("cases").label) === "บริหารงบประมาณ", navIds());
         window.MENU_ALL = true; m88ApplyApps(); renderShell(); ok("P88: MENU_ALL shows every menu again (nothing deleted)", APP_IDS.includes("finance") && navIds().includes("today") && tx(prPage("reqn").label) === "ขอซื้อขอจ้าง"); window.MENU_ALL = false; m88ApplyApps();
         // Planning: the import, the details of its part, the unit and its amount
-        S.bi = null; login("plan"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("plan:budget"); BI.view = "imp"; route(); await tick(300);
+        S.bi = null; login("plan"); renderShell(); window.APP_ROUTE = "#procurement"; procSet("plan:budget"); BI.view = "imp"; route(); await tick(300);
         document.querySelector("#bi-sample").click(); for (let i = 0; i < 40 && !(S.bi && S.bi.rows && S.bi.rows.length); i++) await tick(300);
         BI.fy = biFy(S.bi.rows[0]); BI.view = "list"; route(); await tick(200);
         ok("P88: the item list has no money-plan columns and no money-plan filter", !!document.querySelector("table.bi88") && !/>ต\.ค\.</.test(document.querySelector("table.bi-table thead").innerHTML) && !document.querySelector('[data-pdf="mon"]'));
@@ -2462,13 +2462,13 @@
         login("plan"); renderShell(); procSet("progress88"); MON_TAB = "track"; OV89.g = "prod"; route(); await tick(300);
         ok("P88/P90: ติดตามความก้าวหน้า in procurement: six tabs, the dashboard by ผลผลิต/โครงการ, the status report", document.querySelectorAll("[data-m88tab]").length === 6 && /ตามผลผลิต\/โครงการ/.test(v().innerText) && !!document.querySelector(".d90-row") && !document.querySelector(".ov89-t") && (MON_TAB = "status90", route(), !!document.querySelector(".ov89-t") && /เลขที่สัญญา/.test(v().innerText) && d90Book()[0].rows[2].length === 23 && !/d+ · /.test(document.querySelector(".ov89-t thead").innerText)) && (MON_TAB = "track", route(), true) && !BAD.test(v().innerText));
         { const b = [...document.querySelectorAll("[data-stgo]")].find(x => /"prod"/.test(x.dataset.stgo)); if (b) { b.click(); await tick(300); } ok("P88: a row by ผลผลิต opens the list filtered on it, with a ผลผลิต filter", !!b && MON_TAB === "tracklist" && !!document.querySelector('[data-stf="prod"]') && PROC_PAGE === "progress88"); SPT.f = {}; }
-        window.FISKO_ROUTE = "#dashboard"; route(); await tick(300); ok("P88: the budget page ติดตามความก้าวหน้า has the same six tabs", document.querySelectorAll("[data-btab]").length === 6, document.querySelectorAll("[data-btab]").length);
-        login("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("disb"); route(); await tick(300); ok("P88: ติดตามการเบิกจ่าย: plan and result by month", document.querySelectorAll("table.m88-pa-t tbody tr").length === 12);
+        window.APP_ROUTE = "#dashboard"; route(); await tick(300); ok("P88: the budget page ติดตามความก้าวหน้า has the same six tabs", document.querySelectorAll("[data-btab]").length === 6, document.querySelectorAll("[data-btab]").length);
+        login("proc"); renderShell(); window.APP_ROUTE = "#procurement"; procSet("disb"); route(); await tick(300); ok("P88: ติดตามการเบิกจ่าย: plan and result by month", document.querySelectorAll("table.m88-pa-t tbody tr").length === 12);
         M88.dq = "q"; route(); await tick(200); ok("P88: ... and by quarter", document.querySelectorAll("table.m88-pa-t tbody tr").length === 4); M88.dq = "m";
         procSet("library"); route(); await tick(200); ok("P88: คลังเอกสาร lists the budget items of the year", document.querySelectorAll("[data-m88lib]").length === prDtRows(BI.fy, false).length && !BAD.test(v().innerText));
-        login("exec"); renderShell(); window.FISKO_ROUTE = "#od-dash"; route(); await tick(300); ok("P88/P99: แดชบอร์ดผู้บริหาร is the infographic of the budget", !!document.querySelector(".x99-hero") && document.querySelectorAll(".x99-card").length >= 6 && !BAD.test(document.querySelector(".x99").innerText));
+        login("exec"); renderShell(); window.APP_ROUTE = "#od-dash"; route(); await tick(300); ok("P88/P99: แดชบอร์ดผู้บริหาร is the infographic of the budget", !!document.querySelector(".x99-hero") && document.querySelectorAll(".x99-card").length >= 6 && !BAD.test(document.querySelector(".x99").innerText));
         // ขอจัดซื้อจัดจ้าง: the AI, the unit's columns, who sends e-GP
-        { const cs = caseByPlan(pp.id); const du = S.users.find(x => x.role === "div" && x.unit === u2.id); SESSION = { user: du.id }; ROLE = "div"; renderShell(); window.FISKO_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = cs.id; CASE_MAIN[cs.id] = 2; route(); await tick(400);
+        { const cs = caseByPlan(pp.id); const du = S.users.find(x => x.role === "div" && x.unit === u2.id); SESSION = { user: du.id }; ROLE = "div"; renderShell(); window.APP_ROUTE = "#procurement"; PROC_TAB = "cases"; CASE_OPEN = cs.id; CASE_MAIN[cs.id] = 2; route(); await tick(400);
           ok("P88: the request form has the unit's columns of the form and the e-GP choice", !!document.querySelector("#pr-survey") && !!document.querySelector("#pr-tor") && document.querySelectorAll('input[name="rq-egpby"]').length === 2);
           document.querySelector("#pr-obj").value = ""; RQ_FILES = []; document.querySelector(`[data-rq88ai="${cs.id}"]`).click(); await tick(100); const noFile = !document.querySelector("#pr-obj").value;
           RQ_FILES = [{ name: "TOR ร่าง.pdf", size: 100, type: "application/pdf", kind: 0 }, { name: "ประมาณราคา BOQ.xlsx", size: 100, type: "", kind: 0 }]; document.querySelector(`[data-rq88ai="${cs.id}"]`).click(); await tick(100);
@@ -2480,7 +2480,7 @@
             if (c && rq.status === "approved") { c.egpBy = "self"; const un = famLine(famPlan(c.plan).line).unit, du = S.users.find(x => x.role === "div" && x.unit === un); if (du) { SESSION = { user: du.id }; ROLE = "div";
                 ok("P88: a unit that sends e-GP itself records the e-GP steps of its own item", egp7Save(c, 1, { date: "2026-11-01" }, {}) !== "เฉพาะเจ้าหน้าที่พัสดุบันทึกได้" && egp7Of(c).s1.date === "2026-11-01" && ROLE === "div");
                 c.egpBy = "proc"; ok("P88: ... and not an item the Treasury sends", /เฉพาะเจ้าหน้าที่พัสดุ/.test(egp7Save(c, 1, { date: "2026-11-02" }, {}))); } }
-            login("proc"); renderShell(); window.FISKO_ROUTE = "#procurement"; procSet("cases"); CASE_OPEN = null; route(); await tick(300); ok("P88: บริหารงบประมาณ lists the approved items the Treasury sends", !!document.querySelector(".rq88-list") && !BAD.test(document.querySelector(".rq88-list").innerText)); } }
+            login("proc"); renderShell(); window.APP_ROUTE = "#procurement"; procSet("cases"); CASE_OPEN = null; route(); await tick(300); ok("P88: บริหารงบประมาณ lists the approved items the Treasury sends", !!document.querySelector(".rq88-list") && !BAD.test(document.querySelector(".rq88-list").innerText)); } }
         // the contract: PO, how it is paid, the advance with its GF number, the deduction %, a payment made by the unit
         { login("proc"); const k = S.contracts.find(c => S.cases.some(x => x.contract === c.id)), X = Object.assign(kxOf(k), { dl: [], lastAccept: "", amends: [] });
           kxSave(k, { amount: "1000000", nPhases: "4", advHas: true, advPct: "15" }, {}); KX88_IN = { po: "PO-0001 (สมมติ)", payMode: "phase", dedPct: "20" }; const m1 = kxSave(k, {}, {});
@@ -2494,11 +2494,11 @@
           const un = famLine(famPlan(k.plan).line).unit, du = S.users.find(x => x.role === "div" && x.unit === un);
           if (du) { SESSION = { user: du.id }; ROLE = "div"; const n = X.dl.length; ok("P88: the unit responsible creates a payment", kxDlAdd(k, { deliver: "2026-11-27", amount: "50000", deduct: "" }, {}) === "" && X.dl.length === n + 1 && ROLE === "div" && /data-cxdl=/.test(kxManageView(k))); }
           login("proc"); }
-        window.FISKO_ROUTE = ""; CASE_OPEN = null; window.MENU_ALL = true; m88ApplyApps(); as("plan"); renderShell();
+        window.APP_ROUTE = ""; CASE_OPEN = null; window.MENU_ALL = true; m88ApplyApps(); as("plan"); renderShell();
       });
       // every new page opens without a broken value, for every role
       const pages = ["pj-reg", "pj-row", "pj-imp", "pl-plan", "pl-act", "pl-res", "pl-dash", "pv-reg", "cx-reg", "cx-doc", "cx-grt", "cx-alert", "cw-reg", "cw-all", "fx-rev", "fx-k", "fx-res", "fx-wht", "fx-ta", "fx-ref", "fx-rcp", "cm-reg", "cm-mem", "cm-meet", "cm-type", "cm-slot", "lt-reg", "lt-tpl", "lt-in", "vh-reg", "vh-book", "vh-fuel", "rm-book", "fm-bldg", "fm-eq", "fm-wo", "fm-insp", "fm-alert", "hr-sal", "hr-ded", "od-imp", "od-dash", "rg-out", "rg-act", "bq-cfg", "bq-money", "bq-cat", "bq-geo", "bq-ref", "bq-obs", "bq-ocr", "bq-dash", "bq-rpt", "bq-cal"];
-      reseed(); for (const role of Object.keys(ROLES)) { as(role); renderShell(); for (const id of pages) { n++; window.FISKO_ROUTE = "#" + id; try { route(); } catch (e) { errs.push(`page ${id} as ${role} THROW ${e && e.message}`); continue; } const v = document.getElementById("view"), s = v ? v.innerText : "", m = s.match(BAD); if (m) errs.push(`page ${id} as ${role}: …${s.slice(Math.max(0, m.index - 30), m.index + 20).replace(/\s+/g, " ")}`); } o.onProgress({ what: "pages " + role, n, errors: errs.length }); await tick(); }
+      reseed(); for (const role of Object.keys(ROLES)) { as(role); renderShell(); for (const id of pages) { n++; window.APP_ROUTE = "#" + id; try { route(); } catch (e) { errs.push(`page ${id} as ${role} THROW ${e && e.message}`); continue; } const v = document.getElementById("view"), s = v ? v.innerText : "", m = s.match(BAD); if (m) errs.push(`page ${id} as ${role}: …${s.slice(Math.max(0, m.index - 30), m.index + 20).replace(/\s+/g, " ")}`); } o.onProgress({ what: "pages " + role, n, errors: errs.length }); await tick(); }
     } catch (e) { errs.push("THROW " + (e && e.stack || e)); }
     window.MENU_ALL = MENU0; if (typeof m88ApplyApps === "function") m88ApplyApps();
     window.onerror = oldErr; ORG = ORG0; try { store.del(key()); } catch (e) {}

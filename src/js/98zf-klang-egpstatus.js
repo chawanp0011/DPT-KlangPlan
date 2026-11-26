@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P3 (12 Nov 2569): the public hearing of the draft announcement and the price negotiation,
+// KlangFinance, procurement round P3 (12 Nov 2569): the public hearing of the draft announcement and the price negotiation,
 // kept as STATUS only. The officer does both in e-GP; this system records where each stands (c.egpSt) and uses it:
 //  - public hearing: needed for a competitive method when the amount reaches the profile's limit (5,000,000 baht in the sample) or the
 //    item is flagged (the existing rule hearingReq in 70-profile.js, so one rule decides). Status: not started, open (from - to), done without

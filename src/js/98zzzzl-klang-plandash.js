@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P83 (24 Nov 2569): แผนจัดซื้อ (Planning) split into a dashboard and a list.
+// KlangFinance, round P83 (24 Nov 2569): แผนจัดซื้อ (Planning) split into a dashboard and a list.
 // Asked for: "แยกหน้า dashboard ออกจากหน้าลิส ... เข้าไปดูลิสแท็บตรงได้เลย หรือ คลิกจากแถวใน dashboard ของแต่ละ section ตามตัวกรอง".
 // Three tabs: ภาพรวม (dashboard), รายการ (the list with its filters), นำเข้า (import and its history).
 // Every row of the dashboard (a status, a type, a unit, a kind of expense, a month) opens the list filtered on it; the list shows the

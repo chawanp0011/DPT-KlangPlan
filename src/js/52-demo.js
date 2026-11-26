@@ -1,7 +1,7 @@
 // In-app demo guide (round 6): the 15-minute storyline, each step one click away with the right role.
 const DEMO = [
   { t: "0:00", role: "plan", link: "home", title: ["แพลตฟอร์มเดียว 6 บทบาท", "One platform, six roles"],
-    say: ["Fisko รวมวงจรงบประมาณทั้งหมดไว้ในระบบเดียว แต่ละบทบาทเห็นเฉพาะงานของตนเอง พร้อมกำหนดส่งจากปฏิทินงบประมาณ", "Fisko holds the whole budget cycle. Each role sees only its own work, with deadlines from the budget calendar."],
+    say: ["รวมวงจรงบประมาณทั้งหมดไว้ในระบบเดียว แต่ละบทบาทเห็นเฉพาะงานของตนเอง พร้อมกำหนดส่งจากปฏิทินงบประมาณ", "holds the whole budget cycle. Each role sees only its own work, with deadlines from the budget calendar."],
     do: ["เข้าสู่ระบบด้วย SSO และรหัส MFA (246810) ชี้งานของฉันและปฏิทิน ลองค้นหาด้วย Ctrl+K สลับภาษา TH/EN", "Sign in with SSO and the MFA code (246810); point at My tasks and the calendar; try Ctrl+K search; switch TH/EN"] },
   { t: "0:45", role: "plan", link: "strat-bank", title: ["B2 คลังโครงการ", "B2 Project bank"],
     say: ["แนวคิดโครงการทุกเรื่องผูกกับตัวชี้วัดตั้งแต่ต้น กองแผนงานให้คะแนนตามเกณฑ์เดียวกัน และใช้บทเรียนจากการประเมินผลปีก่อนประกอบ", "Every project idea is tied to a KPI from the start. Planning scores them on the same criteria, informed by lessons from past evaluations."],
@@ -45,7 +45,7 @@ const DEMO = [
   { t: "14:00", role: "admin", link: "admin-notify", title: ["M10 ปรับได้โดยไม่แก้โค้ด และปิดท้าย", "M10 Configure without code, and close"],
     say: ["ข้อความแจ้งเตือน SLA กฎ และ Workflow ปรับได้โดยผู้ดูแลระบบ มีผลทันทีทุกโมดูล และทุกการกระทำมี Audit Trail", "Notifications, SLAs, rules and workflow are changed by the administrator, apply everywhere at once, and every action has an audit trail."],
     do: ["แก้ข้อความแม่แบบดูตัวอย่าง → “ตรวจและส่งแจ้งเตือนตอนนี้” → แท็บบันทึกการใช้งาน", "Edit a template and watch the preview → Check and notify now → Audit log tab"] },
-  // Extension (round 17): Fisko Procurement and Fisko Finance, about 10 minutes, same sample organisation.
+  // Extension (round 17): Procurement and Finance, about 10 minutes, same sample organisation.
   { t: "15:00", role: "div", link: "prc-plan", title: ["ขอซื้อขอจ้าง และระบบตรวจการแตกซื้อ", "Raising requisitions and the split-purchase check"],
     say: ["แผนจัดซื้อผูกกับรายการจัดสรรของ B7 ผู้ขอซื้อส่งใบขอได้ในวงเงินที่เหลือ และระบบเตือนเมื่อรายการเล็กหลายรายการรวมกันเกินเพดานวิธีเฉพาะเจาะจง", "The procurement plan is tied to B7 allocation lines. The requester raises a requisition within the room left, and the system warns when several small items together pass the specific-method ceiling."],
     do: [`“ขอซื้อขอจ้าง” PP-2570-006 (0.35 ล้าน) → “ส่งขออนุมัติ” → ทำซ้ำกับ PP-2570-005 (0.4 ล้าน) ระบบขอคำชี้แจง → พิมพ์เหตุผล → ส่ง`, `Raise PP-2570-006 (0.35 M) → Send → do the same for PP-2570-005 (0.4 M); the system asks for an explanation → type a reason → Send`] },
@@ -59,7 +59,7 @@ const DEMO = [
     say: ["ทุกการเลือกที่ต่างจากคำแนะนำผ่านหัวหน้าพัสดุ และอยู่ในไทม์ไลน์ของรายการจัดซื้อ ตารางเกณฑ์และตัวเลขแต่ละตัวมีระดับ A B C ให้หน่วยงานยืนยัน", "Every override goes through the head and appears in the case timeline. Each number in the rules table carries a level A, B or C for the agency to confirm."],
     do: ["“อนุมัติวิธีนี้” → เปิดหน้า ผู้ดูแลระบบ → กฎจัดซื้อจัดจ้าง เพื่อดูตารางเกณฑ์", "Approve this method → open System administration → Procurement rules to see the table"] },
   { t: "19:00", role: "proc", link: `case:PC-2570-003`, title: ["ผู้ยื่น พิจารณาผล อุทธรณ์ และทำสัญญา", "Bids, evaluation, appeal window and contract"],
-    say: ["ขั้นตอนทางการทำใน e-GP Fisko เก็บข้อมูล คุมลำดับ และกันการลงนามสัญญาก่อนพ้นช่วงอุทธรณ์ กรรมการพิจารณาผลเป็นกรรมการตรวจรับของสัญญาเดียวกันไม่ได้ (SD-06)", "The official steps run in e-GP. Fisko records, keeps the order and blocks the contract until the appeal window ends. An evaluation committee member can't sit on the same contract's acceptance committee (SD-06)."],
+    say: ["ขั้นตอนทางการทำใน e-GP เก็บข้อมูล คุมลำดับ และกันการลงนามสัญญาก่อนพ้นช่วงอุทธรณ์ กรรมการพิจารณาผลเป็นกรรมการตรวจรับของสัญญาเดียวกันไม่ได้ (SD-06)", "The official steps run in e-GP. records, keeps the order and blocks the contract until the appeal window ends. An evaluation committee member can't sit on the same contract's acceptance committee (SD-06)."],
     do: ["“จำลอง: ถึงวันปิดรับข้อเสนอ” → ใส่ผู้ยื่น 1 ราย → ไปขั้นพิจารณาผล → แต่งตั้งกรรมการ → “จำลอง: กรรมการทุกคนส่งแบบแจ้งและใบให้คะแนน” ชี้ตารางคะแนนรวม → บันทึกผลและประกาศผู้ชนะ → “จำลอง: พ้นกำหนดโดยไม่มีผู้อุทธรณ์” → ไปขั้นทำสัญญา", "Demo: the closing date arrives → 1 bidder → move to evaluation → appoint the committee → Demo: every member sends the declaration and score sheet, point at the totals → record and announce → Demo: no appeal → move to contracting"] },
   { t: "20:30", role: "proc", link: "prc-contracts", title: ["สัญญา ค่าปรับ และใบแจ้งหนี้", "Contract, penalty and invoice"],
     say: [`งวดแรกของสัญญา CT-2570-002 ส่งมอบช้า 1 วัน ระบบคิดค่าปรับตามอัตราที่ตั้งใน M10 งวดที่ตรวจรับแล้วบันทึกใบแจ้งหนี้ได้ ส่วนการแก้ไขสัญญาและขยายเวลาต้องผ่านระดับอนุมัติตามสัดส่วน`, `Phase 1 of CT-2570-002 was delivered one day late, and the system works out the penalty at the rate set in M10. An accepted phase can take an invoice, while contract changes and extensions follow an approval ladder.`],
@@ -96,7 +96,7 @@ const DEMO = [
     say: ["ก่อนชี้แจงสำนักงบประมาณ ครม. หรือกรรมาธิการ ระบบสรุปหนึ่งหน้าต่อคำขอ คาดคำถาม และให้ AI ร่างคำตอบจากข้อมูลคำขอ พร้อมข้อสังเกตของกรรมาธิการปีก่อน", "Before a hearing, one page per request, the likely questions and AI-drafted answers from the request data, plus last year's committee observations."],
     do: ["ชี้ข้อสังเกตปีก่อน → “ให้ AI ร่างคำตอบ (AG-16)” → อ่านคำตอบหนึ่งข้อ", "Point at last year's observations → Have AI draft the answers (AG-16) → read one answer"] },
   { t: "34:00", role: "fin", link: "alloc-balance", title: ["B7 ยอดคงเหลือ 4 ระดับ", "B7 Four-level balances"],
-    say: ["ทุกบรรทัดเห็นจัดสรร จอง ผูกพัน และเบิกจ่าย จาก Fisko Procurement และ Fisko Finance ยอดใช้ได้จริงคือจัดสรรลบจองและผูกพัน และระบบจัดซื้อไม่ให้ใช้เกินยอดนี้", "Each line shows allotted, reserved, committed and paid, from Fisko Procurement and Finance. Available = allotted − reserved − committed, and procurement can't go beyond it."],
+    say: ["ทุกบรรทัดเห็นจัดสรร จอง ผูกพัน และเบิกจ่าย จาก Procurement และ Finance ยอดใช้ได้จริงคือจัดสรรลบจองและผูกพัน และระบบจัดซื้อไม่ให้ใช้เกินยอดนี้", "Each line shows allotted, reserved, committed and paid, from Procurement and Finance. Available = allotted − reserved − committed, and procurement can't go beyond it."],
     do: ["ชี้แถบสี่ชั้น → คลิกบรรทัดที่มีสัญญาเพื่อดูใบขอซื้อ สัญญา และการเบิกจ่าย → ชี้บรรทัดที่ต้องส่งต่อส่วนภูมิภาคภายใน 15 วัน", "Point at the four-part bars → click a line with a contract to see its requisitions, contracts and payments → point at the line due to the region within 15 days"] },
   { t: "35:00", role: "fin", link: "alloc-savings", title: ["B7 เงินเหลือจ่ายและการโอนตามระเบียบ", "B7 Savings and transfers by the regulation"],
     say: ["เงินเหลือจ่ายจากสัญญาโอนได้ ระบบจัดประเภทการโอนจากโครงสร้างงบประมาณ: ภายในผลผลิตอนุมัติได้เองแล้วรายงานภายใน 15 วัน ข้ามแผนงานต้องตกลงสำนักงบประมาณ โครงการใหม่ต้องเสนอ ครม.", "A contract saving can be moved. The system classifies the transfer from the budget structure: within an output it is approved here and reported within 15 days, across programmes it needs the Budget Bureau, a new project needs the Cabinet."],
@@ -120,7 +120,7 @@ const DEMO = [
     say: ["เป้าหมายการเบิกจ่ายตามมติ ครม. สมมติฐานพยากรณ์ เกณฑ์สัญญาณ และเกณฑ์ 3R ปรับได้ทุกปีโดยผู้ดูแลระบบ ทุกค่าบอกระดับความมั่นใจ และทุกการปรับอยู่ในบันทึกการใช้งาน", "Spending targets from the Cabinet resolution, forecast assumptions, signal thresholds and the 3R rules are set each year by the administrator. Each value shows its confidence level, and every change is in the audit log."],
     do: ["ลดเกณฑ์ BF-01 เป็น 10% → กลับไปแท็บสัญญาณดูจำนวนที่เปลี่ยน → “คืนค่าตั้งต้น”", "Lower BF-01 to 10% → go back to the signals tab and see the count change → Restore defaults"] },
   { t: "42:00", role: "admin", link: "admin-procprof", title: ["M10 โปรไฟล์จัดซื้อ: ส่วนราชการหรือรัฐวิสาหกิจ", "M10 Procurement profile: government or state enterprise"],
-    say: ["Fisko ตัวเดียวใช้ได้ทั้งส่วนราชการและรัฐวิสาหกิจ ต่างกันที่โปรไฟล์ เลือกชนิดหน่วยงานแล้วสวิตช์ฟังก์ชันเปลี่ยนเป็นค่าตั้งต้น แก้ทีละข้อได้ ปิดสวิตช์แล้วต้นแบบกลับไปทำงานแบบเดิม เลขที่เอกสารออกอัตโนมัติและตั้งรูปแบบได้ที่นี่", "One Fisko serves government agencies and state enterprises; the profile is what differs. Choosing a kind resets the switches to its starting values, each can be changed, and with a switch off the prototype works as before. Document numbers are issued automatically and formatted here."],
+    say: ["ตัวเดียวใช้ได้ทั้งส่วนราชการและรัฐวิสาหกิจ ต่างกันที่โปรไฟล์ เลือกชนิดหน่วยงานแล้วสวิตช์ฟังก์ชันเปลี่ยนเป็นค่าตั้งต้น แก้ทีละข้อได้ ปิดสวิตช์แล้วต้นแบบกลับไปทำงานแบบเดิม เลขที่เอกสารออกอัตโนมัติและตั้งรูปแบบได้ที่นี่", "One serves government agencies and state enterprises; the profile is what differs. Choosing a kind resets the switches to its starting values, each can be changed, and with a switch off the prototype works as before. Document numbers are issued automatically and formatted here."],
     do: ["กด “รัฐวิสาหกิจ” → ดูสวิตช์ที่เปิดเพิ่ม (รับฟังความคิดเห็น รหัส ERP) → ปรับ “รับฟังเมื่อวงเงินตั้งแต่” → ดูรูปแบบเลขที่เอกสาร", "Press State enterprise → see the extra switches that turn on (hearing, ERP codes) → change the hearing threshold → look at the document number formats"] },
   { t: "43:00", role: "proc", link: `case:PC-2570-003`, title: ["รายการจัดซื้อ: ข้อมูลเพิ่มเติม หนังสือเชิญ และดัชนีราคา", "Case file: item details, invitations and price indices"],
     say: ["รายการมีช่องข้อมูลเพิ่ม เช่น มาตรฐานคุณภาพ วันส่งมอบ ภาษีมูลค่าเพิ่ม และรหัส ERP ใบสอบถามราคาออกเลขที่อัตโนมัติ ผู้ทิ้งงานเลือกเชิญไม่ได้ ผู้ขายตอบแล้วบันทึกราคา ราคากลางเทียบกับการซื้อครั้งก่อนและดัชนีราคา การส่งเป็นการจำลอง", "Items carry extra fields such as quality standard, delivery date, VAT and ERP codes. An RFQ gets an automatic number, anyone on the abandoned-work list cannot be invited, and replies are recorded with a price. The reference price is shown against the last purchase and price indices. Sending is simulated."],
@@ -151,7 +151,7 @@ const DEMO = [
     do: ["ผลประโยชน์ทับซ้อน → จัดทำรายงาน → เสนอหัวหน้าพัสดุ → สลับเป็นหัวหน้าพัสดุอนุมัติ → ส่งออกไฟล์ CSV → ผู้ขาย → ตรวจนิติบุคคลหนึ่งราย", "Conflicts of interest → Prepare a report → send to the head → switch to the head and approve → export the CSV → Suppliers → check one legal entity"] },
 ];
 VIEWS.demo = () => `
-  <div class="head"><div><div class="eyebrow">${L("คู่มือการสาธิต", "Demo guide")}</div><h1>${L("สาธิต Fisko 15 นาที + ส่วนเสริมจัดซื้อและการเงิน + วงจรงบประมาณเชิงลึก", "Fisko in 15 minutes + the Procurement and Finance extension + the Budget cycle in depth")}</h1>
+  <div class="head"><div><div class="eyebrow">${L("คู่มือการสาธิต", "Demo guide")}</div><h1>${L("สาธิต 15 นาที + ส่วนเสริมจัดซื้อและการเงิน + วงจรงบประมาณเชิงลึก", "in 15 minutes + the Procurement and Finance extension + the Budget cycle in depth")}</h1>
     <p>${L("ทุกขั้นตอนเดินตามโครงการตัวอย่างเดียวกัน กด “ไปที่ขั้นนี้” เพื่อสลับบทบาทและเปิดหน้าที่ถูกต้อง", "Every step follows the same storyline project. Go to step switches the role and opens the right screen.")}</p></div>
     <div class="sp"></div><button class="btn" type="button" id="demo-reset">${L("เริ่มใหม่ด้วยข้อมูลตั้งต้น", "Start over with fresh data")}</button></div>
   <ol class="demo">${DEMO.map((s, i) => `<li class="panel"><div class="demo-t">${s.t}</div>
@@ -162,7 +162,7 @@ BIND.demo = () => {
   $("#demo-reset").onclick = () => { store.del(key()); S = SEEDS[ORG].seed(); save(); resetUi(); renderShell(); route(); toast(L("รีเซ็ตข้อมูลแล้ว พร้อมเริ่มสาธิต", "Data reset · ready to demo")); };
   $$("[data-step]").forEach(b => (b.onclick = () => {
     const s = DEMO[Number(b.dataset.step)];
-    ROLE = s.role; store.set("fisko-role", ROLE); renderShell();
+    ROLE = s.role; store.set("app-role", ROLE); renderShell();
     jump(s.link.replace("STORY", S.story));
     toast(`${L("ขั้นที่", "Step")} ${Number(b.dataset.step) + 1} · ${tx(ROLES[ROLE])}`);
   }));

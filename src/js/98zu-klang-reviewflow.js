@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round B3 (14 Nov 2569): the review and approval page.
+// KlangFinance, budget round B3 (14 Nov 2569): the review and approval page.
 // Asked for (pasted spec):
 //  - Queue ("requests waiting for review"): a filter by division and a Review button.
 //  - "Amount per round" becomes "Overview of the budget requests", shown against the quota.

@@ -1,5 +1,5 @@
 // Segregation of duties (round 11): rules that stop one person doing consecutive steps on the same item
-// across Fisko Procurement and Fisko Finance. Delegation never bypasses them: the signed-in user and the
+// across Procurement and Finance. Delegation never bypasses them: the signed-in user and the
 // person whose authority they hold are both checked. Rules can be switched off in M10 (admin only).
 const SOD_RULES = [
   ["SD-01", ["ผู้ขอซื้อขอจ้างต้องไม่เป็นผู้อนุมัติใบขอซื้อรายการเดียวกัน", "A requester can't approve their own requisition"]],

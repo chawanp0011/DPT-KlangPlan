@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P63 (23 Nov 2569): "สัญญาและงวดงาน" for the Treasury, as the user set it out.
+// KlangFinance, round P63 (23 Nov 2569): "สัญญาและงวดงาน" for the Treasury, as the user set it out.
 // 1. A new tab "บริหารเงิน" on a contract: the Treasury officer updates the money-management columns of the department's disbursement file
 //    (กันไว้เบิกเหลื่อมปี/ตกพับ, เงินเหลือจ่าย, ยกเลิกสัญญา, งานช้า, งานเร็ว); the other columns are worked out from the data.
 // 2. The list of the menu shows every budget item of the year with its state. An item with a contract opens the contract (its tabs as

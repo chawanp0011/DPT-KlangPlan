@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q4c (12 Nov 2569): the expenditure reference table, from the reference file the user gave
+// KlangFinance, budget round Q4c (12 Nov 2569): the expenditure reference table, from the reference file the user gave
 // (columns REF_ID, REF_CODE, REF_NAME, REF_TYPE, PARENT_ID). It replaces the table of samples of mine that Q4a had.
 // The file holds four levels, each pointing at its parent:
 //   BUD_TYPE  budget type          01 to 05 (personnel, operating, investment, subsidies, other)

@@ -1,4 +1,4 @@
-// Fisko Budget pages (round 47: information architecture), the same way 66h-fin-pages.js and 74-proc-pages.js lay
+// Budget pages (round 47: information architecture), the same way 66h-fin-pages.js and 74-proc-pages.js lay
 // out Finance and Procurement. The pages are renumbered B1 to B11 (the old module code stays on the eyebrow, for
 // example "B7 · M06"), grouped by the budget cycle: formulation for FY2571, execution for FY2570, and results and
 // analysis. M09 is split into two pages: analytics and forecasts (B10) and the AI assistant and agents (B11).
@@ -107,7 +107,7 @@ function bHead(p, html) {
 // Render another page in place of this one and fix the address, the crumb and the menu to match.
 function bRedirect(q, base) {
   CUR = q.id;
-  if (!window.FISKO_ROUTE && location.hash !== "#" + q.id) history.replaceState(null, "", "#" + q.id);
+  if (!window.APP_ROUTE && location.hash !== "#" + q.id) history.replaceState(null, "", "#" + q.id);
   const n = NAV.find(x => x.id === q.id);
   setTimeout(() => { markNav(n); $("#crumb").innerHTML = `${esc(tx(S.org))} · <b>${tx(n.label)}</b>`; });
   return bRender(q, base);

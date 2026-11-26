@@ -1,5 +1,5 @@
-// Fisko-KlangFinance, round R1: Project ID of a procurement item, e-GP number linked afterwards, GFMIS budget rows,
-// file import adapters, and the end-to-end loop of an item. Written new for the DPT finance division (not from Fisko-ERP-Gov).
+// KlangFinance, round R1: Project ID of a procurement item, e-GP number linked afterwards, GFMIS budget rows,
+// file import adapters, and the end-to-end loop of an item. Written new for the DPT finance division (not from ERP-Gov).
 // Rules agreed with the user on 3 Nov 2569: a Project ID is the code of ONE procurement item; the system issues it
 // automatically when the item is created from an allocation line (eBud); every procurement has one, with or without
 // an e-GP number; the e-GP number is linked later, after the item has been sent to e-GP. The number format below is a
@@ -31,7 +31,7 @@ function pjLink(p, no, src, why, date) {
   audit(prev ? ["แก้เลข e-GP ที่ผูก", "Changed the linked e-GP number"] : ["ผูกเลข e-GP กับรหัสโครงการ", "Linked an e-GP number to a Project ID"], `${p.pid} ${no}${why ? " · " + why : ""}`);
 }
 
-// ---------- the loop of one item, derived from the data already in Fisko ----------
+// ---------- the loop of one item, derived from the data already in ----------
 function pjLoop(p) {
   const line = famLine(p.line), rq = (S.reqn || []).filter(r => r.plan === p.id).slice(-1)[0], cs = S.cases ? caseByPlan(p.id) : null, ct = (S.contracts || []).find(c => c.plan === p.id), st = pjState(p);
   const accN = ct ? ct.phases.filter(phaseAccepted).length : 0, paid = ct ? sumv(S.payreqs.filter(y => y.contract === ct.id && y.status === "approved").map(y => y.amount)) : 0;
@@ -48,7 +48,7 @@ function pjLoop(p) {
   ];
   const cur = steps.findIndex(s => !s[1]);
   return `<ol class="pj-loop" style="list-style:none;margin:0;padding:0">${steps.map((s, i) => `<li style="display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)">${dotI(s[1] ? "ok" : i === cur ? "warn" : "muted")}<b style="font-weight:600;min-width:12em">${i + 1}. ${s[0]}</b><span class="sub">${s[2]}</span>${i === cur ? tag(L("ขั้นปัจจุบัน", "Current step"), "p-warn") : ""}</li>`).join("")}</ol>
-    <p class="sub">${L("ที่มา: อ่านจากแผน ใบขอซื้อ รายการจัดซื้อ สัญญา และใบอนุมัติเบิกจ่ายที่มีใน Fisko (ข้อมูลตัวอย่าง) ไม่ได้ติดตามผลเบิกจ่ายจริงจาก GFMIS", "Read from the plan, requisitions, procurement files, contracts and payment approvals already in Fisko (sample data); real GFMIS disbursement is not tracked")}</p>`;
+    <p class="sub">${L("ที่มา: อ่านจากแผน ใบขอซื้อ รายการจัดซื้อ สัญญา และใบอนุมัติเบิกจ่ายที่มีใน (ข้อมูลตัวอย่าง) ไม่ได้ติดตามผลเบิกจ่ายจริงจาก GFMIS", "Read from the plan, requisitions, procurement files, contracts and payment approvals already in (sample data); real GFMIS disbursement is not tracked")}</p>`;
 }
 
 // ---------- seed: every sample plan item gets a Project ID, budget rows, and a short link history ----------

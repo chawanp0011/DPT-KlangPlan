@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P89 (25 Nov 2569): the overview of ติดตามความก้าวหน้า as the department's summary sheet
+// KlangFinance, round P89 (25 Nov 2569): the overview of ติดตามความก้าวหน้า as the department's summary sheet
 // ("ภาพรวม สถานะการจัดซื้อจัดจ้าง ประจำปีงบประมาณ": rows รวมทั้งสิ้น / ส่วนกลาง / ส่วนภูมิภาค, then each type with its budget kind and
 // central/regional; columns จำนวน, งบประมาณ, then each procurement stage with a count and an amount in million baht).
 // The rows can be grouped by ประเภท (as the sheet), ผลผลิต/โครงการ, หน่วยงาน or ลักษณะงบประมาณ. Every number opens the list filtered on

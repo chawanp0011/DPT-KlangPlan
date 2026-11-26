@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P18 (16 Nov 2569): the budget request dashboard (BQ9) made clean, with only what each right needs.
+// KlangFinance, round P18 (16 Nov 2569): the budget request dashboard (BQ9) made clean, with only what each right needs.
 // Before: every right saw the same page, fourteen tables. Now the page has four profiles (the figures and the sums are still those of file 98zl):
 //   - a division (unit) user: its own requests: what to do (drafts and returned), the stage of the requests, the kind of expenditure, the quarterly plan;
 //   - Planning: what waits for it (to review, unchecked, possible duplicates, hearing answers), the quota, by division, by stage, by budget type;

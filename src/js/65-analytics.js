@@ -1,4 +1,4 @@
-// Fisko Procurement round 15 (P3 of the detailed design): analytics with KPI definitions in one place
+// Procurement round 15 (P3 of the detailed design): analytics with KPI definitions in one place
 // (the "semantic layer"), the red-flag library RF-01..10 with the triage workflow, and an OCDS export of
 // published data only. Signals say "should be checked", never "wrong": a single signal proves nothing.
 const med = a => { const s = a.filter(x => x != null && !isNaN(x)).sort((x, y) => x - y); if (!s.length) return null; const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
@@ -95,7 +95,7 @@ const rfVisible = f => rfSeeAll() || (ROLE === "proc" && rfRev(f.key).status ===
 // ---------- OCDS (published data only) ----------
 const OCDS_METHOD = { specific: "limited", ebid: "open", selective: "selective", emarket: "open" };
 function ocdsRelease(c) {
-  const p = famPlan(c.plan), rq = caseReq(c), con = caseCon(c), a = c.award, rel = { ocid: `ocds-fisko-${c.id}`, id: `${c.id}-${(con && con.ver) || 1}`, date: (S.caseEvents.find(e => e.case === c.id) || {}).t || nowIso(), tag: [], initiationType: "tender" };
+  const p = famPlan(c.plan), rq = caseReq(c), con = caseCon(c), a = c.award, rel = { ocid: `ocds-app-${c.id}`, id: `${c.id}-${(con && con.ver) || 1}`, date: (S.caseEvents.find(e => e.case === c.id) || {}).t || nowIso(), tag: [], initiationType: "tender" };
   rel.planning = { budget: { id: c.line, description: tx(famLine(c.line).name), amount: { amount: p.est, currency: "THB" } } };
   if (c.egp && c.egp.announce) { rel.tag.push("tender"); rel.tender = { id: c.egp.no, title: tx(p.name), status: a ? "complete" : "active", procurementMethod: OCDS_METHOD[c.method] || "limited", mainProcurementCategory: c.kind === "goods" ? "goods" : c.kind === "construction" ? "works" : "services", value: c.ref ? { amount: c.ref.amount, currency: "THB" } : undefined, tenderPeriod: { startDate: c.egp.announce, endDate: c.egp.close }, numberOfTenderers: c.egp.bidders != null ? c.egp.bidders : undefined }; }
   else if (a) { rel.tag.push("tender"); rel.tender = { id: c.id, title: tx(p.name), status: "complete", procurementMethod: "limited", value: { amount: rq.amount, currency: "THB" } }; }
@@ -103,7 +103,7 @@ function ocdsRelease(c) {
   if (con) {
     rel.tag.push("contract"); rel.contracts = [{ id: con.id, awardID: `${c.id}-A1`, title: tx(p.name), status: c.close ? "terminated" : "active", value: { amount: con.amount, currency: "THB" }, dateSigned: con.signed, period: { startDate: con.signed, endDate: con.phases[con.phases.length - 1].due },
       amendments: (con.vars || []).filter(v => v.status === "approved").map(v => ({ id: v.id, date: v.decided.t.slice(0, 10), rationale: v.kind === "time" ? `time extension ${v.days} days` : `amount change ${v.delta}` })) }];
-    const tr = S.payreqs.filter(x => x.contract === con.id && x.status === "approved").map(x => ({ id: x.id, source: "Fisko Finance", date: (x.decided || {}).t ? x.decided.t.slice(0, 10) : x.t.slice(0, 10), value: { amount: x.amount, currency: "THB" } }));
+    const tr = S.payreqs.filter(x => x.contract === con.id && x.status === "approved").map(x => ({ id: x.id, source: "Finance", date: (x.decided || {}).t ? x.decided.t.slice(0, 10) : x.t.slice(0, 10), value: { amount: x.amount, currency: "THB" } }));
     rel.tag.push("implementation"); rel.contracts[0].implementation = { transactions: tr };
   }
   return rel;
@@ -152,7 +152,7 @@ PROC.ocds = () => {
   <div class="alert"><div class="ic" style="background:var(--info-soft);color:var(--info)">i</div><div><b>${L("ส่งออกเฉพาะข้อมูลที่ประกาศแล้ว", "Only published data is exported")}</b><p>${L("ไม่รวมข้อเสนอของผู้ยื่นที่ไม่ชนะ รายชื่อกรรมการ และเหตุผลภายใน รหัสรายการจัดซื้อใช้เป็น OCID ชั่วคราว คำนำหน้าที่จดทะเบียนและรูปแบบที่กรมบัญชีกลางใช้จริงต้องตรวจก่อนส่งออกจริง (ผลลัพธ์นี้เป็นตัวอย่างโครงสร้าง OCDS 1.1)", "Losing bids, committee names and internal reasons are left out. The case ID stands in as the OCID; the registered prefix and the format the Comptroller General's Department actually uses must be checked before a real export. This is a structure sample of OCDS 1.1.")}</p></div></div>
   <section class="panel"><header><h2>${L("รายการจัดซื้อที่ส่งออกได้", "Cases that can be exported")}</h2><span class="sp"></span><button class="btn primary" type="button" id="ocds-gen">${L("สร้าง JSON", "Build JSON")}</button></header>
     <div class="tbl-wrap"><table><thead><tr><th>OCID</th><th>${L("รายการ", "Item")}</th><th>${L("ขั้นที่ส่งออก", "Stages")}</th></tr></thead>
-      <tbody>${cs.map(c => `<tr><td class="mono">ocds-fisko-${c.id}</td><td>${esc(caseName(c))}</td><td class="sub">${ocdsRelease(c).tag.join(" · ")}</td></tr>`).join("") || `<tr><td colspan="3" class="sub">—</td></tr>`}</tbody></table></div>
+      <tbody>${cs.map(c => `<tr><td class="mono">ocds-app-${c.id}</td><td>${esc(caseName(c))}</td><td class="sub">${ocdsRelease(c).tag.join(" · ")}</td></tr>`).join("") || `<tr><td colspan="3" class="sub">—</td></tr>`}</tbody></table></div>
     ${skip.length ? `<div class="body sub">${L("ยังไม่ส่งออก (ยังไม่ประกาศ)", "Not exported yet (not announced)")}: ${skip.map(c => c.id).join(", ")}</div>` : ""}</section>
   ${OCDS_JSON ? `<section class="panel"><header><h2>${L("ผลลัพธ์", "Output")}</h2><span class="sp"></span><button class="btn" type="button" id="ocds-copy">${L("คัดลอก", "Copy")}</button><button class="btn" type="button" id="ocds-dl">${L("ดาวน์โหลดไฟล์", "Download")}</button></header>
     <div class="body"><pre id="ocds-pre" style="margin:0;max-height:420px;overflow:auto;font-family:var(--mono);font-size:12px;white-space:pre">${esc(OCDS_JSON)}</pre><div class="sub" style="margin-top:6px">${L("ปุ่มดาวน์โหลดทำงานในไฟล์ที่เปิดตรง ๆ ส่วนในหน้าที่เผยแพร่ให้ใช้ปุ่มคัดลอก", "Download works in the standalone file; on the published page use Copy.")}</div></div></section>` : ""}`;
@@ -174,7 +174,7 @@ function bindAnalytics() {
   const g = $("#ocds-gen"); if (g) g.onclick = () => { OCDS_JSON = JSON.stringify(ocdsPackage(), null, 2); audit(["สร้างไฟล์ OCDS", "Built an OCDS export"], `${ocdsCases().length} releases`); commit(); route(); };
   const cp = $("#ocds-copy"); if (cp) cp.onclick = () => { const fb = () => { const r = document.createRange(); r.selectNodeContents($("#ocds-pre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast(L("เลือกข้อความแล้ว กด Ctrl+C", "Selected; press Ctrl+C")); };
     try { navigator.clipboard.writeText(OCDS_JSON).then(() => toast(L("คัดลอกแล้ว", "Copied")), fb); } catch (e) { fb(); } };
-  const dl = $("#ocds-dl"); if (dl) dl.onclick = () => { try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([OCDS_JSON], { type: "application/json" })); a.download = `fisko-ocds-${TODAY}.json`; a.click(); } catch (e) { toast(L("ดาวน์โหลดไม่ได้ในหน้านี้ ใช้ปุ่มคัดลอก", "Can't download on this page; use Copy")); } };
+  const dl = $("#ocds-dl"); if (dl) dl.onclick = () => { try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([OCDS_JSON], { type: "application/json" })); a.download = `app-ocds-${TODAY}.json`; a.click(); } catch (e) { toast(L("ดาวน์โหลดไม่ได้ในหน้านี้ ใช้ปุ่มคัดลอก", "Can't download on this page; use Copy")); } };
 }
 {
   const base = BIND.procurement;

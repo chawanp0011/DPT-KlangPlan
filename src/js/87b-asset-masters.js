@@ -1,4 +1,4 @@
-// Fisko Assets, round R9, part 2: master data and batch work.
+// Assets, round R9, part 2: master data and batch work.
 //   A7  depreciation register, one line per asset, laid out from the Comptroller General's Department letter
 //   A8  asset type register (main type / sub type, life range, rate range, CGD code placeholder)
 //   A9  location register (building, floor, room, address, coordinates) so reports and other systems can reuse the place

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P91 (25 Nov 2569): the sample of FY 2570 shaped like the department's follow-up files
+// KlangFinance, round P91 (25 Nov 2569): the sample of FY 2570 shaped like the department's follow-up files
 // (asked for: "ใช้ข้อมูลในนี้เป็นตัวอย่างในการทำข้อมูล", folder "ติดตามเร่งรัดการเบิกจ่าย ประจำปีงบประมาณ พ.ศ. 2570").
 // Only the SHAPE is taken from the files, nothing else: the share of each type of work (ก่อสร้าง ~70%, จ้างที่ปรึกษา ~10%, ครุภัณฑ์ ~17%,
 // ดำเนินการเอง ~3%, งบเงินอุดหนุน), central against regional (~70/30), one-year against multi-year, the share at each procurement stage

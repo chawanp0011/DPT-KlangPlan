@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q3 (10 Nov 2569): the quota from the Budget Bureau and the submission ceiling.
+// KlangFinance, budget round Q3 (10 Nov 2569): the quota from the Budget Bureau and the submission ceiling.
 // The Planning division keeps one record per fiscal year: the starting budget amount (the quota the Bureau gave) and the
 // ceiling in percent (sample starting value 120). The package for the Bureau may not total more than quota x ceiling; the
 // batch on page B6 can't be made, changed or sent while it does. The total is the sum of every batch not cancelled (the

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P22 (16 Nov 2569): the hand-over onward to the local authority (อปท.) or the owner of the project is made for
+// KlangFinance, procurement round P22 (16 Nov 2569): the hand-over onward to the local authority (อปท.) or the owner of the project is made for
 // the WHOLE PROJECT, not phase by phase ("ส่งมอบต่อให้ อปท. / เจ้าของโครงการ (หลังปิดแฟ้ม) ส่งทั้งโครงการ ไม่ใช่รายงวด").
 // Round P6 (file 98zi) kept it per phase: ph.handover = { to, party, date, docNo, note, by, t }. Now it is one record on the contract, c.handover, with the same
 // fields. What stays per phase is what really is per phase: the contractor's delivery (ph.delivered), the division's receipt (ph.recv) and the committee's

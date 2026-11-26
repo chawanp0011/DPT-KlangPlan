@@ -1,10 +1,10 @@
-# Fisko: project handoff
+#: project handoff
 
-State as of 18 October 2026, branch `main`. Round 42 (Fisko Finance FN6) is the latest; see sections 36 to 42. This note is for whoever picks the work up next: what exists, how to run and change it, what was decided, and what is still open.
+State as of 18 October 2026, branch `main`. Round 42 (Finance FN6) is the latest; see sections 36 to 42. This note is for whoever picks the work up next: what exists, how to run and change it, what was decided, and what is still open.
 
 ## 1. What this is
 
-**Fisko** is the working name for a budgeting platform for Thai government agencies (the requirements call it AEBMS, Agency e-Budgeting Management System). It covers the full cycle: strategic plan, budget requests, consolidation, review, submission to the Budget Bureau, allocation, spending, performance, AI support and administration (modules M01 to M10).
+**** is the working name for a budgeting platform for Thai government agencies (the requirements call it AEBMS, Agency e-Budgeting Management System). It covers the full cycle: strategic plan, budget requests, consolidation, review, submission to the Budget Bureau, allocation, spending, performance, AI support and administration (modules M01 to M10).
 
 What has been produced so far is **discussion material for a customer**, not a real system:
 
@@ -12,26 +12,26 @@ What has been produced so far is **discussion material for a customer**, not a r
 - A clickable HTML prototype that runs entirely in the browser with fictional data.
 - No backend, no database, no real integrations, no real AI model.
 
-Everything is labelled sample data. The name Fisko still needs a trademark check, and no Avalant product names appear anywhere (on purpose).
+Everything is labelled sample data. The name still needs a trademark check, and no Avalant product names appear anywhere (on purpose).
 
 ## 2. Where everything is
 
 | Item | File | Notes |
 |---|---|---|
-| Prototype (standalone) | `Fisko_Prototype.html` | Opens directly in a browser. Has both sample organisations. |
-| Prototype (published build) | `fisko-prototype.html` | Same code but **without** the กรมโยธา sample. Published as an artifact. |
-| Solution design (Thai) | `Fisko_Solution_Design.html` | v0.3. Functional, application, technical, data, integration, AI and security design. |
-| Demo script (Thai) | `Fisko_Demo_Script.html` | 25 steps: 15 minutes plus a 12-minute Procurement and Finance extension (steps 16 to 25). Matches the in-app demo guide. |
-| Customer deck | `Fisko_Conceptual_Architecture.pptx` / `.pdf` | Built on the customer's CPAxtra template. Not touched since round 1. |
+| Prototype (standalone) | `Prototype.html` | Opens directly in a browser. Has both sample organisations. |
+| Prototype (published build) | `prototype-page.html` | Same code but **without** the กรมโยธา sample. Published as an artifact. |
+| Solution design (Thai) | `Solution_Design.html` | v0.3. Functional, application, technical, data, integration, AI and security design. |
+| Demo script (Thai) | `Demo_Script.html` | 25 steps: 15 minutes plus a 12-minute Procurement and Finance extension (steps 16 to 25). Matches the in-app demo guide. |
+| Customer deck | `Conceptual_Architecture.pptx` / `.pdf` | Built on the customer's CPAxtra template. Not touched since round 1. |
 | Roadmap | `ROADMAP.md` | What each module's deeper feature was. All built. |
-| Product family concept (Thai) | `Fisko_Product_Family_Concept.html` | v0.2. Fisko Budget, Procurement and Finance on one shared core. Decisions D-F01 to D-F03 and D-F06 are recorded in it. |
+| Product family concept (Thai) | `Product_Family_Concept.html` | v0.2. Budget, Procurement and Finance on one shared core. Decisions D-F01 to D-F03 and D-F06 are recorded in it. |
 | Prototype source | `src/` | The only place to edit the prototype. |
 
 Links and places:
 
-- GitHub: `https://github.com/akarapolb/Fisko` (private). Push works with stored credentials. The `gh` CLI is not installed.
+- GitHub: `https://github.com/akarapolb/` (private). Push works with stored credentials. The `gh` CLI is not installed.
 - Published prototype: `https://claude.ai/artifact/K8TJFETX7GMftoZYb9zFZR` (version 14, shared as "anyone with the link").
-- Working folder: `D:\Claude\Fisko`.
+- Working folder: `D:\Claude\`.
 
 ## 3. Run, build, publish
 
@@ -46,18 +46,18 @@ This concatenates `src/head.html`, `styles.css`, `body.html` and every `src/js/*
 **Check syntax** after a build (extract the script and let Node parse it):
 
 ```bash
-sed -n "/<script>/,/<\/script>/p" Fisko_Prototype.html | sed '1d;$d' > "$TEMP/fk_check.js" && node --check "$TEMP/fk_check.js"
+sed -n "/<script>/,/<\/script>/p" Prototype.html | sed '1d;$d' > "$TEMP/fk_check.js" && node --check "$TEMP/fk_check.js"
 ```
 
 **Run locally**:
 
 ```bash
-cd /d/Claude/Fisko && python -m http.server 8787 --bind 127.0.0.1
+cd /d/Claude/&& python -m http.server 8787 --bind 127.0.0.1
 ```
 
-Then open `http://localhost:8787/Fisko_Prototype.html`. The page also works by double-clicking the file.
+Then open `http://localhost:8787/Prototype.html`. The page also works by double-clicking the file.
 
-**Publish**: the published page is the artifact tool's job. Republish `fisko-prototype.html` with the existing URL so the link stays the same. The artifact is a different file from the standalone one, so rebuild first.
+**Publish**: the published page is the artifact tool's job. Republish `prototype-page.html` with the existing URL so the link stays the same. The artifact is a different file from the standalone one, so rebuild first.
 
 **Sign in**: pick a sample account and use the passcode `246810`. It is the same for every account (the two-factor step is simulated). Accounts without two-factor set up (for example มาลี ศรีสุข in the sample department) get a sample QR step first.
 
@@ -73,7 +73,7 @@ It is one global scope: every `src/js` file becomes part of one `<script>`, so t
 | `20-shell.js`, `30-home.js` | Navigation, top bar, My Workspace tasks (`myTasks()`), `jump()` |
 | `40` to `48` | The modules. Files ending in `b` or `c` are tabs and deeper features added later |
 | `50`, `50b` | M10 administration |
-| `60`, `62`, `64` | Fisko Procurement, Fisko Finance, duty-separation engine and its M10 tab |
+| `60`, `62`, `64` | Procurement, Finance, duty-separation engine and its M10 tab |
 | `66` | App switcher: the three apps, the menu built per app, the switcher menu |
 | `52-demo.js` | The in-app demo guide (`DEMO` array) |
 | `54-identity.js`, `56-search.js`, `58-history.js` | Sign-in and delegation, global search, record history drawer |
@@ -91,7 +91,7 @@ Conventions worth knowing before you edit:
 
 ## 5. State and data
 
-- State is kept per organisation in `localStorage` under `fisko-v1-<org>` (`sample` or `dpt`). Other keys: `fisko-session`, `fisko-lang`, `fisko-role`, `fisko-org`, `fisko-app`.
+- State is kept per organisation in `localStorage` under `app-v1-<org>` (`sample` or `dpt`). Other keys: `app-session`, `app-lang`, `app-role`, `app-org`, `app-app`.
 - `DATA_V` in `00-core.js` (now **21**) is the seed version. **Bump it whenever you change the shape of seeded data**, or browsers that already hold old saved state will keep the old shape and break. Bumping resets everyone's saved demo data once.
 - Seed data is built by `buildOrg()` in `06-seedhelp.js`. Rounds 7 to 10 add their data at the end of that function, in clearly commented blocks.
 - All dates are anchored to a constant, `TODAY = "2026-10-16"` in `00-core.js`, **not the computer's clock**. So deadlines, "days left" and delegation periods behave the same on any day. Only the time of day comes from the real clock.
@@ -101,7 +101,7 @@ Conventions worth knowing before you edit:
 
 There is **no automated test suite**. Testing was done by driving the page in the browser pane:
 
-1. Clear `fisko-v1-*` keys, reload, switch organisation, language and role through the page's own functions.
+1. Clear `app-v1-*` keys, reload, switch organisation, language and role through the page's own functions.
 2. A render sweep: visit every route and tab for every role, in both languages and both organisations, catching exceptions (about 1,200 renders per sweep).
 3. End-to-end flows for each new feature (create, approve, reject, edit), reading the resulting state.
 4. A phone-width check: set the viewport to 375 px and confirm `document.documentElement.scrollWidth` does not exceed the width, on every new screen.
@@ -123,8 +123,8 @@ Tested only in the browser pane (a Chromium engine). Safari and Firefox were not
 | 8 | M01 project bank and plan revision; M02 price catalogue and paste from Excel; M03 ceiling responses and 4-year forward estimates |
 | 9 | M04 budget hearings and cut impact; M05 parliament stages; M06 allotment releases and carry-over |
 | 10 | M07 year-end forecast and procurement milestones; M08 project evaluation and lessons; M09 spending anomalies and justification quality; M10 notification templates, SLAs, retention and backup |
-| 11 | Light versions of Fisko Procurement and Fisko Finance, a procurement officer role, and duty-separation rules (see section 12) |
-| 12 | App switcher between Fisko Budget, Fisko Procurement and Fisko Finance (see section 12) |
+| 11 | Light versions of Procurement and Finance, a procurement officer role, and duty-separation rules (see section 12) |
+| 12 | App switcher between Budget, Procurement and Finance (see section 12) |
 
 After round 10 the demo guide and script were rewritten, and the design document went to v0.3 with the new requirements tagged "ใหม่ v0.3".
 
@@ -155,7 +155,7 @@ Customer-facing:
 1. Confirm the proposals above with the agency, especially priorities, thresholds and the cabinet targets.
 2. Settle the open decisions D-01 to D-09 in section 14 of the design document (deployment model, multi-organisation approach, allowed AI models, review rounds, history depth, forms, notification channels, anomaly thresholds, delegable approvals).
 3. Check the design against the agency's actual TOR, then write the Detailed Design (the demo closes by proposing six document sets and a workshop on real approval lines and forms).
-4. Run the Fisko trademark check, covering the sub-names Fisko Budget, Fisko Procurement and Fisko Finance (decision D-F06).
+4. Run the trademark check, covering the sub-names Budget, Procurement and Finance (decision D-F06).
 5. Product family: the direction is decided (build Procurement and Finance in parallel, as separate products on one core, with light versions first). Still open with the agency: the segregation-of-duties policy (D-F04) and the e-GP and GFMIS access channels (D-F05). Sizing, time and cost have not been estimated.
 
 Engineering, if the prototype is kept going:
@@ -175,20 +175,20 @@ Engineering, if the prototype is kept going:
 - **Line endings.** Git warns that LF will become CRLF. It is harmless here.
 - **Commit messages** end with the attribution line the session was told to use. Branch is `main` and was left as is on purpose.
 
-## 12. Fisko Procurement and Fisko Finance (round 11)
+## 12. Procurement and Finance (round 11)
 
 Built as light versions inside the same prototype, following the product family concept (decisions D-F01 to D-F03 and D-F06). The working defaults for the two open decisions are the ones chosen in this session: **files only** for e-GP and GFMIS (D-F05) and the **chapter 7 table** for duty separation (D-F04).
 
-- **Where:** two new menu items under "More Fisko products" (`procurement`, `finance`) and an M10 tab, "Duty separation". Code is in `60-procurement.js`, `62-finance.js` and `64-duties.js`. Deep links are `prc-<tab>` and `fnc-<tab>`.
+- **Where:** two new menu items under "More products" (`procurement`, `finance`) and an M10 tab, "Duty separation". Code is in `60-procurement.js`, `62-finance.js` and `64-duties.js`. Deep links are `prc-<tab>` and `fnc-<tab>`.
 - **Data:** FY2570 only, built on the M06 allocation lines. Seeded in `06-seedhelp.js` (round 11 block): a procurement plan (`S.pplan`), requisitions (`S.reqn`), contracts with phases and acceptance signatures (`S.contracts`), payment requests (`S.payreqs`), GFMIS file imports (`S.gfmisFiles`), e-GP file imports (`S.egpImports`) and the duty rules (`S.sod`). A procurement officer user is added to both organisations.
 - **Chain:** allocation line, plan item, requisition (executive approves, within the room left on the line), contract (procurement officer creates it, which commits the line), acceptance (2 signatures from the committee), payment request (finance), payment approval (executive), file reconciliation (finance).
 - **Duty rules SD-01 to SD-05** are checked on the signed-in user and on the person whose authority they hold by delegation, so delegation can't get around them. Blocked attempts are logged in the audit log and shown in M10 → Duty separation. The two seeded delegations of "approve requisitions and payments" (to Planning and to Finance) exist so the SD-04 and SD-03 blocks can be shown in the demo. SD-01, SD-02 and SD-05 are in the code but are hard to trigger with the sample users.
-- **Not done:** the light M06 and M07 screens in Fisko Budget still keep their own data and don't read from the new products yet (the concept says they should). The demo guide and demo script don't cover these screens. The design document (Solution Design) and the concept document were not changed for these screens, except for the note in concept chapter 9.
-- **App switcher (round 12):** every `NAV` entry has an `app` (`budget`, `procurement`, `finance`, or `all` for My Workspace and M10). The left menu is built per app in `renderNav()` (`66-apps.js`). The Procurement and Finance entries carry `tabs`, which become their menu items (`P1`..`P4`, `F1`..`F3`). The page you open decides the current app (`appSync()` runs in the router), so deep links, tasks and notifications switch apps by themselves. The current app is kept in `localStorage` (`fisko-app`), and the last page of each app is remembered while the page is open. An app a role can't use is greyed out in the switcher. To add a fourth app, add it to `APPS` and `APP_IDS` (`00-core.js`, `66-apps.js`), give its `NAV` entries an `app` and a `group`, and add that group to `GROUPS`.
+- **Not done:** the light M06 and M07 screens in Budget still keep their own data and don't read from the new products yet (the concept says they should). The demo guide and demo script don't cover these screens. The design document (Solution Design) and the concept document were not changed for these screens, except for the note in concept chapter 9.
+- **App switcher (round 12):** every `NAV` entry has an `app` (`budget`, `procurement`, `finance`, or `all` for My Workspace and M10). The left menu is built per app in `renderNav()` (`66-apps.js`). The Procurement and Finance entries carry `tabs`, which become their menu items (`P1`..`P4`, `F1`..`F3`). The page you open decides the current app (`appSync()` runs in the router), so deep links, tasks and notifications switch apps by themselves. The current app is kept in `localStorage` (`app-app`), and the last page of each app is remembered while the page is open. An app a role can't use is greyed out in the switcher. To add a fourth app, add it to `APPS` and `APP_IDS` (`00-core.js`, `66-apps.js`), give its `NAV` entries an `app` and a `group`, and add that group to `GROUPS`.
 
 ## 13. Procurement case files, P0 and P1 (round 13)
 
-Builds P0 and P1 of `Fisko_Procurement_Design.html` (chapter 10). All code is in `61-cases.js`, plus small patches in `60-procurement.js`, `64-duties.js`, `66-apps.js` and the seed.
+Builds P0 and P1 of `Procurement_Design.html` (chapter 10). All code is in `61-cases.js`, plus small patches in `60-procurement.js`, `64-duties.js`, `66-apps.js` and the seed.
 
 - **New role** `prochead` (head of procurement, user `u11`). `proc` is the officer who does the work; `prochead` approves a method that differs from the advice, approves special cases and decides appeals. Both can use the case screens. Helper `isProcRole()` replaces the old `ROLE === "proc"` checks. Neither role is offered as an acceptance-committee member (`famPeople`).
 - **Settings in state (P0):** `S.mrules` (method rules MR-01..05, each with kind, ceiling, method, committees, appeal flag, confidence A/B/C and an effective date), `S.pcfg` (`specificMax` 500000, `singleInspectorMax` 100000, `minMembers` 3, `appealDays` 7, `splitDays` 90), `S.holidays` (sample dates) and `S.caseEvents` (event log, newest first). Edited in M10 → **Procurement rules** (admin edits, audit/proc/prochead view). Only A-level facts are fixed in the design; the other numbers are starting values to confirm.
@@ -203,7 +203,7 @@ Builds P0 and P1 of `Fisko_Procurement_Design.html` (chapter 10). All code is in
 
 ## 14. Contract management and the payment gate, P2 (round 14)
 
-Builds P2 of `Fisko_Procurement_Design.html`. New file `63-contracts.js` (loads after `62-finance.js`); `60-procurement.js` now calls `conPanel(c)` for every contract panel, and the old `[data-sign]` handler is gone.
+Builds P2 of `Procurement_Design.html`. New file `63-contracts.js` (loads after `62-finance.js`); `60-procurement.js` now calls `conPanel(c)` for every contract panel, and the old `[data-sign]` handler is gone.
 
 - **Settings** added to `S.pcfg` (all editable in M10 → Procurement rules, all marked to be confirmed except where the design says otherwise): `penaltyPct` (percent per day, 0.1), `penaltyCapPct` (10), `guaranteePct` (5), `guaranteeWarnDays` (30), `ladderPct` (10), `extDaysHead` (30), `acceptWd` (3), `acceptWdLast` (5), `invoiceTol` (0).
 - **Contract fields:** `base`, `ver`, `versions[]`, `vars[]`, `guarantee`; per phase `delivered`, `ext` (days that forgive penalty: employer's fault or force majeure), `extV` (supplier's fault: moves the date but not the penalty), `result` (`ok` or `partial`), `okAmount`, `dissent[]`, `cert`, `invoice`, `hold`, `release`.
@@ -242,7 +242,7 @@ New file `67-procai.js` (loads last of the procurement files). One new Procureme
 
 ## 17. Demo extension for Procurement and Finance (round 17)
 
-The in-app demo guide (`52-demo.js`) and `Fisko_Demo_Script.html` now have steps 16 to 24, about 10 minutes, run on the sample organisation straight after step 15 without a reset: raise two small requisitions and meet the split-purchase check; the executive approves; the officer chooses a method that differs from the advice; the head approves; case PC-2570-003 goes through bids, award, the (simulated) appeal window and to the contract step; invoice for CT-2570-002 phase 1 (one day late, so a penalty shows); Finance request through the payment gate; Audit red flags and analytics; AI assistant and OCDS export.
+The in-app demo guide (`52-demo.js`) and `Demo_Script.html` now have steps 16 to 24, about 10 minutes, run on the sample organisation straight after step 15 without a reset: raise two small requisitions and meet the split-purchase check; the executive approves; the officer chooses a method that differs from the advice; the head approves; case PC-2570-003 goes through bids, award, the (simulated) appeal window and to the contract step; invoice for CT-2570-002 phase 1 (one day late, so a penalty shows); Finance request through the payment gate; Audit red flags and analytics; AI assistant and OCDS export.
 
 - All nine steps were walked through the real UI with a script, and the demo guide lists 24 steps. If the seed data changes, rerun that walk: the steps depend on PP-2570-005 and 006 (the small items in the requester's unit), PC-2570-003 (at the e-GP step with a 30 October close), CT-2570-002 (a late phase 1) and the single-bidder case PC-2570-002.
 - The award price in step 20 must stay at or under the reference price (about 29.4 million), or the screen asks for a reason.
@@ -250,7 +250,7 @@ The in-app demo guide (`52-demo.js`) and `Fisko_Demo_Script.html` now have steps
 
 ## 18. Sourcing in depth, Q1 (round 18)
 
-Builds round Q1 of `Fisko_Procurement_Design.html` v0.2 (FR-PR-39 to 45, rules R-13, R-14, R-19, SD-07). New file `61b-sourcing.js`, which loads right after `61-cases.js`. One new Procurement tab, `tor` (TOR library); the tab codes are now P1 to P10.
+Builds round Q1 of `Procurement_Design.html` v0.2 (FR-PR-39 to 45, rules R-13, R-14, R-19, SD-07). New file `61b-sourcing.js`, which loads right after `61-cases.js`. One new Procurement tab, `tor` (TOR library); the tab codes are now P1 to P10.
 
 - **Hooks:** `61-cases.js` now has `CASE_PANELS` (functions that return extra HTML for the case page) and `CASE_BINDS` (functions that bind them, given the case and `done`). `61b` adds its panels through these and wraps `caseChecks`. Use the same hooks for later rounds rather than editing `caseDetail`.
 - **TOR library:** `S.torLib` with versions. An officer proposes a version (with a reason), and the head of procurement approves it; the proposer can't approve their own. A case's TOR is created from the latest approved version of a template, and `c.tor` records `tpl` and `tplV`.
@@ -356,7 +356,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 - **Rules it applies:** one slate-navy accent (`#34498C`, brightened from `#2B3A67` in 26c; `#9DB0E3` in dark) for actions, the current menu item and charts; green, amber and red only as small status dots in outline pills; grey icon chips; no gradients, glows, hover lifts or entrance motion; borders instead of shadows; headings and big numbers at semibold 24 px; chart colours `--c-1..6` are navy-to-grey shades with amber as the only warm tone; white sidebar with a soft navy highlight.
 - **Code changes:** `APPS` colours in `66-apps.js` are now `var(--app-b/p/f)` (the brand mark and app chips use them); `AV_COLORS` in `05b-ui.js` are slate shades. The paper colours inside the document image SVG (`63c`, `63d`) are left as they are, because they draw a paper document.
 - **Tested:** 728 renders (all roles × th/en × both organisations × every page and tab), the 25-step demo walk, 375 px width (no overflow, full-width main), and dark mode on Procurement pages. Note: a screenshot taken right after switching to dark mode can catch a colour transition; take it again before judging.
-- **Charts keep the brand colour (26b):** after review, the user wanted the UI mostly calm but charts in the Fisko colours. New chart tokens `--ch-1..6` (Fisko green `#16A34A`, navy, light green, amber, teal, grey; brighter versions in dark mode); `--c-1..6` now point at them. Chart code uses `--ch-1` where it used `--accent` and `--ch-2` where it used `--info` (`40-dashboard`, `40b`, `44b`, `47`, `48`, `65b` charts, `65-analytics` funnel, `61c` timeline, `49` rounds, home spark); `spark()` and `ring()` default to `--ch-1`. Alert icons keep `--info`. Progress bars, funnels and legend swatches use the chart colours through `calm.css`. Tested again: 728 renders, demo walk, dark mode.
+- **Charts keep the brand colour (26b):** after review, the user wanted the UI mostly calm but charts in the colours. New chart tokens `--ch-1..6` (green `#16A34A`, navy, light green, amber, teal, grey; brighter versions in dark mode); `--c-1..6` now point at them. Chart code uses `--ch-1` where it used `--accent` and `--ch-2` where it used `--info` (`40-dashboard`, `40b`, `44b`, `47`, `48`, `65b` charts, `65-analytics` funnel, `61c` timeline, `49` rounds, home spark); `spark()` and `ring()` default to `--ch-1`. Alert icons keep `--info`. Progress bars, funnels and legend swatches use the chart colours through `calm.css`. Tested again: 728 renders, demo walk, dark mode.
 - **Menus hidden by role stay hidden:** the user chose not to show them as locked items.
 - **App switcher (26c):** the logo button still used the dark rail hover (`--rail-2`) when open, the app letters were dark on navy, and the current app had a hard left bar. `calm.css` now gives the open button the light sidebar hover, white letters on the app marks (dark letters in dark mode), a soft highlight for the current app and an outline task count. CSS only.
 
@@ -364,7 +364,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 - **Asked for:** an AI assistant and co-work chat "like Claude or ChatGPT" in every module, with a chat box, file upload, voice and attachments, where you can also talk to each specialised agent. Choices: build it before round B1; real file and voice input where the browser allows; both a side panel and a full page.
 - **Where:** `src/js/68-cowork.js` (engine and UI) and `src/cowork.css` (added to `build.sh` after `calm.css`). It wraps `renderShell` (adds the **AI** button before the bell) and `route` (keeps the panel in step with the page). New route `#cowork` (not in NAV, open to every role, like `#demo`).
-- **Agents:** `cwAgents()` = the general **Fisko Assistant** (`FA`) plus the agents in `S.agents` whose app the role can use, with icon, autonomy level and abilities from `CW_META`. Switched-off agents (M09) answer that they are off. `FA` routes by keywords (`CW_ROUTE`); attaching an image or PDF routes to AG-14. `@AG-05` in a message switches agent.
+- **Agents:** `cwAgents()` = the general **Assistant** (`FA`) plus the agents in `S.agents` whose app the role can use, with icon, autonomy level and abilities from `CW_META`. Switched-off agents (M09) answer that they are off. `FA` routes by keywords (`CW_ROUTE`); attaching an image or PDF routes to AG-14. `@AG-05` in a message switches agent.
 - **Answers:** `cwAnswer(agent, text, files, recs)` returns HTML, the steps taken (shown as a collapsible list that ticks through) and action buttons. It reuses existing logic: `checks()` (AG-02), `answer(0/2)` from M09 (AG-05, AG-03), `aiAnswer()` KPI layer (AG-10), `phLate()` (AG-08/12), `caseState()` (AG-11), `sampleDocs()` (AG-14), `myTasks()` and `S.payreqs`. A guard (`CW_NO`) refuses approving, changing amounts, signing, paying, awarding or scoring. "Put this draft in the request" is the only write, it is a button, and it only works when the person can edit the request. Each answer is logged in `S.aiLog`.
 - **Context:** the panel sends the current page and record (request on `#request`, case on an open case) unless you remove the context chip.
 - **Files:** picker, drag-and-drop onto the composer, and paste. CSV and text files are read with `FileReader` (CSV: row and column count, first rows, totals of numeric columns). Images and PDFs show a preview and a simulated reading (D-P10). Only file metadata is saved in `S.cowork`; previews use object URLs and are lost on reload.
@@ -375,7 +375,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 28. Budget round B1: data spine and request form (round 28)
 
-- **Design:** round B1 of `Fisko_Budget_Design.html` (FR-B-07 to 13, 19, 20; BR-07 to 13; UX-02, UX-04).
+- **Design:** round B1 of `Budget_Design.html` (FR-B-07 to 13, 19, 20; BR-07 to 13; UX-02, UX-04).
 - **Where:** `src/js/41d-req-b1.js` (roles, statuses, rules, request steps and panels, data sync, seed) and `src/js/49b-budget-b1.js` (review waterfall, consolidation cap strip). Small edits: `42a-review-mode.js` (who can review which status; the pass button's next status), `41-requests.js` (timeline index for the new statuses; `routeSteps` uses `needsCommittee`; unit-scoped lists use `unitRole()`), `49-budget-ui.js` (board columns and card bar for the new statuses), `06-seedhelp.js` (calls `seedBudgetB1`), `00-core.js` (`DATA_V` 22). Styles at the end of `src/calm.css`.
 - **Role and statuses:** `divhead` (division director; demo user u20 in the requester's unit). New statuses `unit` (waiting for the director) and `exec` (waiting for the executive when the committee is not needed). Flow: draft → unit → plan → committee or exec → approved. `needsCommittee(r)`: amount ≥ w3 amount, or a new project (`w3.newProj`), or investment if `w3.invest`. The director is added to every menu the requester has, at shell render (so menus registered by later files are covered). `MATRIX.divhead` is set the same way.
 - **Request steps:** `reqTabsBar` is replaced by a step bar. Every check carries a `step` (`main`, `plan`, `ready`, `docs`, `years`, `equip`), and the dot is red if any check in that step blocks, amber if any warns. The "Next" hint shows the first open item with a button to its step. Submitting with a blocking item jumps to that step.
@@ -387,7 +387,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 29. Budget round B2: Budget Bureau structure, 3R, priority, zero-based, MTEF (round 29)
 
-- **Design:** round B2 of `Fisko_Budget_Design.html` (FR-B-01, 03, 04, 14 to 17).
+- **Design:** round B2 of `Budget_Design.html` (FR-B-01, 03, 04, 14 to 17).
 - **Where:** `src/js/43d-cons-b2.js` (M03) and `src/js/45c-strategy-b2.js` (M01 and `seedBudgetB2`). Styles at the end of `src/calm.css`. `DATA_V` 23.
 - **Five criteria:** `S.criteria` is now k1 obligation 25, k2 urgent policy 20, k3 readiness 20, k4 severity 20, k5 beneficiaries 15 (weights still editable on the Priority tab). `autoScore(r)` fills obligation (personnel or multi-year 5, continuing 4, new 2) and readiness (from B1's readiness score) and carries the old scores over. `ensureScores()` runs before every route so new requests always have five scores. `scoreOf` is replaced to read any number of criteria.
 - **3R:** `threeR()` per request: personnel is kept as an entitlement; score below 55 → redeploy 15%; last year under 70% of plan (from `S.dash.units`) on a continuing request → redeploy 10%; a zero-based flag → redeploy 10%; score 70+ below the project-ceiling line → replace with up to half its request, from the redeployed pool. Planning's button writes the result into round 2 (`S.review.r1`) only for requests waiting for Planning, with a 3R reason in the change log.
@@ -399,7 +399,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 30. Budget round B3: committee, cut impact, submission and briefing packs, lines from the act (round 30)
 
-- **Design:** round B3 of `Fisko_Budget_Design.html` (FR-B-18 not done; FR-B-21 to 26; SD-10; D-B02, D-B03, D-B07).
+- **Design:** round B3 of `Budget_Design.html` (FR-B-18 not done; FR-B-21 to 26; SD-10; D-B02, D-B03, D-B07).
 - **Where:** `src/js/42d-review-b3.js` (committee, quorum, votes, minutes, cut impact, `seedBudgetB3`), `src/js/46c-sub-b3.js` (minister approval, pack, briefing, `seedBudgetB3Sub`), `src/js/47c-alloc-b3.js` (lines from the act). Styles at the end of `src/calm.css`. `DATA_V` 24. AG-16 (Hearing Prep Agent) added to M09 and to the AI co-work chat.
 - **Committee:** role `committee` (demo users u21 to u23 in U05, U06, U03). `S.committee = { members, chair, secretary, quorum: 50 }`: the executive (chair), finance and the three members vote; Planning is the non-voting secretary. On the next scheduled meeting, `m.present` and `m.votes[reqId][userId]`. The record button is blocked without a quorum (`quorumN()`). A present member whose unit matches the request's unit abstains (SD-10). After recording, `m.minutes` holds a bilingual draft (attendance, resolutions, votes, abstentions) shown with a copy button. Members get a "vote on the agenda" task.
 - **Cut impact:** `cutImpact(r, amount)` scales each linked KPI's first-year target and the quarterly plan in direct proportion (D-B07). It is shown live beside the resolved amount; when a cut is resolved, `r.cutImpact` is saved, `r.qplan` is scaled, and the request page shows the effect.
@@ -410,7 +410,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 31. Budget round B4: live in-year management (round 31)
 
-- **Design:** round B4 of `Fisko_Budget_Design.html` (FR-B-27 to 33; R-B-01; BR-14 to 17, 19 to 21). FR-B-34 (central fund and supplementary requests) not built.
+- **Design:** round B4 of `Budget_Design.html` (FR-B-27 to 33; R-B-01; BR-14 to 17, 19 to 21). FR-B-34 (central fund and supplementary requests) not built.
 - **Where:** `src/js/47d-alloc-b4.js` (everything, including `seedBudgetB4`). Styles at the end of `src/calm.css`. `DATA_V` 25.
 - **Balances:** `bal(l)` = { allot, res: `famReserved`, com: `famCommitted`, paid: approved `S.payreqs` through the line's contracts, avail = allot − res − com }. New M06 tab "Four-level balances" (FY2570 only) with a stacked bar per line and a drill-down to requisitions, contracts and payments. Allotment status `l.allot` (`regional`, `due`, `sent`); the seed has one regional line due today (BR-16).
 - **Transfers:** `ALLOC.transfers` is replaced. `classifyTransfer` uses `lineage(l.act)` for programme and output: T6 if the source is extended, T4 if the target is a new project, T3 across programmes, T2 across outputs, else T1. `TR_TYPE` gives the internal approver (Finance director for T1, executive otherwise, Cabinet for T4) and whether the Budget Bureau must agree. Statuses: pending → (bb) → approved, or rejected; T4 shows "needs Cabinet" and has no approve button. T1 gets `reportDue` (+15 days) and "Mark reported". Amount check uses the available balance, not just the allotment. Reasons are the five of clause 25 (`TR_WHY`). The old transfer form and buttons (`#tr-form`, `data-tap`) are no longer rendered; the old `transferLevel` is unused.
@@ -422,7 +422,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 32. Budget round B5: results (round 32)
 
-- **Design:** round B5 of `Fisko_Budget_Design.html` (FR-B-35 to 40; BR-18; sections 46 to 48).
+- **Design:** round B5 of `Budget_Design.html` (FR-B-35 to 40; BR-18; sections 46 to 48).
 - **Where:** `src/js/48c-perf-b5.js` (five new M08 tabs and `seedBudgetB5`). Styles at the end of `src/calm.css`. `DATA_V` 27.
 - **Data year:** FY2569, the year M07 and M08 already show (snapshot 30 April 2026). Outputs are `S.perf.outputs[projectId]` and spending is `S.dash.projects` (same ids).
 - **Quarterly reports:** `QR_ROUNDS()` gives Q1 to Q4 (due 15 days after each quarter) and the annual report (45 days). `S.qrep[round][unit] = { status: draft | submitted | accepted | returned, items: { projectId: { result, problem, fix } }, evidence: [names], certified, t, by }`. A unit (requester or director) edits only the open rounds (Q4 and annual); sending needs every result. Planning accepts or returns; the auditor certifies the evidence. Seed: Q1 to Q3 accepted for every unit; Q4 accepted for one unit, submitted for another, a draft for the demo requester's unit (U04), and missing for the rest (shown late, because Q4 was due 15 October 2026).
@@ -435,7 +435,7 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 33. Budget round B6: AI and analytics (round 33)
 
-- **Design:** round B6 of `Fisko_Budget_Design.html` (chapter 10: agents, FC-B1 to 3, WI-B1 to 4; chapter 11: KPI-B01 to 10, BF-01 to 06). With this round, B1 to B6 are all built.
+- **Design:** round B6 of `Budget_Design.html` (chapter 10: agents, FC-B1 to 3, WI-B1 to 4; chapter 11: KPI-B01 to 10, BF-01 to 06). With this round, B1 to B6 are all built.
 - **Where:** `src/js/69-budget-ai.js` (four new M09 tabs and `seedBudgetB6`, which adds AG-15 and AG-17). Styles at the end of `src/calm.css`. `DATA_V` 28. AG-15 and AG-17 also added to `CW_META` in the co-work chat.
 - **Agents:** a separate, lighter engine from Procurement's (`67b`), with the same rules. `B_AG[agent].plan()` gives tool steps; `B_EXEC[tool](run, step)` returns done, skipped, blocked or await; `bApply` performs an approved write. Runs are in `S.bRuns`. Who may approve each agent's write step: Planning for AG-02, 03 and 17; Finance or the executive for AG-05; Finance for AG-15 (`bCanApprove`). Writes: notifications (AG-02, AG-17), round-2 amounts with a reason in the change log (AG-03), tasks for the requesting unit in `S.agentTasks` shown in My Workspace (AG-05), a pending transfer that still goes through the normal approval (AG-15). AG-04 only proposes. Every step is logged in `S.aiLog`.
 - **Forecast:** `fcYear()` per FY2570 line: max(paid, contract phases due in the year) + 80% of reservations + the free amount × a probability by budget type (personnel 100%, operating 90%, investment 62%). P10 to P90 widen with the investment share. Carry-over = phases due after 30 September + 25% of free investment. FC-B3 reads next year's multi-year amounts.
@@ -456,26 +456,26 @@ The user found the interface unimpressive and chose a clean enterprise direction
 
 ## 35. Demo guide, Budget design v0.2 and a test runner (round 35)
 
-- **Demo guide:** `src/js/52-demo.js` now has 39 steps. Step 3 now finishes the request through the new steps and the division director; step 7 includes the member vote, quorum, cut impact and drafted minutes; steps 26 to 39 walk the Budget cycle in depth (AI co-work, national-plan links, 3R and zero-based, the waterfall, minister approval and the pack, the briefing pack, four-level balances, transfers by regulation, live monitoring, quarterly reports, budget agents, forecast and what-ifs, KPIs and signals, M10 settings). `Fisko_Demo_Script.html` has the same steps for the presenter, a timing table, extra questions and a 6-minute short version. Step numbers match between the app and the script.
+- **Demo guide:** `src/js/52-demo.js` now has 39 steps. Step 3 now finishes the request through the new steps and the division director; step 7 includes the member vote, quorum, cut impact and drafted minutes; steps 26 to 39 walk the Budget cycle in depth (AI co-work, national-plan links, 3R and zero-based, the waterfall, minister approval and the pack, the briefing pack, four-level balances, transfers by regulation, live monitoring, quarterly reports, budget agents, forecast and what-ifs, KPIs and signals, M10 settings). `Demo_Script.html` has the same steps for the presenter, a timing table, extra questions and a 6-minute short version. Step numbers match between the app and the script.
 - **Budget design v0.2:** version and date, a "what changed" note, a build tag on every FR-B row (32 built, 4 partly built with a note, 4 not built), a build-status table in chapter 12 (rounds 27 to 35 with their files), outcomes of D-B01 to D-B08 and new decisions D-B09 to D-B13 in chapter 13, and the list of what is still open.
-- **Test runner:** `tests/run.html` loads the prototype in an iframe and injects `tests/sweep.js`, which runs inside the app (it needs the app's globals). Buttons: full sweep, quick (sample organisation, five roles), demo walk only; suites can be switched off. Full sweep today: 6,031 checks in about 30 s, all passing. It can also be pasted into the browser console on the prototype and started with `FISKO_TEST.run()`.
+- **Test runner:** `tests/run.html` loads the prototype in an iframe and injects `tests/sweep.js`, which runs inside the app (it needs the app's globals). Buttons: full sweep, quick (sample organisation, five roles), demo walk only; suites can be switched off. Full sweep today: 6,031 checks in about 30 s, all passing. It can also be pasted into the browser console on the prototype and started with `APP_TEST.run()`.
   - **How to run:** `bash src/build.sh`, then `python -m http.server 8787 --bind 127.0.0.1` from the repository root, then open `http://127.0.0.1:8787/tests/run.html`. Opening it as a file won't work.
   - **What fails a check:** page text containing undefined, NaN, [object, Infinity or Invalid; code that throws; or a page other than the one asked for.
-  - **Found while building it:** browsers ignore `history.replaceState` (and hash changes) after a few hundred calls within 10 seconds. The ad-hoc sweeps in earlier rounds used it, so late in a long run some pages re-rendered the previous view. The router now honours a test hook, `window.FISKO_ROUTE` (`00-core.js` `route()`), which the sweep sets instead of touching history, and every page check confirms `CUR` is the page asked for. The full sweep with this check passes, so the earlier results stand.
+  - **Found while building it:** browsers ignore `history.replaceState` (and hash changes) after a few hundred calls within 10 seconds. The ad-hoc sweeps in earlier rounds used it, so late in a long run some pages re-rendered the previous view. The router now honours a test hook, `window.APP_ROUTE` (`00-core.js` `route()`), which the sweep sets instead of touching history, and every page check confirms `CUR` is the page asked for. The full sweep with this check passes, so the earlier results stand.
   - The sweep reseeds data in memory and clears the saved demo state at the end, so the next load of the prototype starts fresh.
 
-## 36. Fisko Finance design v0.1 (round 36)
+## 36. Finance design v0.1 (round 36)
 
-- **What:** `Fisko_Finance_Design.html`, the detailed design for Fisko Finance in Thai, in the same layout as the Budget and Procurement designs (15 chapters). Scope agreed with the user: commitments and POs; vouchers, payments and withholding tax; advances (เงินยืม); receipts, remittance, GFMIS reconciliation, month-end and year-end close, and finance agents. Nothing in the prototype changed this round.
+- **What:** `Finance_Design.html`, the detailed design for Finance in Thai, in the same layout as the Budget and Procurement designs (15 chapters). Scope agreed with the user: commitments and POs; vouchers, payments and withholding tax; advances (เงินยืม); receipts, remittance, GFMIS reconciliation, month-end and year-end close, and finance agents. Nothing in the prototype changed this round.
 - **Grounding:** the Finance Ministry regulation on treasury withdrawals, receipts, payments, keeping and remitting money, B.E. 2562 (Royal Gazette, 13 May 2562), was read in full, so clause numbers are level A. Key facts used: PO in GFMIS from 5,000 baht and request within 5 working days of acceptance (ข้อ 28); payment routes (ข้อ 28–29); approver authority (ข้อ 36); e-Payment first (ข้อ 52); advances: no new loan while one is open (ข้อ 59), clearing in 15 days after return for travel or 30 days after payment otherwise (ข้อ 65), demand within 30 days (ข้อ 68); same-day recording of receipts (ข้อ 81); cash committee and daily cash report (ข้อ 86–95); remit cash revenue at least monthly, within 3 working days when over 10,000 baht in a day (ข้อ 101); carry-over from 100,000 baht (ข้อ 105). The 1% withholding tax from 10,000 baht comes from Revenue Department rulings (level B). Amendments after 2562 and the "as the Ministry sets" circulars are not read yet.
-- **Contents:** FR-FN-01 to 41, rules R-FN-01 to 06 (budget check, payment route table, tax and net amount, regulation clocks, advances, remittance and the month-end checklist), duty rules SD-11 to SD-16, a new role `finhead` (proposed, D-FN-02), screens F1 to F9 plus "My advances" in My Workspace, agents AG-18 to AG-22, forecasts F-FN-01 to 04, what-ifs W-FN-01 to 04, KPI-F01 to 10, signals SG-F01 to 07, build rounds FN1 to FN6, decisions D-FN-01 to 09 (all open). Fisko stays a workbench in front of GFMIS and does not keep a general ledger (D-FN-01).
+- **Contents:** FR-FN-01 to 41, rules R-FN-01 to 06 (budget check, payment route table, tax and net amount, regulation clocks, advances, remittance and the month-end checklist), duty rules SD-11 to SD-16, a new role `finhead` (proposed, D-FN-02), screens F1 to F9 plus "My advances" in My Workspace, agents AG-18 to AG-22, forecasts F-FN-01 to 04, what-ifs W-FN-01 to 04, KPI-F01 to 10, signals SG-F01 to 07, build rounds FN1 to FN6, decisions D-FN-01 to 09 (all open). stays a workbench in front of GFMIS and does not keep a general ledger (D-FN-01).
 - **Published:** https://claude.ai/artifact/G4Sx84KthvJWcLJMAWPKD1 (version 1, private).
 - **Next:** get the user's approval of the design and answers to D-FN-01 to 09, then build round FN1.
 
 
 ## 37. Procurement T1 from the MEA TOR (round 37)
 
-- **Why:** the user asked to add the TOR-driven gaps to the Procurement design and prototype, generic for both government agencies and state enterprises with settable features. Source and findings: `MEA_TOR_P2P_Gap_Analysis.html` (89 requirement groups: 13 covered, 29 partial, 42 gap, 5 platform). Scope agreed: procurement gaps only; payment/AP, ECM, workflow designer and the SAP integration need their own designs (D-P16). Design first (`Fisko_Procurement_Design.html` v0.3, chapter 18, FR-PR-63 to 86, R-20 to R-27, SD-17 for vendor bank-account change, rounds T1 to T4, D-P15 to D-P21), approved by the user, then built.
+- **Why:** the user asked to add the TOR-driven gaps to the Procurement design and prototype, generic for both government agencies and state enterprises with settable features. Source and findings: `MEA_TOR_P2P_Gap_Analysis.html` (89 requirement groups: 13 covered, 29 partial, 42 gap, 5 platform). Scope agreed: procurement gaps only; payment/AP, ECM, workflow designer and the SAP integration need their own designs (D-P16). Design first (`Procurement_Design.html` v0.3, chapter 18, FR-PR-63 to 86, R-20 to R-27, SD-17 for vendor bank-account change, rounds T1 to T4, D-P15 to D-P21), approved by the user, then built.
 - **Built (T1), all in `src/js/70-profile.js`:**
   - `S.prof` = `{ type: "gov" | "soe", sw: {feature: bool}, p: {hearingMin, hearingDays, rfqMin, rfqDays, vatPct} }`; `feat(k)` reads a switch; `PROF_FEATS` lists the ten switches with defaults per kind and a `built` flag (only hearing, rfq and erpRef do anything yet). M10 tab "Procurement profile" (`procprof`): kind buttons reset the switches to that kind's defaults, switches, numeric settings, document-number formats and the last numbers issued. Switching a feature off notifies audit and the head and is audited.
   - **Document numbers:** `docNo(type, unitId, ref)` runs a counter per type, fiscal year and (optionally) unit; format `prefix-unitcode/NNN/FY`, edited in M10. Types so far: `rfq`, `hear`. `S.docno = {fmt, ctr, log}`.
@@ -485,14 +485,14 @@ The user found the interface unimpressive and chose a clean enterprise direction
   - **Price extras (FR-PR-68):** comparison with the last contract in the same category, and `S.priceIdx` imported from pasted text (name, date, value). The "item outside the reference list" alert needs a priced item list and is not built.
 - **Deferred:** FR-PR-85 (small-budget method). The string `"specific"` is used as the non-competitive test in about a dozen places (analytics, forecast, red flags, agents), so a new method key needs a decision first.
 - **Data version:** `DATA_V` is 29 (shared with Finance FN1 work from another session, see below). `seedProfile(s)` is called at the end of `buildOrg`.
-- **Demo guide:** steps 40 to 42 in `52-demo.js` and `Fisko_Demo_Script.html` (profile, case details and RFQ, hearing). Step 42 needs the requisition of PC-2570-004 approved and the method chosen first.
+- **Demo guide:** steps 40 to 42 in `52-demo.js` and `Demo_Script.html` (profile, case details and RFQ, hearing). Step 42 needs the requisition of PC-2570-004 approved and the method chosen first.
 - **Tested:** full sweep 6,490 checks, all passed (33 s). By hand in the app: opened a hearing, commented, blocked an early close, closed early with a reason and a TOR change, head approved, reopened as round 2; sent an RFQ to three suppliers and recorded a reply; saved item details with VAT in; imported price indices; checked that switching `rfq` or `hearing` off hides or releases the check. Not checked: looks at phone width and in dark mode (the browser pane was hidden), and the English text of the new screens beyond the sweep.
-- **Not done:** not published to the artifact and not committed. Another session was building Fisko Finance FN1 (`66b-fin-fn1.js`, edits to `60-procurement.js`, `62-finance.js`, `00-core.js`, `06-seedhelp.js`) in the same working tree at the same time, so the built HTML files contain that unfinished work. Commit only after sorting out whose changes go together.
+- **Not done:** not published to the artifact and not committed. Another session was building Finance FN1 (`66b-fin-fn1.js`, edits to `60-procurement.js`, `62-finance.js`, `00-core.js`, `06-seedhelp.js`) in the same working tree at the same time, so the built HTML files contain that unfinished work. Commit only after sorting out whose changes go together.
 - **Next:** T2 (vendor portal, SME and MiT preference, bid security, samples and type tests, appeal forwarding to the central body), then T3 and T4 as in design chapter 18.
 
-## 37. Fisko Finance FN1: foundations (round 37)
+## 37. Finance FN1: foundations (round 37)
 
-Builds round FN1 of `Fisko_Finance_Design.html`. The proposed answers to the open decisions are used as working defaults: Fisko stays a workbench in front of GFMIS (D-FN-01) and there is a new head of finance role (D-FN-02). New file `src/js/66b-fin-fn1.js` (loads after `66-apps.js`, so it can patch `NAV`, `APPS`, `payGate`, `tabBadge` and `myTasks`).
+Builds round FN1 of `Finance_Design.html`. The proposed answers to the open decisions are used as working defaults: stays a workbench in front of GFMIS (D-FN-01) and there is a new head of finance role (D-FN-02). New file `src/js/66b-fin-fn1.js` (loads after `66-apps.js`, so it can patch `NAV`, `APPS`, `payGate`, `tabBadge` and `myTasks`).
 
 - **Role `finhead`** (user `u31`, both organisations; it was `u21` until round 41, which clashed with a committee member): added to every `NAV` entry that `fin` has (in a `renderShell` wrapper, like `divhead`); `MATRIX.finhead` copies `fin`. Gets clock follow-ups in My Workspace. Helper `isFinRole()`.
 - **M10 → Finance rules** (`ADMIN.fcfg`, `S.fcfg`, defaults in `FCFG_DEFAULT`, read through `fcfg()`): PO threshold 5,000, withholding 10,000 and 1%, carry-over 100,000 and filing date, remittance 10,000, and the clocks (request 5 working days, monthly by day 15, advances 15/30 days, objection 15, demand 30, remit 3 working days, refund 15 working days), plus the clause-36 approval authority table. Each row shows its clause and level A/B/C. Admin edits; fin, finhead and audit read. Changes are audited; "Restore defaults" clears `S.fcfg`.
@@ -513,11 +513,11 @@ Builds round FN1 of `Fisko_Finance_Design.html`. The proposed answers to the ope
   - **Bids panel** (step 6 onward): rank by price after preference, SME and MiT badges with certificate validity, the vendor's contract value this calendar year, history from `vendorHist` plus defects counted from contracts, and a details form (`c.bidDet[name]`) that also edits the vendor's `sme`, `mit`, `smeCert`, `mitCert`. Preference is the higher of SME and MiT, applies only when the item carries the flag and the certificate is valid, and never changes the offered price.
   - **Appeal forwarding:** `c.appeal.fwd = {no, to, sent, due, result, resultDate, ref, notified}`. While it is open the existing dismiss and uphold buttons are disabled in `CASE_BINDS`. Recording the result has the same effects as those buttons. A task appears when the result is within 7 days of `due`.
   - **Supplier role** `vendor` (`ROLES`, `MATRIX.vendor`, the home NAV item allows it, `JUMP_TABS.vp`, `appOfLink` wrapper). User `u90` is seeded and linked to the vendor of the first contract. `VIEWS.vportal` has three tabs; `VIEWS.home` and `BIND.home` are wrapped for this role. Replies go onto `c.rfq` rows (`via: "portal"`) and add a quotation on non-competitive cases. Invoices go to `S.vinv`; an officer confirms them on the Contracts page (`PROC.contracts` is wrapped), which sets `ph.invoice` for the three-way gate.
-- **Data version** `DATA_V` is 30. **Demo guide** steps 43 to 45 (`52-demo.js`, `Fisko_Demo_Script.html`).
+- **Data version** `DATA_V` is 30. **Demo guide** steps 43 to 45 (`52-demo.js`, `Demo_Script.html`).
 - **Tested:** full sweep 6,501 checks passed. By hand: three bid securities; a return refused before the award; a loser's return after it; the winner's return refused before a contract; forfeit hidden from the officer and available to the head; three samples; out-of-order dates refused; results saved; a failing winner blocked then a passing one allowed; SME and MiT preference 5, 5, 0; an appeal forwarded, buttons disabled, an upheld result sent the case back to step 6; the supplier signed in, saw only its own RFQ, replied and sent an invoice, and the officer confirmed it into `ph.invoice`. Not checked: phone width, dark mode, and the English wording of the new screens beyond the sweep.
 - **Not done:** not committed or published. T3 and T4 and FR-PR-85 remain. Check `git status` for the Finance FN1 session's files before committing, and stage hunk by hunk in shared files (`00-core.js`, `06-seedhelp.js`, `52-demo.js`).
 
-## 38. Fisko Finance FN2: vouchers, tax and payment (round 38)
+## 38. Finance FN2: vouchers, tax and payment (round 38)
 
 Builds FR-FN-07 to 17 of the Finance design. New file `src/js/66c-fin-fn2.js`; it replaces `FIN.pay` (F3) and wraps `BIND.finance`, `finClocks`, `tabBadge` and `myTasks`.
 
@@ -533,11 +533,11 @@ Builds FR-FN-07 to 17 of the Finance design. New file `src/js/66c-fin-fn2.js`; i
 - **Supplier bank accounts** (`S.vendorChanges`, `VB-2570-nn`): requested by `fin` with a 10-digit account and an attachment tick; confirmed by someone else (SD-14), which sets `vendor.bank` (shown masked).
 - **Duty rules:** SD-11 and SD-14 are pushed into `SOD_RULES` and `SOD_STEPS` and seeded on.
 - **Seed** (`seedFinanceFN2`): VC-001 (the old PY-2570-001, paid and matched, so V7), VC-002 electricity (paid), VC-003 IT maintenance (paid, tax withheld, certificate not sent), VC-004 speaker fees (waiting for approval, agency route), VC-005 branch rent (in checking, blocked until CM-2570-002 gets its PO), VC-006 water bill (draft). `DATA_V` is 30.
-- **Demo:** step 22 (app and `Fisko_Demo_Script.html`) now makes a voucher for CT-2570-002 phase 1.
+- **Demo:** step 22 (app and `Demo_Script.html`) now makes a voucher for CT-2570-002 phase 1.
 - **Tested:** full sweep 6,501 checks passing; by hand: the full procurement path (make, check, approve, file, post, pay, certificate), the agency path with the e-Payment batch, the checker blocked by a missing PO, the daily check, a cheque without a reason refused, SD-14 refusing the requester.
 - **Not done:** advances (FN3) and receipts (FN4); the GFMIS user register (FR-FN-34) is not yet checked when making files.
 
-## 39. Fisko Finance FN3: advances (round 39)
+## 39. Finance FN3: advances (round 39)
 
 Builds FR-FN-18 to 24. New file `src/js/66d-fin-fn3.js`.
 
@@ -562,12 +562,12 @@ Builds FR-FN-18 to 24. New file `src/js/66d-fin-fn3.js`.
   - **BOQ and serials:** `k.boq[] = {item, unit, qty, price, serial, kind}`, `k.serials[] = {i, no, phase, t, by}`. Saving needs a delivery noted, refuses numbers already used on any contract (case-insensitive) or repeated in the input, and refuses more than the quantity. A BOQ total that differs from the contract amount is flagged, not blocked.
   - **Extra data:** cumulative progress from the latest supervisor report (guarded when a contract has no supervision), accepted share by value, a projected date penalties reach the cap (`capDate`), and `k.xref = {wbs, po, fund, asset}` when the `erpRef` switch is on.
   - **Committee fees:** NAV tab `fees` (P18), only listed while the `commFee` switch is on (the NAV item's `tabs` is a getter). `S.fees[] = {id, docNo, case, kind, dates, rows[{u, pos, n, dates, rate, gross, net, notes}], total, status: pending|approved|rejected, decided}`. `feeCalc` drops days off (weekends and `S.holidays`, unless allowed), dates already claimed by the same person on the same case and committee, and members below the attendance rule; it caps each person per month and each case at a percentage of its value. Amount up to `feeLadder` goes to the head of procurement, above it to the executive; the person who raised a claim can't approve it. The "accept" committee uses the contract's inspectors. Pending claims create tasks for the approver. `VIEWS.procurement` is wrapped to give the tab its own heading.
-  - **FR-PR-79:** Fisko Finance round 38 already built supplier bank-account changes (`S.vendorChanges`, SD-14). Here the supplier portal got a fourth tab with a request form (10-digit account, book copy ticked) that pushes into that list with `via: "portal"`; a second person in Finance confirms. The design's SD-17 was not needed.
-- **Data version** `DATA_V` is 32. **Demo guide** steps 46 and 47 (`52-demo.js`, `Fisko_Demo_Script.html`).
+  - **FR-PR-79:** Finance round 38 already built supplier bank-account changes (`S.vendorChanges`, SD-14). Here the supplier portal got a fourth tab with a request form (10-digit account, book copy ticked) that pushes into that list with `via: "portal"`; a second person in Finance confirms. The design's SD-17 was not needed.
+- **Data version** `DATA_V` is 32. **Demo guide** steps 46 and 47 (`52-demo.js`, `Demo_Script.html`).
 - **Tested:** full sweep 6,545 checks passed. By hand: serial numbers saved, a repeat refused, more than the quantity refused; a BOQ row added; ERP reference saved; the first phase's acceptance form replaced by the R-23 message, a drawing round recorded with MN/001/2570, a send-back refused without a reason and accepted with one, a second round approved and the form restored; a fee claim for three dates (the Saturday dropped, one attendance unticked) came to 7,800, the officer could not approve it and the head did; a second claim for an already-claimed date paid nothing; the fees tab disappears when the switch is off; the supplier requested a bank change and Finance saw it. Not checked: phone width, dark mode, the English wording, and the overdue tag on a drawing round (text was checked in the wrong language).
 - **Not done:** not committed or published. T4 (forms catalogue, e-mail outbox and signature status, conflict-of-interest report, announcement builder, entity check) and FR-PR-85 remain. A Finance FN3 session was working in the same tree; check `git status` before committing.
 
-## 40. Fisko Finance FN4: receipts, cash custody and remittance (round 40)
+## 40. Finance FN4: receipts, cash custody and remittance (round 40)
 
 Builds FR-FN-25 to 32 (FR-FN-33, key handover, is not built). New file `src/js/66e-fin-fn4.js`; two Finance tabs, F5 `recv` and F6 `cash`, and a page `#cashcount` with no menu entry (reached from tasks and notifications; listed in the router's `extra` crumbs).
 
@@ -583,14 +583,14 @@ Builds FR-FN-25 to 32 (FR-FN-33, key handover, is not built). New file `src/js/6
 - **Seed** (`seedFinanceFN4`): committee = Planning user and division director (order 15/2569); books 1/2570, 7/2569 (returned), 8/2569 (held by a division, not returned); five October receipts (one remitted, a cheque refund one day overdue, two today not recorded); signed reports for 14 and 15 October. `DATA_V` is 32.
 - **Tested:** full sweep 6,547 checks passing; by hand: issue, record, remit (late item flagged), the 3-working-day rule when today's cash passes 10,000, the daily report with one member counting short (diff and report), acknowledgement; 375 px width for F5, F6 and the count page.
 
-## 41. Fisko Finance FN5: GFMIS, reconciliation and closing (round 41)
+## 41. Finance FN5: GFMIS, reconciliation and closing (round 41)
 
 Builds FR-FN-34 to 41. New file `src/js/66f-fin-fn5.js`; it wraps `FIN.recon` (F7) and adds F8 `close`.
 
 - **GFMIS users** (`S.gfUsers`: user, duties `record`/`approve`/`remit`, order, until): `gfOk(duty)` refuses and audits when the signed-in user has no live assignment. "Create the request file" (66c) checks `record`; remitting (66e) checks `remit`. `finhead` adds or revokes assignments.
 - **Bank accounts** (`S.bankAccts`: `budget` and `nonbudget`, opening balance for September): `bookLines()` builds the agency account movements from advances (funded in, paid out), agency-route vouchers (funded, paid) and book adjustments (`S.bookAdj`). Opening balances roll forward (`bkOpen`).
 - **Statements** (`S.bankStmts`): the sample import copies the month's book lines except the last one (in transit) and adds a 25-baht bank fee. `bkMatch()` matches on reference and amount and works out the adjusted bank and book balances; bank-only lines get "Record in the books". The reconciliation (`S.bankRecs`) can be signed only with no difference and no bank-only items left, and only by someone who did not record that month's money (`monthRecorders`, SD-15), so in the demo `finhead` signs and `fin` is refused.
-- **GFMIS files in:** the revenue report stamps each remittance with a GFMIS document (`r.gf`); the trial balance (`S.tbs`) is built from the Fisko book balances and line spending, so it agrees (`ok`).
+- **GFMIS files in:** the revenue report stamps each remittance with a GFMIS document (`r.gf`); the trial balance (`S.tbs`) is built from the book balances and line spending, so it agrees (`ok`).
 - **Daily close** (`S.dayCloses`): four checks (receipts recorded, daily cash report signed, payments checked, nothing due; the last is a warning only); failing checks need a reason.
 - **Month close** (`S.periods`): the six R-FN-06 checks (`monthChecks`); check 6 is a "Reviewed" tick by `finhead`. Closing with failures needs a reason of 10+ characters, recorded as exceptions. Reopening needs a reason and is refused for the person who closed it (SD-16); the executive may reopen.
 - **Year-end list:** carry-over candidates proposed, advances running into the new year, receipt books, year-end trial balance (status only).
@@ -616,7 +616,7 @@ Builds FR-FN-34 to 41. New file `src/js/66f-fin-fn5.js`; it wraps `FIN.recon` (F
 - **Tested:** full sweep 6,547 checks passed. By hand: a memo got `บก-05/001/2570`; a winner letter refused with no winner; the invitation letter couldn't be e-mailed before it was signed, the head signed it, then it went to the supplier's address; an announcement was signed by the executive and recorded as published on e-GP; an overdue RFQ produced a reminder and a second one was blocked; the COI page listed three members, a report was prepared, sent, approved by the head (the officer had no approve button) and could then be exported; the entity check set a status. Not checked: phone width, dark mode, the CSV file opening in Excel, English wording beyond the sweep, and the wording of each template against MEA's real forms.
 - **Not done:** not committed or published. FR-PR-85 remains deferred. Procurement chapter 18 is otherwise built. Next in the larger TOR picture are the designs that don't exist yet: AP and payment on the MEA side, ECM, the workflow and form designer, and the SAP integration.
 
-## 42. Fisko Finance FN6: AI and analytics (round 42)
+## 42. Finance FN6: AI and analytics (round 42)
 
 Builds chapters 10 and 11 of the Finance design. New file `src/js/66g-fin-fn6.js`; F9 tab `ai` with four sub-pages (`FAI_TAB`: agents, fc, wi, kpi).
 
@@ -625,13 +625,13 @@ Builds chapters 10 and 11 of the Finance design. New file `src/js/66g-fin-fn6.js
 - **What-if** (`WI_DEF`, `wiCalc`, saved in `S.fWhatifs`): W-FN-01 days from acceptance to payment, W-FN-02 delivery slip, W-FN-03 year-end target, W-FN-04 on-time clearing share. Nothing in the data changes.
 - **KPIs** (`kpiF()`, KPI-F01 to 10 with target and pass flag) show on F9; those off target also show on F1. **Signals** (`fSignals()`, SG-F01 to 07) with triage in `S.fSig`: audit or finhead ask, fin explains, audit or finhead decide (issue or false positive); false positives are counted.
 - **Seed** (`seedFinanceFN6`): agents in `S.agents`; VC-2570-008 (a water bill keyed twice, for SG-F01); AD-2569-041 (a Planning advance cleared late last year, so SG-F04 fires with AD-2570-002). `nextAdv()` (66d) now numbers within the current year only. `DATA_V` is 35.
-- **Demo guide:** six Finance steps (52:00 to 57:00) are appended to `DEMO` from 66g, so this round leaves `52-demo.js` to the Procurement session. `Fisko_Demo_Script.html` is not updated for them (the other session has uncommitted changes there).
+- **Demo guide:** six Finance steps (52:00 to 57:00) are appended to `DEMO` from 66g, so this round leaves `52-demo.js` to the Procurement session. `Demo_Script.html` is not updated for them (the other session has uncommitted changes there).
 - **Tests:** `tests/sweep.js` now opens every menu tab of the Procurement and Finance apps for each role and language (before, only the current tab was rendered), starts every finance agent and renders the F9 sub-pages. Full sweep: 7,487 checks passing in about 46 s.
-- **Design document:** `Fisko_Finance_Design.html` is v0.2 with a "what changed" note and a build-status table (12.1). Not built: FR-FN-33 (key handover) and the Excel or PDF export in FR-FN-41.
+- **Design document:** `Finance_Design.html` is v0.2 with a "what changed" note and a build-status table (12.1). Not built: FR-FN-33 (key handover) and the Excel or PDF export in FR-FN-41.
 - **With this round, rounds FN1 to FN6 of the Finance design are all in the prototype.**
 
 
-## 43. Fisko Finance information architecture (round 43)
+## 43. Finance information architecture (round 43)
 
 The Finance menu was ordered by build round (FN1 to FN6), and each round had added its panels to the nearest page, so one page often did several unrelated jobs. This round reorganises the pages around the work and moves the composition into one place. No feature, rule or data changed; `DATA_V` stays 35.
 
@@ -644,9 +644,9 @@ The Finance menu was ordered by build round (FN1 to FN6), and each round had add
 - **One look:** filters and month or account pickers use the `.seg` control (`segBar()`), tabs inside a page use `.tabs` with `role="tab"` and badges for work waiting (`finTabBadge()`). Opening a voucher or an advance shows it in a side panel (`.fn-drawer`; scrim click and Escape close it through its own close button). Row actions that need input (release a commitment, cancel a receipt) open one form row under the row (`FIN_ROW`, `rowBtn()`, `rowForm()`) instead of an input in every row. The repeated "GFMIS stays the official books" note now shows on F1 only.
 - **My advances** moves to My Workspace (overview group, app `all`, no code). My Workspace items show in every app's sidebar, so it is still in the Finance menu for every role (the round-41 user change) and is now also reachable from Budget and Procurement. Its old code F5 clashed with Receipts.
 - **Tests:** the menu-tab pass in `tests/sweep.js` now also clicks every tab inside each page and skips menu tabs a role can't see. Full sweep: 8,035 checks passing in about 75 s.
-- **Design document:** `Fisko_Finance_Design.html` is v0.3; chapter 9.1 has the new menu map and layout rules.
+- **Design document:** `Finance_Design.html` is v0.3; chapter 9.1 has the new menu map and layout rules.
 
-## 44. Fisko Procurement information architecture (round 44)
+## 44. Procurement information architecture (round 44)
 
 The Procurement menu had 20 pages (P1 to P20) in build order and every role saw all of them; several pages stacked unrelated panels (P5 contracts showed every contract in full, about 3,300 px for two). This round reorganises the app around the work, following round 43 for Finance. No feature, rule or data change; `DATA_V` stays 35.
 
@@ -660,9 +660,9 @@ The Procurement menu had 20 pages (P1 to P20) in build order and every role saw 
 - **Labels:** "แบบ BOQ และข้อมูลเพิ่มเติม" (contract panel, was "เพิ่มเติม (รอบ T3)"), M10 panels "หลักประกัน แต้มต่อ และอุทธรณ์", "ค่าตอบแทนกรรมการและการอนุมัติแบบ", "อีเมลเตือน"; demo step 48 text updated.
 - **Roles:** requesting units (`div`, `divhead`) see P1 to P4 and P7; `plan` P1 to P4, P7, P10; `exec` P1 to P4, P7, P8, P10, P11, P13; `fin`/`finhead` P1, P7 to P10; `audit`, `proc`, `prochead` all. The vendor portal is unchanged.
 - **Tests:** `tests/sweep.js` also opens every contract and every AI tool for proc, prochead, div, fin and audit (they used to render on one page). Full sweep: 8,143 checks passing. Old links checked: prc-docs, prc-gantt, prc-flags, prc-agents, prc-reports, prc-ocds, prc-whatif, prc-coi, prc-forms, prc-fees, prc-contracts, prc-plan, prc-cases, prc-suppliers, case:<id>. No page overflows at 375 px (the case board scrolls inside its own container, as before).
-- **Design:** `Fisko_Procurement_Design.html` v0.4 adds chapter 19 (menu map with old and new codes, layout rules).
-- **Built in a separate worktree** (`..\Fisko-proc`, branch `proc-ia-r44` from `origin/procurement-ia`) because other sessions share `D:\Claude\Fisko`.
-- **Follow-ups not done yet:** wide tables at about 1080 px (plan item column), tabs inside the opened contract (phases, changes, supervision, guarantee and warranty, letters, drawings and BOQ), one-row forms instead of inputs on every row, demo-script steps 50 to 57 in `Fisko_Demo_Script.html`, PO number and voucher status on contract phases.
+- **Design:** `Procurement_Design.html` v0.4 adds chapter 19 (menu map with old and new codes, layout rules).
+- **Built in a separate worktree** (`..\-proc`, branch `proc-ia-r44` from `origin/procurement-ia`) because other sessions share `D:\Claude\`.
+- **Follow-ups not done yet:** wide tables at about 1080 px (plan item column), tabs inside the opened contract (phases, changes, supervision, guarantee and warranty, letters, drawings and BOQ), one-row forms instead of inputs on every row, demo-script steps 50 to 57 in `Demo_Script.html`, PO number and voucher status on contract phases.
 
 ## 45. Procurement polish and the Finance demo steps (round 45)
 
@@ -672,12 +672,12 @@ The round-44 follow-ups. No rule or data change; `DATA_V` stays 35. `main` was f
 - **Finance on the contract:** `conPoTag(c)` shows the GFMIS PO number next to the supplier, or "No GFMIS PO yet" with a link to Finance commitments; `phVoucher(c, ph)` shows the voucher state on the phase, with a button that opens the voucher in Finance (`VC_OPEN`, `fnc-pay`) for roles that can use Finance.
 - **Wide tables:** minimum widths on the plan item (240 px), method and e-GP columns, the requisition item and requester, and the supplier name. At 1080 px plan rows went from about 300 px to about 100 px tall; the tables scroll sideways inside their wrappers.
 - **One form row at a time:** `PR_ROW`, `prRowBtn`, `prRowForm` (74, bound through `data-prow`) for portal invoice returns (71-t2) and bid security extend/return/forfeit (71-t2, case file). Finance uses its existing `rowBtn`/`rowForm` for audit answers (66f) and reconciliation explanations (62).
-- **Demo script:** `Fisko_Demo_Script.html` gains "ส่วนเสริม 3: Fisko Finance เชิงลึก" with steps 50 to 55 (52:00 to 57:00), generated from the in-app steps in 66g; step 46 and the in-app step 48 follow the new contract tabs.
+- **Demo script:** `Demo_Script.html` gains "ส่วนเสริม 3: Finance เชิงลึก" with steps 50 to 55 (52:00 to 57:00), generated from the in-app steps in 66g; step 46 and the in-app step 48 follow the new contract tabs.
 - **Tests:** the sweep opens every contract on every contract tab. Full sweep 8,343 checks passing.
 
 ## 46. Finance decisions and non-budget money (round 46)
 
-- **Decisions recorded** (Finance design 13.2): D-FN-01 workbench in front of GFMIS; D-FN-02 keep `finhead` and self-service advances; D-FN-03 salaries as a file only; **D-FN-04 non-budget money as a full cycle with a spending plan**; D-FN-05 travel calculator from M10 rates; D-FN-06 tax and 50 ทวิ computed in Fisko; D-FN-07 settable file formats; D-FN-08 committee confirms counts in the system; D-FN-09 legal and finance review the rules before real use.
+- **Decisions recorded** (Finance design 13.2): D-FN-01 workbench in front of GFMIS; D-FN-02 keep `finhead` and self-service advances; D-FN-03 salaries as a file only; **D-FN-04 non-budget money as a full cycle with a spending plan**; D-FN-05 travel calculator from M10 rates; D-FN-06 tax and 50 ทวิ computed in; D-FN-07 settable file formats; D-FN-08 committee confirms counts in the system; D-FN-09 legal and finance review the rules before real use.
 - **New file** `src/js/66i-fin-nb.js` (loads after 66h, so it adds a page to `FIN_PAGES` and rebuilds the menu tabs). Page F11 `nb` in the Receiving group with tabs funds, plans, withdrawals; deep links `fnc-nb:plans`, `fnc-nb:wd`.
 - **Data:** `S.nbFunds` (id, name, basis, `openA` agency account and `openT` treasury deposit at 1 October), `S.nbPlans` (one per fund and year: lines with id, name, category, amount; income expected; status draft, submitted, approved, returned), `S.nbWd` (withdrawals: pending, done with a GFMIS document, rejected, back). Receipts carry `fund`; vouchers and advances carry `fund` and `nbLine`.
 - **Balances** (`nbBal`): income from fund receipts; deposited = remitted fund receipts; withdrawn = done withdrawals less amounts deposited back; spent = paid fund vouchers (net + tax) and paid fund advances less cash back. Treasury = `openT` + deposited − withdrawn; account = `openA` + income − deposited + withdrawn − spent.
@@ -689,22 +689,22 @@ The round-44 follow-ups. No rule or data change; `DATA_V` stays 35. `main` was f
 - **Seed** (`seedFinanceNB`): NB-01 venue income (approved plan, a 50,000 withdrawal done on 5 Oct, VC-2570-009 paid 32,100, VC-2570-010 electricity in draft, the existing non-budget receipt booked to it); NB-02 donations for staff development (plan waiting for the executive). `DATA_V` is 36.
 - **Tested:** full sweep 8,463 checks passing; by hand: plan approval, a fund voucher through check, approval (nbready), withdrawal approval and e-Payment batch, a non-budget receipt and advance against plan lines, the M06 view.
 
-## 47. Fisko Budget information architecture (round 47)
+## 47. Budget information architecture (round 47)
 
 - **Decisions (asked this round):** renumber the Budget pages B1 to B11 and keep the old M-code on the eyebrow; split M09 in two; B8 (M07) opens on the live FY2570 tab; add a Budget today page.
 - **New file** `src/js/75-budget-pages.js` declares `BUD_PAGES`: id, code, old module code `m`, menu group, and tabs. A tab is an old key, or `{ id, label, keys, roles }` when several old keys sit behind one tab (a segment bar `data-bseg` picks between them; `BUD_SUB` remembers the last one per tab). `BUD_MOD` maps each module to its tab variable (`STRAT_TAB`, `CONS_TAB`, `REV_TAB`, `SUB_TAB`, `ALLOC_TAB`, `MON_TAB`, `PERF_TAB`, `INTEL_TAB`).
-- **How it works:** `VIEWS[page]` is wrapped. `bRender` checks the module key against the page's visible tabs, renders the module's own view, finds its old tab bar (`<div class="tabs" role="tablist">`, the first one), keeps only the keys that bar shows (so each module's own role filter and counts carry over), and swaps it for the new bar (`data-bbar`, buttons `data-btab`). Counts in old labels, such as "Alerts (3)", become badges, summed on merged tabs. `bHead` rewrites the eyebrow to "Fisko Budget · B7 · M06 · group" and, for B10 and B11, the heading.
+- **How it works:** `VIEWS[page]` is wrapped. `bRender` checks the module key against the page's visible tabs, renders the module's own view, finds its old tab bar (`<div class="tabs" role="tablist">`, the first one), keeps only the keys that bar shows (so each module's own role filter and counts carry over), and swaps it for the new bar (`data-bbar`, buttons `data-btab`). Counts in old labels, such as "Alerts (3)", become badges, summed on merged tabs. `bHead` rewrites the eyebrow to "Budget · B7 · M06 · group" and, for B10 and B11, the heading.
 - **Old keys and links:** a key set on purpose (`BUD_SEEN` tracks the last key rendered, seeded with the defaults at load) that belongs to another page opens that page (`bRedirect` fixes the address with `replaceState`, the crumb and the menu). `jump("intel-…")` goes to the page that owns the key. A menu click keeps the tab you were last on (`BUD_KEY`).
 - **Menu:** `GROUPS` gets `bud`, and form, exec and intel are renamed (Formulation FY2571, Execution FY2570, Results and analysis); `APPS.budget.groups` is `bud, form, exec, intel`. Performance moves to the intel group. New NAV entries `btoday` (B1, first in the Budget app, so switching to Budget lands there) and `insight` (B10, before `assistant`). Badges: B1 counts tasks due or overdue; B10 counts new anomalies for plan, exec and audit.
 - **Merged tabs:** B2 links + link; B4 ceilings + responses, r3 + zbb; B6 pack + form + export, status + parliament; B7 appropriation + allocate, carry + savings; B9 kpis + scorecard, report + evaluate + stages; B10 bwhatif + whatif, bkpi + anoms + quality. B8 tab `overview` is labelled "FY2569" and comes last. Role filters: the division sees B2 map, KPIs and project bank; B8 without import; B9 KPIs, chain, quarterly and recommendations; B11 ask only. B10 is for plan, exec, fin and audit.
 - **Style:** `.seg-scroll` (theme.css) lets a long segment bar scroll sideways on a phone instead of clipping.
 - **Docs:** Budget design v0.3 chapter 15 (menu map and page rules); the demo script and the in-app demo guide (`52-demo.js`) use the B-codes and the new tab paths.
 - **Tests:** the sweep opens every old key of every Budget page for every role and checks that the right tab is on, and follows seven old deep links. Full sweep 9,451 checks passing. By hand: deep links, segment memory, menu moves between B10 and B11, a fresh load of `#insight`, phone width and dark mode.
-- **User change after the round:** "My advances" shows only in the Fisko Finance menu (NAV `app: "finance"` in `66d`, `appOfLink("advances")` is finance in `66-apps.js`), not in the Budget and Procurement menus. Every role can still open it, so every role can switch to Finance; opening it from a task switches the app.
+- **User change after the round:** "My advances" shows only in the Finance menu (NAV `app: "finance"` in `66d`, `appOfLink("advances")` is finance in `66-apps.js`), not in the Budget and Procurement menus. Every role can still open it, so every role can switch to Finance; opening it from a task switches the app.
 
 ## 48. Budget CRUD round C1: shared list + drawer, B7 allocation (round 48)
 
-- **Design:** `Fisko_Budget_CRUD_Design.html` v0.1 (Thai), approved. Decisions: full CRUD for every record and master data; B8 and B9 move to FY2570 data; one pattern, list + side drawer; steps decided outside (Budget Bureau results, parliament cuts, appeals) get a form plus a Simulate button. Requirements FR-C-01 to 52, rules R-C-01 to 06, flows FL-01 to 11, SIM-01 to 05, demo script E-01 to E-16, build rounds C1 to C6. Published at https://claude.ai/artifact/3NigvMP1qa4DpvQrjN84Zz (private).
+- **Design:** `Budget_CRUD_Design.html` v0.1 (Thai), approved. Decisions: full CRUD for every record and master data; B8 and B9 move to FY2570 data; one pattern, list + side drawer; steps decided outside (Budget Bureau results, parliament cuts, appeals) get a form plus a Simulate button. Requirements FR-C-01 to 52, rules R-C-01 to 06, flows FL-01 to 11, SIM-01 to 05, demo script E-01 to E-16, build rounds C1 to C6. Published at https://claude.ai/artifact/3NigvMP1qa4DpvQrjN84Zz (private).
 - **New file `src/js/76-crud.js`:** `CRUD.def(key, spec)` declares a record type (list, id, title, status pills, filters, columns, form fields, checks, create, edit, actions). `crudList(key, { head, after, empty })` renders the toolbar (search, filters, "show cancelled", + New), the table and, when a record is open, the drawer (`.fn-drawer.cr-drawer`). The drawer has Details, extra tabs and History (from `historyItems`), an action bar driven by the record's state, an edit form built from the field list (money fields in million baht stored as baht, required marks, errors under each field and a summary), a reason step for cancel, withdraw and reject (at least 10 characters), a discard guard for unsaved edits, and a 10-second Undo bar (a JSON snapshot of `S`). All clicks, submits and filter changes are handled once on `document`, so pages only render. State: `CR_OPEN`, `CR_F`, `CR_UNDO`; `crOpen`, `crClose`, `crHere(key)` for a drawer without a list.
 - **New file `src/js/77-alloc-crud.js` (B7):**
   - `alLine` allocation lines: new lines are drafts in `A.drafts` (id `AL-<fy>-nnn` from `A.seq`, never reused) with unit, name, budget type, activity (budget code), amount, new-project (T4) and extended (T6) flags; Confirm moves a draft into `A.lines` with its monthly plan; Delete draft. A confirmed line can be edited (name, activity, flags, amount between what is used and the type's unallocated room) with a reason, and cancelled with a reason only when nothing is reserved, committed or pending (R-C-03): it stays in `A.lines` with amount 0 and `cancelled`.

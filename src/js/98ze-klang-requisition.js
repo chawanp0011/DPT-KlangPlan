@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round B (12 Nov 2569): the division raises the requisition on the case page, not in a pop-up.
+// KlangFinance, procurement round B (12 Nov 2569): the division raises the requisition on the case page, not in a pop-up.
 // What the user asked for: when the division presses "raise a requisition" it goes into the case, to the panel "Prepare the data", and
 // fills everything there (project details, method, reference price, TOR, committee), then sends it to the division's authority from the
 // same place; the method the division chooses is approved by the division's authority (the head, an executive, or someone allowed to

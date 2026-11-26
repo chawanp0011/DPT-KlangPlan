@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fisko Test Sweep</title>
+<title>Test Sweep</title>
 <style>
 :root { --bg: #F7F8FA; --surface: #FFFFFF; --line: #E5E7EB; --ink: #111827; --muted: #6B7280; --ok: #15803D; --bad: #B91C1C; --accent: #34498C; }
 @media (prefers-color-scheme: dark) { :root { --bg: #0E1015; --surface: #15181F; --line: #262B36; --ink: #E8EAEE; --muted: #8F96A3; --ok: #4ADE80; --bad: #F08A8A; --accent: #9DB0E3; color-scheme: dark; } }
@@ -25,7 +25,7 @@ iframe { width: 100%; height: 420px; border: 1px solid var(--line); border-radiu
 </head>
 <body>
 <main>
-  <h1>Fisko test sweep</h1>
+  <h1>test sweep</h1>
   <p class="sub">Serve the project folder (for example <code>python -m http.server 8787 --bind 127.0.0.1</code> from the repository root) and open <code>http://127.0.0.1:8787/tests/run.html</code>. Rebuild first with <code>bash src/build.sh</code>. The sweep runs inside the prototype below and resets its saved demo data when it finishes.</p>
   <div class="card">
     <div class="row">
@@ -43,7 +43,7 @@ iframe { width: 100%; height: 420px; border: 1px solid var(--line); border-radiu
     <div id="status" class="sub">Loading the prototype…</div>
   </div>
   <div class="card"><b>Result</b><pre id="out">–</pre></div>
-  <iframe id="app" src="../Fisko_Prototype.html" title="Fisko prototype under test"></iframe>
+  <iframe id="app" src="../Prototype.html" title="prototype under test"></iframe>
 </main>
 <script>
 (function () {
@@ -63,7 +63,7 @@ iframe { width: 100%; height: 420px; border: 1px solid var(--line); border-radiu
     btns.forEach(b => (b.disabled = true)); out.textContent = "Running…"; bar.style.width = "0";
     const w = app.contentWindow;
     try {
-      const r = await w.FISKO_TEST.run(Object.assign({ onProgress: p => { st.textContent = `${p.what} · ${p.n} checks · ${p.errors} errors`; bar.style.width = Math.min(100, p.done / Math.max(1, p.total) * 100) + "%"; } }, opts));
+      const r = await w.APP_TEST.run(Object.assign({ onProgress: p => { st.textContent = `${p.what} · ${p.n} checks · ${p.errors} errors`; bar.style.width = Math.min(100, p.done / Math.max(1, p.total) * 100) + "%"; } }, opts));
       bar.style.width = "100%";
       st.innerHTML = r.ok ? `<span class="ok">Passed</span> · ${r.checks} checks in ${r.seconds} s` : `<span class="bad">${r.errors.length} errors</span> · ${r.checks} checks in ${r.seconds} s`;
       out.textContent = r.ok ? "All checks passed." : r.errors.join("\n");

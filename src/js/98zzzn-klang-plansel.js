@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P28 (17 Nov 2569): the procurement plan is made by CHOOSING THE BUDGET ITEM ("กองแผนแค่เข้ามากดเลือกรายการงบประมาณได้เลย แล้วส่งให้ ผอ.อนุมัติได้เลย").
+// KlangFinance, procurement round P28 (17 Nov 2569): the procurement plan is made by CHOOSING THE BUDGET ITEM ("กองแผนแค่เข้ามากดเลือกรายการงบประมาณได้เลย แล้วส่งให้ ผอ.อนุมัติได้เลย").
 // The form that asked for the name, the category, the quantity, the unit, the estimate, the method, the date, the duration and the note is gone (planAddForm of file 60). What is left: find and
 // pick an allocation line (M06) and press "Add to the plan". The item is made from the line, and Planning can then send it to the director of the Planning division for approval (file 98zzzj).
 //   the name is the name of the budget line; the estimate is what is left on the line (the room of the line less the items still only planned on it); the category follows the kind of the line (investment: equipment,

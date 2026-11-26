@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P25 (16 Nov 2569): the procurement plan, item by item, without proposing a new plan version
+// KlangFinance, procurement round P25 (16 Nov 2569): the procurement plan, item by item, without proposing a new plan version
 // ("แผนจัดซื้อ ปรับใหม่ โดยไม่ต้องเสนอแผนฉบับใหม่ แต่ให้ส่งรายรายการเลย").
 //   1. The list shows only the items that have passed the Appropriation Act: the item's budget line is in an allocation that is not a draft (the allocation
 //      is made from the act), or its line is tied to a request that has an act amount (actSource(r) === "act"). Items that are already past the plan
@@ -51,7 +51,7 @@ const planApCell = p => {
   const done = msg => { commit(); route(); toast(msg); };
   document.addEventListener("click", e => {
     const swb = e.target.closest && e.target.closest("[data-pswitch]");
-    if (swb) { const u = (S.users || []).find(x => x.id === swb.dataset.pswitch); if (!u || !planHeads().includes(u)) return; ROLE = u.role; store.set("fisko-role", ROLE); SESSION = SESSION || { user: u.id }; SESSION.user = u.id; store.set("fisko-session", JSON.stringify(SESSION)); renderShell(); route(); toast(`${L("สลับเป็น", "Switched to")} ${tx(u.name)} · ${L("ผู้อำนวยการกองแผนงาน", "Planning director")}`); return; }
+    if (swb) { const u = (S.users || []).find(x => x.id === swb.dataset.pswitch); if (!u || !planHeads().includes(u)) return; ROLE = u.role; store.set("app-role", ROLE); SESSION = SESSION || { user: u.id }; SESSION.user = u.id; store.set("app-session", JSON.stringify(SESSION)); renderShell(); route(); toast(`${L("สลับเป็น", "Switched to")} ${tx(u.name)} · ${L("ผู้อำนวยการกองแผนงาน", "Planning director")}`); return; }
     const ask = e.target.closest && e.target.closest("[data-pask]"), dec = e.target.closest && e.target.closest("[data-pdec]");
     if (ask) { const p = S.pplan.find(x => x.id === ask.dataset.pask); if (!p || p.status !== "planned" || !isPlanRole() || !["none", "rejected"].includes(planApSt(p))) return;
       p.ap = { st: "asked", ask: { by: me().id, t: nowIso() } }; audit(["ส่งแผนจัดซื้อรายรายการให้ ผอ.กองแผนงานอนุมัติ", "Sent a plan item to the Planning director"], p.id); notify(["divhead"], [`${p.id} กองแผนงานส่งแผนจัดซื้อให้อนุมัติ (${tx(p.name)})`, `${p.id}: Planning sent a plan item for approval (${tx(p.name)})`], "prc-plan"); done(L("ส่ง ผอ.กองแผนงานอนุมัติแล้ว", "Sent to the director")); return; }

@@ -1,4 +1,4 @@
-// Fisko Finance round FN3 (Finance design v0.1, chapter 6.3): advances (เงินยืม), clauses 55 to 68.
+// Finance round FN3 (Finance design v0.1, chapter 6.3): advances (เงินยืม), clauses 55 to 68.
 // - Every user asks for and clears their own advances from My Workspace → My advances (FR-FN-18, 21).
 // - Checks before approval (FR-FN-19, R-FN-05): no open advance (clause 59), items the budget may lend for
 //   (clause 63), travel at most 90 days (64), cross-year limits (62), non-budget money (60), collateral (58), SD-12.

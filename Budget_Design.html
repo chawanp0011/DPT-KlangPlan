@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fisko Budget Detailed Design</title>
+<title>Budget Detailed Design</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
@@ -188,7 +188,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <body>
 <div class="layout">
 <nav class="toc" id="toc" aria-label="สารบัญ">
-  <div class="brand">Fisko Budget<small>Detailed Design · v0.3</small></div>
+  <div class="brand">Budget<small>Detailed Design · v0.3</small></div>
   <div class="tools"><button type="button" id="toc-toggle" aria-expanded="false">สารบัญ</button><button type="button" id="theme">ธีม</button></div>
   <ol>
     <li><a href="#s1"><span class="n">01</span>วัตถุประสงค์และวิธีค้นคว้า</a></li>
@@ -213,9 +213,9 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <div class="doc">
 
 <header class="cover">
-  <div class="eyebrow">Fisko Budget · Detailed Design</div>
-  <h1>Fisko Budget<br><span style="font-size:.55em;color:var(--accent)">ออกแบบเชิงลึก: วงจรงบประมาณตามแนวปฏิบัติไทย ฟังก์ชัน ตรรกะ หน้าจอ และ AI</span></h1>
-  <p class="th">ต่อยอดจากต้นแบบ Fisko Budget (M01 ถึง M10) และรูปแบบที่ใช้ในการออกแบบ Fisko Procurement</p>
+  <div class="eyebrow">Budget · Detailed Design</div>
+  <h1>Budget<br><span style="font-size:.55em;color:var(--accent)">ออกแบบเชิงลึก: วงจรงบประมาณตามแนวปฏิบัติไทย ฟังก์ชัน ตรรกะ หน้าจอ และ AI</span></h1>
+  <p class="th">ต่อยอดจากต้นแบบ Budget (M01 ถึง M10) และรูปแบบที่ใช้ในการออกแบบ Procurement</p>
   <div class="meta">
     <div><span>เวอร์ชัน</span><b>0.3 ฉบับร่างเพื่อการหารือ</b></div>
     <div><span>วันที่</span><b>18 ตุลาคม 2569</b></div>
@@ -231,7 +231,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <!-- ============================== 01 ============================== -->
 <section class="ch" id="s1">
 <h2><span class="num">01</span>วัตถุประสงค์และวิธีค้นคว้า</h2>
-<p class="lede">ทำให้ Fisko Budget เป็นสายเดียวที่ต่อกันตั้งแต่ยุทธศาสตร์ ถึงคำขอ วงเงินที่ได้รับ การใช้จ่าย และผลสัมฤทธิ์ โดยแต่ละขั้นใช้ข้อมูลจากขั้นก่อนหน้า ไม่ใช่ตัวอย่างแยกกัน</p>
+<p class="lede">ทำให้ Budget เป็นสายเดียวที่ต่อกันตั้งแต่ยุทธศาสตร์ ถึงคำขอ วงเงินที่ได้รับ การใช้จ่าย และผลสัมฤทธิ์ โดยแต่ละขั้นใช้ข้อมูลจากขั้นก่อนหน้า ไม่ใช่ตัวอย่างแยกกัน</p>
 <div class="prose">
 <p>ต้นแบบปัจจุบันมีครบ 10 โมดูลและหลายฟังก์ชันเชิงลึกจากรอบ 8 ถึง 10 แต่หลายหน้ายังใช้ข้อมูลตัวอย่างของตัวเอง เช่น ภาพรวมการรวบรวมคำขอ (M03) ใช้ยอดตั้งไว้ ไม่ได้รวมจากคำขอจริง ตารางรอบพิจารณา (M04) ใช้โครงการคนละชุดกับคำขอ (M02) และแดชบอร์ดติดตาม (M07) เป็นภาพปี 2569 ที่ไม่ได้ต่อกับการจัดสรรปี 2570 (M06) เอกสารนี้ออกแบบให้ข้อมูลไหลต่อกันตลอดสาย เพิ่มสิ่งที่แนวปฏิบัติไทยกำหนดแต่ยังไม่มี และออกแบบหน้าจอหลักใหม่ให้ใช้งานง่ายขึ้น</p>
 <p>การค้นคว้าเปิดอ่านคู่มือปฏิบัติการจัดทำคำของบประมาณรายจ่ายประจำปีงบประมาณ พ.ศ. 2570 ของสำนักงบประมาณ (พฤศจิกายน 2568) และเอกสารบรรยายสาระของ พ.ร.บ.วิธีการงบประมาณ พ.ศ. 2561 กับระเบียบว่าด้วยการบริหารงบประมาณ พ.ศ. 2562 โดยตรง และใช้ข่าวเพื่อดูปฏิทินและมาตรการปีปัจจุบัน</p>
@@ -279,7 +279,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
     <tr><td>งบประมาณจะโอนให้หน่วยรับงบประมาณอื่นไม่ได้ เว้นแต่มี พ.ร.บ. (มาตรา 35) โอนข้ามแผนงานหรือรายการต้องได้รับอนุมัติจากผู้อำนวยการสำนักงบประมาณ และอนุมัติไม่ได้ถ้าเพิ่มเงินราชการลับหรือเป็นแผนงานหรือโครงการใหม่ เว้นแต่ ครม. อนุมัติ (มาตรา 36) (S2)</td><td><span class="tag t-must">A</span></td><td>ตารางอำนาจอนุมัติการโอนในบทที่ 7 (R-B-01) แทนกฎ 3 ระดับเดิม</td></tr>
     <tr><td>การโอนระหว่างแผนงาน (พื้นฐานและยุทธศาสตร์) ต้องตกลงกับสำนักงบประมาณ (ข้อ 26) ภายในแผนงานเดียวกันทำตามหลักเกณฑ์ที่สำนักงบประมาณกำหนด (ข้อ 28) และถ้าหลักเกณฑ์ให้ทำได้เอง ต้องรายงานภายใน 15 วัน (ข้อ 29) เงินที่ขยายเวลาเบิกจ่ายแล้วจะโอนต้องตกลงก่อน (ข้อ 27) (S2)</td><td><span class="tag t-must">A</span></td><td>คำขอโอนมีเส้นทางตามประเภท และนาฬิกา 15 วันสำหรับรายงานการโอน</td></tr>
     <tr><td>เหตุผลการโอนต้องเป็น 1 ใน 5 ข้อ: แก้ปัญหาการปฏิบัติงาน เพิ่มประสิทธิภาพ เพิ่มคุณภาพบริการ พัฒนาบุคลากร พัฒนาเทคโนโลยี (ข้อ 25) (S2)</td><td><span class="tag t-must">A</span></td><td>ตัวเลือกเหตุผลการโอนเป็นรายการปิด พร้อมคำอธิบาย</td></tr>
-    <tr><td>จ่ายหรือก่อหนี้ผูกพันได้ตามแผนและเมื่อได้รับอนุมัติเงินจัดสรรแล้วเท่านั้น (มาตรา 40) หน่วยงานไม่ต้องยื่นขออนุมัติเงินจัดสรร เว้นแต่งบเพิ่มเติมหรืองบที่โอนมา (ข้อ 18) ส่งเงินจัดสรรให้ส่วนภูมิภาคภายใน 15 วัน (ข้อ 21) (S2)</td><td><span class="tag t-must">A</span></td><td>สถานะเงินจัดสรรต่อบรรทัด (ยังไม่อนุมัติ อนุมัติแล้ว ส่งต่อแล้ว) และตัวกันใน Fisko Procurement: ห้ามผูกพันเกินเงินจัดสรร</td></tr>
+    <tr><td>จ่ายหรือก่อหนี้ผูกพันได้ตามแผนและเมื่อได้รับอนุมัติเงินจัดสรรแล้วเท่านั้น (มาตรา 40) หน่วยงานไม่ต้องยื่นขออนุมัติเงินจัดสรร เว้นแต่งบเพิ่มเติมหรืองบที่โอนมา (ข้อ 18) ส่งเงินจัดสรรให้ส่วนภูมิภาคภายใน 15 วัน (ข้อ 21) (S2)</td><td><span class="tag t-must">A</span></td><td>สถานะเงินจัดสรรต่อบรรทัด (ยังไม่อนุมัติ อนุมัติแล้ว ส่งต่อแล้ว) และตัวกันใน Procurement: ห้ามผูกพันเกินเงินจัดสรร</td></tr>
     <tr><td>เบิกเงินได้เฉพาะในปีงบประมาณ ถ้าก่อหนี้ไว้ก่อนสิ้นปีและกันเงินไว้แล้ว ขยายเวลาได้อีก 6 เดือน และขยายต่อได้ไม่เกิน 6 เดือนเมื่อตกลงกับกระทรวงการคลัง (มาตรา 43) (S2)</td><td><span class="tag t-must">A</span></td><td>หน้ากันเงินเหลื่อมปีใน M06 ใช้กำหนดเวลา 6+6 เดือน (BR-17)</td></tr>
     <tr><td>รายงานผลการปฏิบัติงานภายใน 15 วันหลังสิ้นไตรมาส รายงานประจำปีภายใน 45 วันหลังสิ้นปี (ข้อ 34; มาตรา 50) แผนบูรณาการรายงานภายใน 45 วันหลังสิ้นไตรมาส (ข้อ 35) (S2)</td><td><span class="tag t-must">A</span></td><td>รอบรายงานใน M08 พร้อมนาฬิกากำหนดส่ง (BR-18)</td></tr>
     <tr><td>งบกลางที่ได้รับจัดสรรแล้วมีเงินเหลือจ่ายต้องส่งคืนสำนักงบประมาณภายใน 15 วัน (ข้อ 33) (S2)</td><td><span class="tag t-must">A</span></td><td>บรรทัดงบกลางมีป้ายและนาฬิกาคืนเงิน</td></tr>
@@ -345,7 +345,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
     <tr><td>แผนการใช้จ่าย (M06)</td><td>ร่าง → ส่งสำนักงบประมาณ → เห็นชอบ → ปรับแผน (รอเห็นชอบ) → เห็นชอบฉบับใหม่</td><td>มีรุ่นของแผน <span class="tag t-new">ใหม่</span></td></tr>
     <tr><td>เงินจัดสรร (M06)</td><td>ยังไม่อนุมัติ → อนุมัติแล้ว → ส่งต่อส่วนภูมิภาคแล้ว</td><td><span class="tag t-new">ใหม่</span></td></tr>
     <tr><td>คำขอโอน (M06)</td><td>ร่าง → อนุมัติภายใน → (ตกลงสำนักงบประมาณ) → มีผล → รายงานแล้ว</td><td>เส้นทางขึ้นกับประเภทการโอน (บทที่ 7)</td></tr>
-    <tr><td>บรรทัดงบประมาณ (M07)</td><td>จัดสรร → จองวงเงิน → ผูกพัน → เบิกจ่าย → คงเหลือ / กันเหลื่อมปี / เหลือจ่าย</td><td>ใช้ยอดจาก Fisko Procurement และ Fisko Finance</td></tr>
+    <tr><td>บรรทัดงบประมาณ (M07)</td><td>จัดสรร → จองวงเงิน → ผูกพัน → เบิกจ่าย → คงเหลือ / กันเหลื่อมปี / เหลือจ่าย</td><td>ใช้ยอดจาก Procurement และ Finance</td></tr>
   </tbody>
 </table></div>
 </section>
@@ -497,7 +497,7 @@ after approval: new plan version if targets change (clause 15), else "no plan ch
   <thead><tr><th>รหัส</th><th>กฎ</th><th>ระดับ</th><th>พารามิเตอร์</th><th>ที่มา</th></tr></thead>
   <tbody>
     <tr><td class="id">BR-14</td><td>ส่งแผนการปฏิบัติงานและแผนการใช้จ่ายก่อนเริ่มปีงบประมาณ</td><td>เตือน</td><td>15 วัน</td><td><span class="tag t-must">A</span> ข้อ 9</td></tr>
-    <tr><td class="id">BR-15</td><td>ห้ามจองหรือผูกพันเกินเงินจัดสรรที่อนุมัติแล้วของบรรทัด (ตรวจที่ Fisko Procurement และ Finance)</td><td>ห้าม</td><td>–</td><td><span class="tag t-must">A</span> มาตรา 40</td></tr>
+    <tr><td class="id">BR-15</td><td>ห้ามจองหรือผูกพันเกินเงินจัดสรรที่อนุมัติแล้วของบรรทัด (ตรวจที่ Procurement และ Finance)</td><td>ห้าม</td><td>–</td><td><span class="tag t-must">A</span> มาตรา 40</td></tr>
     <tr><td class="id">BR-16</td><td>แจกจ่ายเงินจัดสรรให้ส่วนภูมิภาคภายในกำหนด</td><td>เตือน</td><td>15 วัน</td><td><span class="tag t-must">A</span> ข้อ 21</td></tr>
     <tr><td class="id">BR-17</td><td>กันเงินเหลื่อมปีได้เฉพาะรายการที่ก่อหนี้ก่อนสิ้นปี เบิกได้ 6 เดือน ขยายได้อีกไม่เกิน 6 เดือนเมื่อตกลงกระทรวงการคลัง</td><td>ห้าม</td><td>6 + 6 เดือน</td><td><span class="tag t-must">A</span> มาตรา 43</td></tr>
     <tr><td class="id">BR-18</td><td>รายงานผลรายไตรมาสและรายงานประจำปีภายในกำหนด</td><td>เตือน</td><td>15 / 45 วัน</td><td><span class="tag t-must">A</span> ข้อ 34</td></tr>
@@ -532,7 +532,7 @@ unitCost(output)   = paid(output) / actualQuantity(output)   vs planned and last
     <tr><td class="id">Request</td><td>เดิม + steps{} สถานะรายขั้น quarterPlan[4] readiness{} risks[] attachments[] amounts{req, plan, committee, exec, bb, act} cutReasons[]</td><td>Activity, Line</td></tr>
     <tr><td class="id">Line (FY)</td><td>บรรทัดจัดสรร: request, programme, output, activity, type, item, allotted, allotStatus, plan versions, extended</td><td>Transfer, Reservation, Commitment, Payment</td></tr>
     <tr><td class="id">Transfer</td><td>from, to, amount, type T1–T6, reason (5 ข้อ), route, status, reportDue</td><td>Line</td></tr>
-    <tr><td class="id">Reservation / Commitment</td><td>มาจาก Fisko Procurement (ใบขอซื้อ แฟ้ม สัญญา) และ Finance (ใบสั่ง)</td><td>Line</td></tr>
+    <tr><td class="id">Reservation / Commitment</td><td>มาจาก Procurement (ใบขอซื้อ แฟ้ม สัญญา) และ Finance (ใบสั่ง)</td><td>Line</td></tr>
     <tr><td class="id">QuarterReport</td><td>ไตรมาส ผลตัวชี้วัด 4 มิติ ปัญหา แนวทาง หลักฐาน ผู้รับรอง ส่งเมื่อ</td><td>Output, ServiceGoal</td></tr>
     <tr><td class="id">RuleSet (FY)</td><td>ค่ากฎ BR-xx ตาราง R-B-01 เป้าหมายเบิกจ่าย ปฏิทิน ทุกค่ามีแหล่งและระดับความมั่นใจ</td><td>ทุกโมดูล</td></tr>
   </tbody>
@@ -557,10 +557,10 @@ unitCost(output)   = paid(output) / actualQuantity(output)   vs planned and last
     <div class="ext"><b>e-Budgeting / BBL</b>ส่งออกคำขอและรายละเอียดตามงบรายจ่าย นำเข้าผลการพิจารณา</div>
     <div class="ext"><b>BB EvMIS</b>ส่งออกแผน สงป.301/302 และรายงานรายไตรมาส</div>
   </div>
-  <div class="core"><b>Fisko Budget</b><span>สายข้อมูลเดียว ยุทธศาสตร์ → คำขอ → พ.ร.บ. → จัดสรร → ใช้จ่าย → ผล</span></div>
+  <div class="core"><b>Budget</b><span>สายข้อมูลเดียว ยุทธศาสตร์ → คำขอ → พ.ร.บ. → จัดสรร → ใช้จ่าย → ผล</span></div>
   <div class="side">
     <div class="ext"><b>GFMIS</b>นำเข้าเบิกจ่ายและกันเงิน (มีแล้ว IF-xx)</div>
-    <div class="ext"><b>Fisko Procurement · Finance</b>ยอดจองและผูกพัน (ภายใน ทันที)</div>
+    <div class="ext"><b>Procurement · Finance</b>ยอดจองและผูกพัน (ภายใน ทันที)</div>
   </div>
 </div>
 </section>
@@ -568,10 +568,10 @@ unitCost(output)   = paid(output) / actualQuantity(output)   vs planned and last
 <!-- ============================== 09 ============================== -->
 <section class="ch" id="s9">
 <h2><span class="num">09</span>ออกแบบหน้าจอและประสบการณ์ใช้งาน</h2>
-<p class="lede">ใช้ระบบออกแบบเดิม (โทนสงบ สีน้ำเงินหนึ่งสี สถานะเป็นจุดสี กราฟใช้สีตระกูล Fisko) เพิ่มรูปแบบหน้าจอ 8 แบบที่ใช้ซ้ำทั้งโมดูล</p>
+<p class="lede">ใช้ระบบออกแบบเดิม (โทนสงบ สีน้ำเงินหนึ่งสี สถานะเป็นจุดสี กราฟใช้สีตระกูล) เพิ่มรูปแบบหน้าจอ 8 แบบที่ใช้ซ้ำทั้งโมดูล</p>
 <h3><span class="num">9.1</span>หน้าจอหลักที่ออกแบบใหม่</h3>
 <div class="cards">
-  <div class="card"><div class="k">UX-01 · ทุกบทบาท</div><b>โต๊ะทำงานงบประมาณ</b><span>หน้าแรกของ Fisko Budget ตามบทบาท: ช่วงปัจจุบันของปฏิทิน (แถบเวลาที่บอก “เราอยู่ตรงไหน”) งานที่ต้องทำพร้อมกำหนด ตัวเลข 3 ปีพร้อมกัน (กันเหลื่อม ปีนี้ ปีหน้า) และสิ่งที่เสี่ยง</span></div>
+  <div class="card"><div class="k">UX-01 · ทุกบทบาท</div><b>โต๊ะทำงานงบประมาณ</b><span>หน้าแรกของ Budget ตามบทบาท: ช่วงปัจจุบันของปฏิทิน (แถบเวลาที่บอก “เราอยู่ตรงไหน”) งานที่ต้องทำพร้อมกำหนด ตัวเลข 3 ปีพร้อมกัน (กันเหลื่อม ปีนี้ ปีหน้า) และสิ่งที่เสี่ยง</span></div>
   <div class="card"><div class="k">UX-02 · กอง</div><b>ตัวช่วยทำคำขอ 7 ขั้น</b><span>แถบขั้นด้านซ้าย แต่ละขั้นมีจุดสถานะ แผงด้านขวาแสดงกฎที่ยังไม่ผ่านและเอกสารที่ยังขาด สรุปวงเงินติดหน้าจอ ปุ่ม AI ร่างแต่ละขั้น และบันทึกอัตโนมัติ</span></div>
   <div class="card"><div class="k">UX-03 · กองแผน</div><b>ห้องรวบรวมคำขอ</b><span>แถบบนแสดงรวมคำขอเทียบกรอบและเพดาน 20% ตารางจัดลำดับที่ลากเรียงได้ เส้นตัดตามกรอบ (เหนือเส้นได้ ใต้เส้นรอ) แท็บ 3R และฐานศูนย์ ปรับวงเงินในตารางพร้อมเหตุผล</span></div>
   <div class="card"><div class="k">UX-04 · ทุกบทบาท</div><b>น้ำตกวงเงิน</b><span>กราฟน้ำตกจากวงเงินที่ขอถึง พ.ร.บ. ทุกขั้นที่ลดมีเหตุผล กดแท่งเพื่อดูคำขอที่ถูกตัด ใช้ทั้งระดับคำขอ กอง และหน่วยงาน</span></div>
@@ -596,7 +596,7 @@ unitCost(output)   = paid(output) / actualQuantity(output)   vs planned and last
     <tr><td>ตัวเลขเดียว ที่มาเดียว</td><td>ทุกยอดกดดูที่มา (คำขอ บรรทัด สัญญา ใบเบิก) ได้ใน 1 คลิก</td></tr>
     <tr><td>บอกเวลา</td><td>ทุกงานมีกำหนดและนับถอยหลัง กำหนดตามระเบียบแสดงที่มา (เช่น “ข้อ 34: ภายใน 15 วัน”)</td></tr>
     <tr><td>เปรียบเทียบเป็นค่าเริ่มต้น</td><td>ตัวเลขแสดงคู่กับปีก่อน แผน หรือเป้าหมายเสมอ</td></tr>
-    <tr><td>สถานะเป็นจุดสี</td><td>สีเขียว เหลือง แดงใช้กับสถานะเท่านั้น กราฟใช้สีตระกูล Fisko</td></tr>
+    <tr><td>สถานะเป็นจุดสี</td><td>สีเขียว เหลือง แดงใช้กับสถานะเท่านั้น กราฟใช้สีตระกูล</td></tr>
     <tr><td>ใช้ได้บนโทรศัพท์</td><td>ผู้บริหารอนุมัติและดูห้องติดตามบนจอแคบได้ ตารางยาวเปลี่ยนเป็นการ์ด</td></tr>
   </tbody>
 </table></div>
@@ -605,7 +605,7 @@ unitCost(output)   = paid(output) / actualQuantity(output)   vs planned and last
 <!-- ============================== 10 ============================== -->
 <section class="ch" id="s10">
 <h2><span class="num">10</span>AI, Agent, พยากรณ์ และ What-if</h2>
-<p class="lede">ใช้กรอบเดียวกับ Fisko Procurement: Agent วางแผน เรียกเครื่องมือ เสนอผล คนอนุมัติ ระดับความเป็นอิสระ L0–L3 และทุกขั้นบันทึกใน M09 (ต้นแบบจำลองตาม D-P09)</p>
+<p class="lede">ใช้กรอบเดียวกับ Procurement: Agent วางแผน เรียกเครื่องมือ เสนอผล คนอนุมัติ ระดับความเป็นอิสระ L0–L3 และทุกขั้นบันทึกใน M09 (ต้นแบบจำลองตาม D-P09)</p>
 <h3><span class="num">10.1</span>Agent ด้านงบประมาณ</h3>
 <div class="tbl"><table>
   <thead><tr><th>รหัส</th><th>ชื่อ</th><th>งาน</th><th>เครื่องมือหลัก</th><th>ระดับสูงสุด</th></tr></thead>
@@ -818,7 +818,7 @@ unitCost(output)   = paid(output) / actualQuantity(output)   vs planned and last
 <p class="small">รหัสหน้า B1 ถึง B11 ไม่ใช่รอบการสร้าง B1 ถึง B6 ในบทที่ 12 · M10 ผู้ดูแลระบบใช้ร่วมกันทุกแอปและคงรหัสเดิม</p>
 <h3><span class="num">15.2</span>หลักการจัดหน้า</h3>
 <ul>
-  <li>หัวหน้าทุกหน้าแสดง “Fisko Budget · รหัสใหม่ · รหัสเดิม · กลุ่ม” แบบเดียวกับ Fisko Procurement และ Fisko Finance</li>
+  <li>หัวหน้าทุกหน้าแสดง “Budget · รหัสใหม่ · รหัสเดิม · กลุ่ม” แบบเดียวกับ Procurement และ Finance</li>
   <li>แท็บที่ทำงานเรื่องเดียวกันรวมเป็นแท็บเดียว และมีแถบเลือกย่อยด้านใต้ (เช่น กันเงินเหลื่อมปีกับเงินเหลือจ่าย) ระบบจำแท็บย่อยล่าสุดของแต่ละแท็บ</li>
   <li>M09 แยกเป็นสองหน้า: B10 สำหรับตัวเลข พยากรณ์ และการจำลอง · B11 สำหรับการถาม AI และ Agent ที่หยุดให้คนอนุมัติ ลิงก์เดิม intel-… เปิดหน้าที่มีแท็บนั้น</li>
   <li>B8 เปิดที่ปีปัจจุบัน (2570 แบบสด) ข้อมูลตัวอย่างปี 2569 อยู่ในแท็บสุดท้าย</li>

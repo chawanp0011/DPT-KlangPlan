@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P96 (26 Nov 2569): ติดตามการเบิกจ่าย by budget item (asked for: "ยังไม่เห็นระดับรายการ กลุ่มต่างๆ ที่ต้อง
+// KlangFinance, round P96 (26 Nov 2569): ติดตามการเบิกจ่าย by budget item (asked for: "ยังไม่เห็นระดับรายการ กลุ่มต่างๆ ที่ต้อง
 // แสดง พร้อมออกเอกสาร"). The page showed contracts and payment rows only. Now, for the year chosen:
 //   the figures (budget, plan to date, paid, % of plan, % of budget, left); the plan and result by month or quarter;
 //   four group cards (หน่วยงาน, ผลผลิต/โครงการ, ประเภท, ลักษณะงบประมาณ): budget, plan to date, paid, paid/plan; a click filters the items;

@@ -1,4 +1,4 @@
-// Fisko Finance round FN4 (Finance design v0.1, chapters 6.4 and 6.5): receipts, cash custody and remittance.
+// Finance round FN4 (Finance design v0.1, chapters 6.4 and 6.5): receipts, cash custody and remittance.
 // - Electronic receipts with book and number control, cancel but never edit (FR-FN-25, clauses 69–77) and the
 //   receipt-book register with the yearly report due 31 October (FR-FN-26, clause 74).
 // - Recording receipts in the system within the day and closing the day's takings (FR-FN-27, clauses 81–83).

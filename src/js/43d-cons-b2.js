@@ -1,4 +1,4 @@
-// Fisko Budget round B2, consolidation (M03): Budget Bureau ways of reviewing requests.
+// Budget round B2, consolidation (M03): Budget Bureau ways of reviewing requests.
 // - Priority uses the five criteria from the FY2570 request manual (FR-B-15): obligation, urgent policy,
 //   readiness, severity of the problem and beneficiaries. Obligation and readiness are filled from the request.
 // - 3R analysis (FR-B-14): Review last year's spending, Redeploy from low-priority or slow-spending requests,

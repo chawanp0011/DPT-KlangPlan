@@ -1,4 +1,4 @@
-// Fisko Procurement round 16 (P4 of the detailed design): AI use cases for procurement. The prototype uses
+// Procurement round 16 (P4 of the detailed design): AI use cases for procurement. The prototype uses
 // rules and statistics only, with no model call (version "rules-1"). Every use is logged in the M09 AI log,
 // respects the agent switches in M09, and follows the design's limits: AI reads and drafts, a person decides.
 // It never scores or ranks bidders, never announces a winner or selects a supplier, and never approves anything.

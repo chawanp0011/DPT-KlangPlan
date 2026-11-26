@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P95 (26 Nov 2569), as asked:
+// KlangFinance, round P95 (26 Nov 2569), as asked:
 // 1. Planning's details of a budget item: a dialog in place of the long form in the row ("ไม่เอา design แบบนี้ ใช้ยากและไม่สวย"):
 //    - ผลผลิต/โครงการ is a drop-down of the register (ทะเบียนผลผลิต/โครงการ of the item's year);
 //    - several bureaus/divisions can be assigned, each with its amount; the total must not pass the item's amount. When the item is sent,

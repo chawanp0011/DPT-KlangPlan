@@ -1,4 +1,4 @@
-// Fisko Procurement round 40 (T4 of design v0.3, chapter 18): a forms catalogue with documents made from a case (FR-PR-81),
+// Procurement round 40 (T4 of design v0.3, chapter 18): a forms catalogue with documents made from a case (FR-PR-81),
 // a simulated e-mail outbox and signature status (FR-PR-82), an announcement record with publication channels (FR-PR-84),
 // an organisation-wide conflict-of-interest report (FR-PR-83) and a simulated legal-entity check with ERP codes (FR-PR-86).
 // Sending, signing and the entity lookup are simulated (D-P17, D-P18); nothing leaves the prototype.

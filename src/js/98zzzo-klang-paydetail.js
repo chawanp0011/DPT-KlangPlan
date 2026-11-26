@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P29 (17 Nov 2569), corrected on 17 Nov 2569 (P32): the payment request is made by PROCUREMENT, with the phases it pays and its details.
+// KlangFinance, procurement round P29 (17 Nov 2569), corrected on 17 Nov 2569 (P32): the payment request is made by PROCUREMENT, with the phases it pays and its details.
 // The user's words: "เจ้าหน้าที่พัสดุ สร้างรายการเบิกจ่าย · การเบิกจ่ายระบุจำนวนงวดว่าเบิกจ่ายงวดไหนบ้าง · ระบุรายละเอียดอื่นๆที่เกี่ยวกับการเบิกจ่าย".
 // Round P24 (file 98zzzg) let the FINANCE officer make the occasion; the first version of this file kept that. Now:
 //   1. WHO: the procurement officer (proc, prochead) makes the payment request on the contract page (under the phases) and on the case page (panel 6). It reaches the finance officer as a

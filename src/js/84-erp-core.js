@@ -1,8 +1,8 @@
-// Fisko-ERP-Gov, part 1: the five apps added on top of Fisko (Organization, Contract, Assets, Inventory, AI).
-// Fisko already holds Budget, Procurement and Finance. The new apps follow the ERP-Government (Odoo 15) scope:
+// ERP-Gov, part 1: the five apps added on top of (Organization, Contract, Assets, Inventory, AI).
+// already holds Budget, Procurement and Finance. The new apps follow the ERP-Government (Odoo 15) scope:
 // organization and approval tiers (operating_unit, base_tier_validation), agreements (agreement, contract),
 // assets (account_asset_management, asset_transfer, asset_low_value), stock (stock_request, stock_card_report,
-// stock_no_negative). Nothing here uses Odoo code: the rules are rewritten in the Fisko list + drawer pattern.
+// stock_no_negative). Nothing here uses Odoo code: the rules are rewritten in the list + drawer pattern.
 // Every figure is fictional sample data. Tier thresholds, asset categories and useful lives are samples to confirm.
 
 // ---------- roles ----------

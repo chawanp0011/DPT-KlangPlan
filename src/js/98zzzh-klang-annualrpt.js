@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P25 (16 Nov 2569): the menu "Annual budget report" and the Bureau status tab, on the user's brief:
+// KlangFinance, round P25 (16 Nov 2569): the menu "Annual budget report" and the Bureau status tab, on the user's brief:
 //   1. The menu "รายงานสรุปคำของบประมาณ" (BQ10) is renamed "รายงานงบประมาณประจำปี" and has two tabs:
 //        - "รายงานสรุปงบประมาณ ปีงบประมาณ": a dashboard that compares the budget at three steps, the REQUEST, the DRAFT BILL (ร่าง พ.ร.บ.) and the ACT (พ.ร.บ.)
 //          (KPIs, a bar for each unit and a table for each request); the earlier printable report (filters, print, CSV, the sums) stays under it;

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round R7: official letters drafted by the system, signed, numbered and sent; and the incoming-letter
+// KlangFinance, round R7: official letters drafted by the system, signed, numbered and sent; and the incoming-letter
 // register of the general administration unit. Written new for the DPT finance division (MoM 2 Nov 2569: standard letters
 // and forms should come out of the system on schedule; duty list: general administration, correspondence).
 // IMPORTANT: the templates below are SAMPLES of mine, embedded because the user has no real forms yet ("ฝังแบบสมมุติ").

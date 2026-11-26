@@ -1,4 +1,4 @@
-// Fisko Procurement pages (round 44: information architecture), the same way 66h-fin-pages.js lays out Finance.
+// Procurement pages (round 44: information architecture), the same way 66h-fin-pages.js lays out Finance.
 // Every page, its menu group, who sees it, the feature switch it needs and its tabs are declared here. Each tab
 // lists its sections (PROC entries) top to bottom and a `key`: the page id the earlier rounds used. Opening a tab
 // sets PROC_TAB to that key, so the binders added by rounds 11 to T4 (guards such as PROC_TAB === "gantt"),
@@ -203,7 +203,7 @@ PROC.conDetail = () => {
   return `<div class="row" style="margin:0 0 10px"><button class="btn ghost" type="button" data-conback>← ${L("สัญญาทั้งหมด", "All contracts")}</button></div>
     <section class="panel">${conPanel(c, "head")}${bar}${inPanel ? cur[2] : ""}</section>${inPanel ? "" : cur[2]}${prSec("conInvoices")}`;
 };
-// Fisko Finance on the contract (round 45): the GFMIS PO next to the supplier, and the voucher on each phase.
+// Finance on the contract (round 45): the GFMIS PO next to the supplier, and the voucher on each phase.
 function conPoTag(c) {
   if (typeof fcfg !== "function") return "";
   if (c.gfPo) return `<span class="sub">·</span><span class="mono sub">PO ${esc(c.gfPo.no)}</span>`;

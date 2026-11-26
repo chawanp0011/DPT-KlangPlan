@@ -1,4 +1,4 @@
-// Fisko Procurement round 19 (Q2 of design v0.2): the late stage of a contract and the supplier side.
+// Procurement round 19 (Q2 of design v0.2): the late stage of a contract and the supplier side.
 // Supervisor weekly reports and the 50% / 75% / due-date checkpoints (FR-PR-19), termination (FR-PR-46, R-15),
 // warranty period and defect claims (FR-PR-47, R-16), letters from templates with the sent date (FR-PR-48),
 // the supplier register with tax-ID check (FR-PR-50), the abandoned-work list check (FR-PR-51, R-17) and

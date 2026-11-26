@@ -1,4 +1,4 @@
-// Fisko Procurement round 13 (P0 + P1 of the detailed design): the procurement case file with its states,
+// Procurement round 13 (P0 + P1 of the detailed design): the procurement case file with its states,
 // the method advisor driven by rules in M10, committees, reference price, e-GP sourcing, award, the appeal
 // window, the contract gate and the split-purchase check. Rules and numbers come from S.mrules and S.pcfg.
 let CASE_OPEN = null, CASE_GROUP = "";
@@ -259,7 +259,7 @@ function caseDetail(c) {
     ${edit && n === 7 && !c.appealElapsed && !(c.appeal && c.appeal.status === "open") ? `<div class="row"><button class="btn" type="button" id="ap-none">${L("จำลอง: พ้นกำหนดโดยไม่มีผู้อุทธรณ์", "Demo: the period ends with no appeal")}</button><button class="btn" type="button" id="ap-file">${L("จำลอง: มีผู้อุทธรณ์", "Demo: an appeal is filed")}</button></div>` : ""}
     ${c.appeal && c.appeal.status === "open" && (isProcRole() || ROLE === "exec") ? `<div class="row"><button class="btn primary" type="button" id="ap-dismiss">${L("ยกอุทธรณ์", "Dismiss the appeal")}</button><button class="btn danger" type="button" id="ap-uphold">${L("รับอุทธรณ์ กลับไปพิจารณาผล", "Uphold, back to evaluation")}</button></div>` : ""}
     ${c.appeal && c.appeal.status !== "open" ? `<div class="sub">${L("ผลอุทธรณ์", "Appeal result")}: ${c.appeal.status === "dismissed" ? L("ยก", "dismissed") : L("รับ", "upheld")}</div>` : ""}
-    <div class="sub">${L("การอุทธรณ์ทำใน e-GP ภายใน 7 วันทำการ (ตามแหล่งที่ค้น ต้องยืนยัน) Fisko ติดตามกำหนดและกันการทำสัญญาก่อนพ้นกำหนด", "Appeals are filed in e-GP within 7 working days (per the sources found, to be confirmed). Fisko tracks the date and blocks the contract until it passes.")}</div>`
+    <div class="sub">${L("การอุทธรณ์ทำใน e-GP ภายใน 7 วันทำการ (ตามแหล่งที่ค้น ต้องยืนยัน) ติดตามกำหนดและกันการทำสัญญาก่อนพ้นกำหนด", "Appeals are filed in e-GP within 7 working days (per the sources found, to be confirmed). tracks the date and blocks the contract until it passes.")}</div>`
     : `<span class="sub">${L("วิธีนี้ไม่มีช่วงอุทธรณ์ตามค่าตั้งใน M10", "This method has no appeal period in the M10 settings")}</span>`)}
   ${sec(8, L("สัญญา", "Contract"), con ? `<div><span class="mono">${con.id}</span> · ${esc(tx(con.vendor))} · ${mb(con.amount)} ${L("ลบ.", "M")} <button class="btn" type="button" id="case-gocon">${L("เปิดสัญญา", "Open the contract")}</button></div>${closePanel(c, con)}` : `<span class="sub">${n === 8 ? L("พร้อมสร้างสัญญา วงเงินสัญญาต้องไม่เกินราคาที่ประกาศ", "Ready for the contract. Its amount can't exceed the announced price.") : ""}</span>`)}
   ${CASE_PANELS.map(f => f(c)).join("")}

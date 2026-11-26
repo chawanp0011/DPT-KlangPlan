@@ -1,7 +1,7 @@
-// Fisko-ERP-Gov, part 3: Fisko Contract (module 5).
-// Procurement contracts, their phases, guarantees, acceptance and payment already live in Fisko Procurement (P7) and
+// ERP-Gov, part 3: Contract (module 5).
+// Procurement contracts, their phases, guarantees, acceptance and payment already live in Procurement (P7) and
 // Finance; this app gathers them in one register (C1), adds a deadline watch (C3) and a payment plan view (C4) over the
-// same data, and adds agreements outside procurement (C2: lease, MOU, service, licence) that Fisko did not have.
+// same data, and adds agreements outside procurement (C2: lease, MOU, service, licence) that did not have.
 // ERP-Government reference: agreement, agreement_legal, contract, contract_invoice_plan, purchase_work_acceptance.
 const CT_ROLES = ["proc", "prochead", "exec", "fin", "plan", "audit", "div", "divhead", "admin"];
 const CT_APP = "DPT Contract";

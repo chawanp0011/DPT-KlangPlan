@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q4d (12 Nov 2569): the output/project list holds output-level nodes only, each linked to a
+// KlangFinance, budget round Q4d (12 Nov 2569): the output/project list holds output-level nodes only, each linked to a
 // programme, with a type: output (ผลผลิต), project (โครงการ) or fund (กองทุน). A programme is no longer listed as if it were an
 // output. Before this, a programme with no outputs stood in for one because its activities hung straight on it (the sample
 // personnel and core-administration programmes). The sample data now gives each such programme an output of its own and

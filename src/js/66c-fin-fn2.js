@@ -1,4 +1,4 @@
-// Fisko Finance round FN2 (Finance design v0.1, chapter 6.2): payment vouchers, withholding tax and payment.
+// Finance round FN2 (Finance design v0.1, chapter 6.2): payment vouchers, withholding tax and payment.
 // - Voucher types and evidence (FR-FN-07, 08), payment route (FR-FN-09, R-FN-02), withholding tax and the
 //   50 ทวิ certificate (FR-FN-10, R-FN-03), request clocks (FR-FN-11), approval with duty checks (FR-FN-12, SD-11),
 //   GFMIS files out and results in (FR-FN-13, 14), payment from the agency account (FR-FN-15), the daily payment
@@ -90,7 +90,7 @@ const vcCanApprove = () => canSpend();
 const vcIsMaker = v => v.maker === me().id || (!v.maker && !!v.reqBy && ROLE === "fin"); // a request made by procurement has no maker until the finance officer takes it (P32)
 // Voucher checking groups (duty list of the Finance Division): group 2 checks investment, construction, consultant and procurement above 100,000 baht; group 1 checks the rest.
 const VC_GROUP_LIMIT = 100000;
-// Fisko-KlangFinance R2: a voucher of any kind charged to an investment line also goes to group 2 (the duty list names investment spending, not only procurement).
+// KlangFinance R2: a voucher of any kind charged to an investment line also goes to group 2 (the duty list names investment spending, not only procurement).
 function vcGroup(v) { const c = vcCon(v); return v.type === "proc" && c ? (c.amount > VC_GROUP_LIMIT || famLine(c.line).type === "inv" ? 2 : 1) : (v.line && famLine(v.line).type === "inv" ? 2 : 1); }
 const vcCanCheck = v => ROLE === "finhead" || ROLE === "vchk" + vcGroup(v);
 
@@ -183,7 +183,7 @@ FS.vouchers = () => {
       <div class="f" style="flex:1 1 200px"><label for="vf-mwhy">${L("เหตุผลถ้าไม่ใช่ e-Payment", "Reason if not e-Payment")}</label><input type="text" id="vf-mwhy"></div>
       <div class="f" style="flex:1 1 100%"><label><input type="checkbox" id="vf-vat"> ${L("ยอดรวม VAT", "Amount includes VAT")}</label> <label style="margin-left:12px"><input type="checkbox" id="vf-contrib"> ${L("มีเงินสมทบจากผู้อื่น (สาธารณูปโภค ข้อ 29 (1))", "Others contribute (utilities, clause 29 (1))")}</label></div>
       <button class="btn primary" type="submit">${L("สร้างใบขอเบิก", "Create voucher")}</button></form>
-      <p class="sub" style="margin:8px 0 0">${L("เงินเดือนและค่าจ้างประจำมาจากไฟล์ระบบบุคลากร ไม่ทำใบขอเบิกใน Fisko (ประเด็น D-FN-03)", "Salaries and regular wages come as a file from the HR system; no voucher in Fisko (decision D-FN-03)")}</p></div>` : ""}
+      <p class="sub" style="margin:8px 0 0">${L("เงินเดือนและค่าจ้างประจำมาจากไฟล์ระบบบุคลากร ไม่ทำใบขอเบิกใน (ประเด็น D-FN-03)", "Salaries and regular wages come as a file from the HR system; no voucher in (decision D-FN-03)")}</p></div>` : ""}
     <div class="tbl-wrap"><table><thead><tr><th>${L("เลขที่", "No.")}</th><th>${L("ประเภท / ผู้รับเงิน", "Type / payee")}</th><th class="n">${L("จ่ายสุทธิ (บาท)", "Net (baht)")}</th><th>${L("ทางจ่าย", "Route")}</th><th>${L("นาฬิกา", "Clock")}</th><th>${L("สถานะ", "Status")}</th><th></th></tr></thead>
       <tbody>${list.map(v => `<tr${VC_OPEN === v.id ? ' style="background:var(--tint)"' : ""}><td class="mono">${v.id}</td><td>${esc(tx(v.payee.name))}<div class="sub">${tx(VT[v.type].name)} · ${esc(tx(v.desc))}</div></td><td class="n">${fmt(vCalc(v).net, 2)}</td><td class="sub">${tx(ROUTE[vRoute(v).r])}</td>
         <td>${v.due && !["paid", "cancelled"].includes(v.state) ? `${dotI(clockDot(v.due))}<span class="sub">${clockTxt(v.due)}</span>` : "—"}</td><td>${vTag(v)}</td><td><button class="btn ghost" type="button" data-vcopen="${v.id}">${L("เปิด", "Open")}</button></td></tr>`).join("")

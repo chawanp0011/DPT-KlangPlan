@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, changes to the main budget request (M02 request list and the main tab of the request form), asked for
+// KlangFinance, changes to the main budget request (M02 request list and the main tab of the request form), asked for
 // by the user on 3 Nov 2569 with three screenshots of the Budget Bureau's e-budgeting screens:
 // 1. A programme / output-or-project / activity choice that is separate from the budget lines ("รายการ"). The structure
 //    already existed (programme > output > activity); the form only offered one activity list. The list now shows the

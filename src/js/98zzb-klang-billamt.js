@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P16 (16 Nov 2569): the amounts after the Budget Bureau (สงป.) come back into the request, for the draft bill and for the act.
+// KlangFinance, round P16 (16 Nov 2569): the amounts after the Budget Bureau (สงป.) come back into the request, for the draft bill and for the act.
 // Where it is in the prototype (checked in the code):
 //   - the Bureau's result is recorded on the submission page B6 (S.submission.results) and on the request itself (panel "Budget result and allocation");
 //   - the bill in parliament is on B6, tab Parliament (S.parl: the items of the bill, the committee cuts, the appeals) and the act is in force when the last step is done;

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, menu round M2 (13 Nov 2569): the eight tabs of the menu "Strategy and programmes", the register of the agency's
+// KlangFinance, menu round M2 (13 Nov 2569): the eight tabs of the menu "Strategy and programmes", the register of the agency's
 // programmes and the register of kinds of account. Asked for in the user's list (heading "จัดทำงบประมาณ", menu "ยุทธศาสตร์และแผนงาน"):
 //   tab 1  National strategy (e-MENSCR)                       built in round A4 (browse, summary, import as three segments)
 //   tab 2  Programmes by the strategy structure               the programmes the Budget Bureau gives (the budget structure) and

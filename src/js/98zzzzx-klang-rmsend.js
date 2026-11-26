@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P93 (25 Nov 2569): เตรียมคำของบประมาณ gets its last step (asked for: "รัน flow ให้ครบ").
+// KlangFinance, round P93 (25 Nov 2569): เตรียมคำของบประมาณ gets its last step (asked for: "รัน flow ให้ครบ").
 // The flow was run through with the demo users and the sample files: the division makes the case and sends it, Planning receives it,
 // processes it, forwards what is missing, the division returns it, Planning processes again and sets "พร้อมส่ง สงป.". It worked to there,
 // but nothing came after "ready": the pages that send to the Bureau are hidden in the trimmed menus. Now Planning records the sending

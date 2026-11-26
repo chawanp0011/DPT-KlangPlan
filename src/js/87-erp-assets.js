@@ -1,5 +1,5 @@
-// Fisko-ERP-Gov, part 4: Fisko Assets (module 6). Written new; Fisko had no assets app (its Procurement design leaves
-// assets and stock to a future "Fisko Assets"). ERP-Government reference: account_asset_management, account_asset_number,
+// ERP-Gov, part 4: Assets (module 6). Written new; had no assets app (its Procurement design leaves
+// assets and stock to a future "Assets"). ERP-Government reference: account_asset_management, account_asset_number,
 // account_asset_transfer, account_asset_low_value, account_asset_from_expense, l10n_th_gov_account_asset_management.
 // Round R9 (Nov 2569) reworked the app around the Comptroller General's Department letter ที่ กค 0423.3/ว 238 (4 Sep 2557):
 // 22 asset types with a useful-life range, straight-line depreciation, salvage value 1 baht, and items under 5,000 baht

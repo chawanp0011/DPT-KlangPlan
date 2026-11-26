@@ -220,7 +220,7 @@ function buildOrg(cfg) {
   ];
   s.backup = { full: "2026-10-12T01:00", incr: "2026-10-16T01:00", restore: "2026-07-20T10:00", rpo: 1, rto: 4, log: [] };
 
-  // round 11: Fisko Procurement and Fisko Finance (light versions), built on the FY2570 allocation lines.
+  // round 11: Procurement and Finance (light versions), built on the FY2570 allocation lines.
   // A procurement officer joins the demo users; two contracts are running, one payment is paid and matched.
   const sec = s.units.find(u => u.code === "01") || s.units[1];
   if (!s.users.some(u => u.role === "proc")) s.users.push({ id: "u10", role: "proc", unit: sec.id, primary: true, mfa: true, active: true,

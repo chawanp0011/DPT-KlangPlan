@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Assemble the Fisko prototype from src/ into:
-#   fisko-prototype.html  - artifact page (no doctype/head; the publisher wraps it).
+# Assemble the prototype from src/ into:
+#   prototype-page.html  - artifact page (no doctype/head; the publisher wraps it).
 #                           Excludes real-agency sample data (files named *data-dpt*).
-#   Fisko_Prototype.html  - standalone file that opens directly in a browser; includes every sample.
+#   Prototype.html  - standalone file that opens directly in a browser; includes every sample.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -22,7 +22,7 @@ scripts() { # $1 = filename pattern to leave out
   printf '<style>\n'; cat src/styles.css src/theme.css src/calm.css src/cowork.css src/erp.css; printf '</style>\n'
   cat src/body.html
   scripts '*data-dpt*'
-} > fisko-prototype.html
+} > prototype-page.html
 
 {
   printf '<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
@@ -32,6 +32,6 @@ scripts() { # $1 = filename pattern to leave out
   cat src/body.html
   scripts '__none__'
   printf '</body>\n</html>\n'
-} > Fisko_Prototype.html
+} > Prototype.html
 
-wc -c fisko-prototype.html Fisko_Prototype.html
+wc -c prototype-page.html Prototype.html

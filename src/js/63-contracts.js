@@ -1,6 +1,6 @@
-// Fisko Procurement round 14 (P2 of the detailed design): contract guarantee, delivery notice and acceptance
+// Procurement round 14 (P2 of the detailed design): contract guarantee, delivery notice and acceptance
 // timing (R-10), penalties (R-09), contract variations by approval ladder with versions (R-08, SD-08),
-// the three-way payment gate before Fisko Finance (R-11) and closing the case (R-12).
+// the three-way payment gate before Finance (R-11) and closing the case (R-12).
 // All rates, ladders and day counts are settings in S.pcfg (M10 → Procurement rules), not fixed numbers.
 const utcDay = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); };
 const dayDiff = (a, b) => Math.round((utcDay(b) - utcDay(a)) / 864e5);
@@ -52,7 +52,7 @@ const gateBox = (c, ph) => {
   return `<div class="callout" style="margin:0"><b>${L("ประตูเบิกจ่าย (R-11)", "Payment gate (R-11)")}</b>
     <ul class="check" style="margin-top:6px">${g.checks.map(x => `<li><span class="m ${x.ok ? "ok" : "no"}">${x.ok ? "✓" : "×"}</span><div>${esc(x.label)}</div></li>`).join("")}</ul>
     <div class="sub" style="margin-top:6px">${L("ยอดที่ขอได้", "Payable")} = ${fmt(ph.result === "partial" ? ph.okAmount : ph.amount)} − ${L("ค่าปรับ", "penalty")} ${fmt(g.penalty)} = <b>${fmt(g.net)}</b> ${L("บาท", "baht")}${g.rejected ? ` · ${L("ส่วนที่ไม่ผ่านตรวจรับ", "not accepted")} ${fmt(g.rejected)}` : ""}</div>
-    ${g.noPo ? `<div class="sub">${L("ยังไม่มีเลขที่ใบสั่งซื้อ (PO) ใน GFMIS: บันทึกที่ Fisko Finance → วงเงินผูกพันและใบสั่งซื้อ ข้อนี้ปลดเป็นข้อยกเว้นไม่ได้", "No GFMIS purchase order yet: record it in Fisko Finance → Commitments and POs. This check can't be released as an exception.")}</div>` : g.released ? `<div class="sub">${L("ปลดข้อยกเว้นโดย", "Exception released by")} ${esc(userName(ph.release.by))}: ${esc(ph.release.reason)}</div>` : !g.pass ? `<div class="sub">${L("ไม่ผ่านประตู: การเงินส่งคำขอไม่ได้ ระบบจะพักเป็นข้อยกเว้นให้หัวหน้าพัสดุหรือผู้บริหารปลด", "The gate is not passed: Finance can't send the request. It is held as an exception for the head of procurement or the executive to release.")}</div>` : ""}</div>`;
+    ${g.noPo ? `<div class="sub">${L("ยังไม่มีเลขที่ใบสั่งซื้อ (PO) ใน GFMIS: บันทึกที่ Finance → วงเงินผูกพันและใบสั่งซื้อ ข้อนี้ปลดเป็นข้อยกเว้นไม่ได้", "No GFMIS purchase order yet: record it in Finance → Commitments and POs. This check can't be released as an exception.")}</div>` : g.released ? `<div class="sub">${L("ปลดข้อยกเว้นโดย", "Exception released by")} ${esc(userName(ph.release.by))}: ${esc(ph.release.reason)}</div>` : !g.pass ? `<div class="sub">${L("ไม่ผ่านประตู: การเงินส่งคำขอไม่ได้ ระบบจะพักเป็นข้อยกเว้นให้หัวหน้าพัสดุหรือผู้บริหารปลด", "The gate is not passed: Finance can't send the request. It is held as an exception for the head of procurement or the executive to release.")}</div>` : ""}</div>`;
 };
 
 // ---------- the contract panel ----------

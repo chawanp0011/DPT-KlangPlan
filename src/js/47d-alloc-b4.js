@@ -1,4 +1,4 @@
-// Fisko Budget round B4: live in-year management (Budget design chapter 6.4 and 7.2–7.3).
+// Budget round B4: live in-year management (Budget design chapter 6.4 and 7.2–7.3).
 // - Four-level balance per line (FR-B-30): allotted, reserved (approved requisitions), committed (contracts),
 //   paid (approved payments); available = allotted − reserved − committed. Data from Procurement and Finance.
 // - Allotment status and distribution to regional offices within 15 days (FR-B-28, BR-16).
@@ -10,7 +10,7 @@
 //   FY2570 against quarterly targets that are settings (FR-B-31, BR-20, BR-21).
 const B4_FY = CUR_FY;
 const lineStruct = l => { const lin = lineage(l.act); return { prog: (lin[0] || {}).id || "", out: (lin.find(n => n.lvl === "output") || {}).id || "" }; };
-// Actual spending of a line: approved contract payments, plus (Fisko Finance FN5) paid vouchers outside contracts
+// Actual spending of a line: approved contract payments, plus (Finance FN5) paid vouchers outside contracts
 // and budget advances (lent until cleared, then what was spent), so M06 and M07 show what Finance paid.
 const linePaid = id => sumv(S.payreqs.filter(p => p.status === "approved" && (S.contracts.find(c => c.id === p.contract) || {}).line === id).map(p => p.amount))
   + sumv((S.vouchers || []).filter(v => v.line === id && !v.contract && v.state === "paid").map(v => v.gross - (v.penalty || 0)))
@@ -75,15 +75,15 @@ ALLOC.balance = () => {
   const open = BAL_OPEN && A.lines.find(l => l.id === BAL_OPEN);
   return `<section class="stats">
       ${statCard({ label: L("จัดสรรแล้ว", "Allotted"), value: mb(T("allot")), unit: L("ลบ.", "M"), icon: "coins" })}
-      ${statCard({ label: L("จองวงเงิน (ใบขอซื้อ)", "Reserved (requisitions)"), value: mb(T("res")), unit: L("ลบ.", "M"), icon: "inbox", sub: L("จาก Fisko Procurement", "From Fisko Procurement") })}
+      ${statCard({ label: L("จองวงเงิน (ใบขอซื้อ)", "Reserved (requisitions)"), value: mb(T("res")), unit: L("ลบ.", "M"), icon: "inbox", sub: L("จาก Procurement", "From Procurement") })}
       ${statCard({ label: L("ผูกพัน (สัญญา)", "Committed (contracts)"), value: mb(T("com")), unit: L("ลบ.", "M"), icon: "file", ring: T("allot") ? T("com") / T("allot") : 0 })}
-      ${statCard({ label: L("เบิกจ่ายแล้ว", "Paid"), value: mb(T("paid")), unit: L("ลบ.", "M"), icon: "wallet", sub: L("จาก Fisko Finance", "From Fisko Finance") })}</section>
+      ${statCard({ label: L("เบิกจ่ายแล้ว", "Paid"), value: mb(T("paid")), unit: L("ลบ.", "M"), icon: "wallet", sub: L("จาก Finance", "From Finance") })}</section>
     <section class="panel"><header>${chipIco("layers", "info")}<h2>${L("ยอดต่อบรรทัด", "Per line")}</h2><span class="sp"></span><span class="row sub" style="gap:10px"><span><i class="lg bal-p"></i>${L("เบิกจ่าย", "Paid")}</span><span><i class="lg bal-c"></i>${L("ผูกพัน", "Committed")}</span><span><i class="lg bal-r"></i>${L("จอง", "Reserved")}</span></span></header>
       <div class="tbl-wrap"><table><thead><tr><th>${L("บรรทัด", "Line")}</th><th>${L("เงินจัดสรร", "Allotment")}</th><th class="n">${L("จัดสรร", "Allotted")}</th><th style="width:26%"></th><th class="n">${L("คงเหลือใช้ได้", "Available")}</th></tr></thead>
         <tbody>${L4.map(({ l, b }) => `<tr class="click" data-bal="${l.id}" tabindex="0"><td><b style="font-weight:500">${esc(tx(l.name))}</b><div class="sub"><span class="mono">${l.id}</span> · ${unitName(l.unit)} · ${typeName(l.type)}</div></td>
           <td>${allotCell(l)}</td><td class="n">${mb(b.allot)}</td><td>${bar(b)}</td><td class="n" style="color:var(--${b.avail < 0 ? "bad" : "ink"})"><b>${mb(b.avail)}</b></td></tr>
           ${open && open.id === l.id ? `<tr class="cmt-row"><td colspan="5">${balDetail(l)}</td></tr>` : ""}`).join("")}</tbody></table></div>
-      <div class="body sub">${L("คงเหลือใช้ได้ = จัดสรร − จอง − ผูกพัน (การเบิกจ่ายอยู่ในยอดผูกพันแล้ว) · Fisko Procurement ไม่ให้จองหรือผูกพันเกินยอดนี้ (BR-15, มาตรา 40)", "Available = allotted − reserved − committed (payments sit inside commitments) · Fisko Procurement won't reserve or commit beyond it (BR-15, section 40)")}</div></section>`;
+      <div class="body sub">${L("คงเหลือใช้ได้ = จัดสรร − จอง − ผูกพัน (การเบิกจ่ายอยู่ในยอดผูกพันแล้ว) · Procurement ไม่ให้จองหรือผูกพันเกินยอดนี้ (BR-15, มาตรา 40)", "Available = allotted − reserved − committed (payments sit inside commitments) · Procurement won't reserve or commit beyond it (BR-15, section 40)")}</div></section>`;
 };
 function allotCell(l) {
   const a = l.allot || { status: "approved" };

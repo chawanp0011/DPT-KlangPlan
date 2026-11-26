@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P11 (15 Nov 2569): the tabs of the division request, the NBUD form and the budget hearing flow.
+// KlangFinance, round P11 (15 Nov 2569): the tabs of the division request, the NBUD form and the budget hearing flow.
 //  - Tab "ตัวชี้วัด" (indicators): every LINE of the request has its own indicators (not one set for the whole request): name, kind (quantitative,
 //    qualitative, time, cost), unit (the unit list follows the kind), targets for quarters 1 to 4 and the total. The kinds and the unit groups are the
 //    ones of the file ประเภทตัวชี้วัดเชื่อมหน่วยนับ.xlsx ("ร้อยละ" is added by me to the quantitative units). The KPI registers of the strategy and of the

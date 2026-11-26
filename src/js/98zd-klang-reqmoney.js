@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q4a (10 Nov 2569): the request form's kinds of money, off-budget money, expenditure
+// KlangFinance, budget round Q4a (10 Nov 2569): the request form's kinds of money, off-budget money, expenditure
 // categories and a fourth account type. Asked for by the user from the division's side of the budget system:
 //  - account type 1 to 4 (the form had 1 to 3);
 //  - kind of money: budget money, whose types follow the Budget Bureau and can be set (page BQ2), and off-budget money,

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P27 (17 Nov 2569): the sample is written again as ONE story with ONE date, "today" = Tuesday 17 Nov 2569 (2026-11-17), at the user's word
+// KlangFinance, round P27 (17 Nov 2569): the sample is written again as ONE story with ONE date, "today" = Tuesday 17 Nov 2569 (2026-11-17), at the user's word
 // ("make all the samples new, for the budget and for procurement, as current as the process allows, from creating the calendar to the hand-over to the LGU").
 // What was wrong before: the clock was 16 Oct 2569 while the sample events were dated by hand and did not agree with each other. Sixteen of the 22 procurement cases were
 // copies of one another ("Sample, panel N ..." with the same supplier, the same dates and the same 14 Oct signing); a case was "handed on" on 15 Oct and "closed" on 22 Oct;

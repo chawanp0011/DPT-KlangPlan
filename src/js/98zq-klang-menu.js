@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, menu round M1 (13 Nov 2569): the order and names of the budget formulation menu, the fiscal year inside each
+// KlangFinance, menu round M1 (13 Nov 2569): the order and names of the budget formulation menu, the fiscal year inside each
 // page, and the intake page taken out. Asked for by the user in a list headed "จัดทำงบประมาณ":
 //   Formulation, in this order: Dashboard, Calendar, Strategy and programmes, Quota, Committee observations, Requests (made by the
 //   offices and divisions), Consolidation at agency level (by the budget group), Review and approval, Summary and submission to the

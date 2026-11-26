@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P85 (24 Nov 2569): the follow-up form of FY 2570 filled for the sample, and the year and the month on top.
+// KlangFinance, round P85 (24 Nov 2569): the follow-up form of FY 2570 filled for the sample, and the year and the month on top.
 // 1. The sample cases were made before the e-GP form (c.egp7), so their follow-up rows had no dates: every step showed 0. A case with
 //    no e-GP form gets the dates of the steps it has passed (from its state), counted back from its contract or its last event, with
 //    the e-GP number, the reference price, the winner and the price; the type of the older plan items; a problem where there is one

@@ -1,4 +1,4 @@
-// Fisko Budget round B3, allocation (M06): FY2571 allocation lines from the appropriation act (FR-B-26).
+// Budget round B3, allocation (M06): FY2571 allocation lines from the appropriation act (FR-B-26).
 // When the bill is in force, each line takes its amount from parliament (after cuts and restored appeals); before
 // that, from the Budget Bureau result in M05. Every line keeps its request id, and its monthly plan comes from the
 // request's quarterly plan scaled to the amount (each quarter spread over its three months).

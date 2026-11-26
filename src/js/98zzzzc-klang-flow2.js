@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P60 (23 Nov 2569), as the user asked:
+// KlangFinance, round P60 (23 Nov 2569), as the user asked:
 // - the flow strip is taken off every page (it did not show the right counts);
 // - แผนจัดซื้อ: no step tabs (นำเข้า / ตรวจสอบรายการ): one page, the check list, with a fiscal-year drop-down, the import button and the
 //   history of the imports;
@@ -128,14 +128,14 @@ document.addEventListener("click", e => { const b = e.target && e.target.closest
 
 // ---------- P68 (23 Nov 2569): the year a person last chose is kept, and the default is the newest year with budget items ----------
 // (A division opened the page on 2570 while Planning had imported and sent 2571, so the list looked empty.)
-{ let saved = null; try { saved = Number(store.get("fisko-pr-fy")) || null; } catch (e) {}
+{ let saved = null; try { saved = Number(store.get("app-pr-fy")) || null; } catch (e) {}
   const pick = () => { const ys = [...new Set(((typeof S !== "undefined" && S && S.bi && S.bi.rows) || []).map(biFy))].sort((a, b) => b - a); return ys.length ? ys[0] : FAM_FY; };
   BI.fyPicked = !!(saved && PR_FYS().includes(saved)); try { BI.fy = BI.fyPicked ? saved : pick(); } catch (e) { BI.fy = FAM_FY; }
   const base = biView; biView = function () { if (!BI.fyPicked) BI.fy = pick(); let h = base();
     if (["div", "divhead"].includes(ROLE)) { const mineAt = y => ((S.bi && S.bi.rows) || []).filter(r => r.sent && biFy(r) === y && biUnit(r) && biUnit(r).id === me().unit).length, other = PR_FYS().filter(y => y !== BI.fy && mineAt(y));
       if (other.length) h = h.replace(prFySel(), prFySel() + `<div class="sub" style="margin:-4px 0 8px">มีรายการที่ได้รับในปีงบประมาณ ${other.map(y => `${y} (${mineAt(y)} รายการ)`).join(", ")}: เลือกปีด้านบน</div>`); }
     return h; }; }
-document.addEventListener("change", e => { const t = e.target; if (t && t.matches && t.matches("[data-prfy]")) { BI.fyPicked = true; try { store.set("fisko-pr-fy", String(t.value)); } catch (er) {} } }, true);
+document.addEventListener("change", e => { const t = e.target; if (t && t.matches && t.matches("[data-prfy]")) { BI.fyPicked = true; try { store.set("app-pr-fy", String(t.value)); } catch (er) {} } }, true);
 // ขอซื้อขอจ้าง: what the unit received from Planning in the chosen year, with the button to write the details (opens the รายการจัดซื้อ at ขอซื้อขอจ้าง)
 function prRecvPanel() { if (!["div", "divhead", "plan", "proc", "prochead", "admin"].includes(ROLE)) return ""; if (!BI.fyPicked) { const ys = [...new Set(((S.bi && S.bi.rows) || []).map(biFy))].sort((a, b) => b - a); if (ys.length) BI.fy = ys[0]; }
   const mineU = ["div", "divhead"].includes(ROLE) ? me().unit : null, rows = ((S.bi && S.bi.rows) || []).filter(r => r.sent && biFy(r) === BI.fy && (!mineU || (biUnit(r) && biUnit(r).id === mineU)));

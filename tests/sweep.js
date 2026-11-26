@@ -1,6 +1,6 @@
-// Fisko prototype test sweep. Runs inside the prototype page (it needs the app's globals: ROLE, LANG, ORG, S,
-// route, NAV ...), so tests/run.html injects it into an iframe that loads Fisko_Prototype.html. It can also be
-// pasted into the browser console on the prototype page and started with FISKO_TEST.run().
+// prototype test sweep. Runs inside the prototype page (it needs the app's globals: ROLE, LANG, ORG, S,
+// route, NAV ...), so tests/run.html injects it into an iframe that loads Prototype.html. It can also be
+// pasted into the browser console on the prototype page and started with APP_TEST.run().
 //
 // Suites
 //   render  every page, every tab clicked, for every role × language × organisation, plus request steps,
@@ -17,7 +17,7 @@
   const tick = () => new Promise(r => { const c = new MessageChannel(); c.port1.onmessage = () => r(); c.port2.postMessage(0); });
   const QS = ["Check this request", "Draft the justification", "What if the ceiling drops 10%", "Which units are behind plan", "Any spending anomalies", "Summarise requests by status", "Which contracts are late", "Which cases are stuck", "What is the share of competitive cases", "What should I do first today", "Summarise payments", "hello"];
   async function run(opts = {}) {
-    if (typeof SEL_FY !== "undefined") { SEL_FY = null; try { store.del("fisko-fy"); } catch (e) {} } // a fiscal year left chosen in the top bar would turn most pages into notices
+    if (typeof SEL_FY !== "undefined") { SEL_FY = null; try { store.del("app-fy"); } catch (e) {} } // a fiscal year left chosen in the top bar would turn most pages into notices
     const o = Object.assign({ suites: ["render", "chat", "agents", "demo"], orgs: Object.keys(SEEDS), langs: ["th", "en"], roles: Object.keys(ROLES), onProgress: () => {} }, opts);
     const t0 = performance.now(), errs = [];
     let n = 0, done = 0;
@@ -25,7 +25,7 @@
     const chk = label => { n++; const v = document.getElementById("view"), s = v ? v.innerText : "", m = s.match(BAD); if (m) errs.push(`${label}: …${s.slice(Math.max(0, m.index - 40), m.index + 20).replace(/\s+/g, " ")}…`); };
     const safe = (label, fn) => { try { fn(); } catch (e) { errs.push(`${label} THROW ${e && e.message}`); } };
     // route by the test hook, not history (browsers ignore replaceState after a few hundred calls in 10 s)
-    const go2 = id => { window.FISKO_ROUTE = "#" + id; route(); const want = id.startsWith("admin-") ? "admin" : id; if (CUR !== want) errs.push(`asked for ${id}, got ${CUR}`); };
+    const go2 = id => { window.APP_ROUTE = "#" + id; route(); const want = id.startsWith("admin-") ? "admin" : id; if (CUR !== want) errs.push(`asked for ${id}, got ${CUR}`); };
     const report = what => o.onProgress({ what, n, errors: errs.length, done: ++done, total });
     const oldErr = window.onerror; window.onerror = (msg, src, line) => { errs.push(`window.onerror ${msg} @${line}`); };
     for (const org of o.orgs) {
@@ -216,7 +216,7 @@
     if (o.suites.includes("demo") && typeof DEMO !== "undefined") {
       ORG = "sample"; S = SEEDS.sample.seed(); LANG = "en";
       ROLE = "plan"; renderShell(); await new Promise(r => setTimeout(r, 60));
-      const openGuide = () => { window.FISKO_ROUTE = "#demo"; route(); window.FISKO_ROUTE = null; };
+      const openGuide = () => { window.APP_ROUTE = "#demo"; route(); window.APP_ROUTE = null; };
       for (let i = 0; i < DEMO.length; i++) {
         // a step's click changes the hash; let the change fire, then open the guide again
         await new Promise(r => setTimeout(r, 20)); openGuide();
@@ -226,10 +226,10 @@
       }
       report("demo");
     }
-    window.onerror = oldErr; window.FISKO_ROUTE = null;
+    window.onerror = oldErr; window.APP_ROUTE = null;
     Object.keys(SEEDS).forEach(org => { ORG = org; store.del(key()); });
     ORG = "sample"; S = SEEDS.sample.seed(); LANG = "th"; ROLE = "plan"; renderShell(); history.replaceState(null, "", "#home"); route();
     return { ok: errs.length === 0, checks: n, errors: errs, seconds: Math.round((performance.now() - t0) / 100) / 10 };
   }
-  window.FISKO_TEST = { run, version: 1 };
+  window.APP_TEST = { run, version: 1 };
 })();

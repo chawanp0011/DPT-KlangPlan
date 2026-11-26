@@ -1,4 +1,4 @@
-// Fisko Procurement round 18 (Q1 of design v0.2): sourcing in depth. TOR library with versions and approval
+// Procurement round 18 (Q1 of design v0.2): sourcing in depth. TOR library with versions and approval
 // (FR-PR-39), market research log (FR-PR-40), conflict-of-interest declarations with rule SD-07 (FR-PR-41, R-13),
 // the evaluation matrix where committee members enter their own scores and the system only adds them up
 // (FR-PR-42, R-14), Q&A during the announcement (FR-PR-43), an e-GP data pack (FR-PR-44) and status sync with
@@ -170,7 +170,7 @@ CASE_PANELS.push(c => {
 });
 function egpPack(c) {
   const p = famPlan(c.plan), rq = caseReq(c), line = famLine(c.line), cm = k => (c.committees[k] ? `${c.committees[k].order} · ${committeeMembers(c.committees[k]).map(userName).join(", ")}` : "-");
-  return [`โครงการ: ${tx(p.name)}`, `รหัสรายการจัดซื้อ Fisko: ${c.id} · แผน ${p.id}`, `วิธีจัดซื้อ: ${tx(PMETHOD[c.method])}`, `ประเภท: ${tx(KINDS[c.kind])}`,
+  return [`โครงการ: ${tx(p.name)}`, `รหัสรายการจัดซื้อ: ${c.id} · แผน ${p.id}`, `วิธีจัดซื้อ: ${tx(PMETHOD[c.method])}`, `ประเภท: ${tx(KINDS[c.kind])}`,
     `วงเงินงบประมาณ: ${fmt(rq ? rq.amount : p.est)} บาท · รายการจัดสรร ${line.id} ${tx(line.name)}`, `ราคากลาง: ${c.ref ? fmt(c.ref.amount) + " บาท · แหล่ง " + c.ref.basis.map(b => tx(BASIS[b])).join(", ") : "-"}`,
     `TOR: ${c.tor ? c.tor.doc : "-"}`, `คณะกรรมการ TOR และราคากลาง: ${cm("tor")}`, `เกณฑ์พิจารณา: ${(c.criteria || []).map(k => `${tx(k.name)} ${k.w}`).join(", ") || "-"}`,
     `ประกาศ: ${c.egp ? fdate(c.egp.announce) : "-"} · ยื่นข้อเสนอถึง: ${c.egp ? fdate(c.egp.close) : "-"}`].join("\n");

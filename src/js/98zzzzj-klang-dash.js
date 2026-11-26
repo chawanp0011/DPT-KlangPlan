@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P81 (24 Nov 2569): the two follow-up dashboards, made clearer for what each is for.
+// KlangFinance, round P81 (24 Nov 2569): the two follow-up dashboards, made clearer for what each is for.
 //   ติดตามค่าใช้จ่าย (Planning): where the money of each budget item is now: not sent, at the unit, in procurement, contracted, paid.
 //   ติดตามเบิกจ่าย (the Treasury and the payment desks): how much of the contracts is paid, what waits at which desk, against the
 //   government's monthly target. The Excel buttons and the list of deliveries are kept.

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance: one fiscal-year selector in the top bar for the whole system (asked for by the user on 4 Nov 2569,
+// KlangFinance: one fiscal-year selector in the top bar for the whole system (asked for by the user on 4 Nov 2569,
 // after the same selector on the request page).
 // How it works, and what it cannot do: the prototype only holds data for some years. The year being prepared (FORM_FY) has the
 // requests, consolidation, review and submission; the year in execution (CUR_FY) has everything else (allocation lines, the
@@ -7,12 +7,12 @@
 // as it was. When a year is chosen, a page that shows that year renders normally; a page that is built on another year shows a
 // notice saying which year it holds and offering to switch to it, instead of showing the wrong year's figures under the chosen
 // label. Pages that do not depend on a year (home, admin, demo guide, AI assistant, flow document) are never replaced.
-let SEL_FY = (() => { const v = Number(store.get("fisko-fy")); return v > 2000 ? v : null; })();
+let SEL_FY = (() => { const v = Number(store.get("app-fy")); return v > 2000 ? v : null; })();
 const FY_FREE = ["home", "admin", "demo", "flow", "delegation", "assistant", "soon"]; // pages with no fiscal year of their own
 const FY_FORM = ["strategy", "requests", "request", "consolidation", "review", "submission"]; // pages built on the year being prepared
 const fyYears = () => (S.fyList || []).map(x => x.fy);
 function fyRouteId() {
-  let v = (window.FISKO_ROUTE || location.hash || "#home").slice(1);
+  let v = (window.APP_ROUTE || location.hash || "#home").slice(1);
   if (v.startsWith("admin-")) v = "admin";
   return !VIEWS[v] && !NAV.find(n => n.id === v) ? "home" : v;
 }
@@ -28,7 +28,7 @@ function fyPageHas(id, y) {
   if (id === "allocation") return !!(S.allocs && S.allocs[y]); // only years that have allocation lines; the prepared year gets its draft from a request ("take it into the allocation") or the draft button on the executing year's page
   return fyOfPage(id) === y;
 }
-function setFy(y) { SEL_FY = y ? Number(y) : null; if (SEL_FY) store.set("fisko-fy", String(SEL_FY)); else store.del("fisko-fy"); fyBar(); route(); }
+function setFy(y) { SEL_FY = y ? Number(y) : null; if (SEL_FY) store.set("app-fy", String(SEL_FY)); else store.del("app-fy"); fyBar(); route(); }
 function fyBar() {
   const top = $("#top"), role = $("#role"); if (!top || !role) return;
   let sel = $("#fy-sel"); if (!sel) { sel = document.createElement("select"); sel.id = "fy-sel"; sel.onchange = () => setFy(sel.value); role.parentNode.insertBefore(sel, $("#org") || role); }

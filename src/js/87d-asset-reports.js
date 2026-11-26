@@ -1,4 +1,4 @@
-// Fisko Assets, round R9, part 4: reports (A11), the work flows of the asset team (A12), menu order and icons.
+// Assets, round R9, part 4: reports (A11), the work flows of the asset team (A12), menu order and icons.
 // Reports read the register as it stands; nothing here posts to books. Sample data.
 let RPT = { id: "reg", unit: "", fy: CUR_FY };
 const rpFy = d => fyOf(d);

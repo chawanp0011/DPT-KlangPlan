@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q7 (12 Nov 2569): the dashboard of budget requests and the summary report.
+// KlangFinance, budget round Q7 (12 Nov 2569): the dashboard of budget requests and the summary report.
 // What was asked: a dashboard that sums the requests by kind of expenditure (recurrent or investment), single-year,
 // multi-year commitment and continuing commitment, number of projects, area, and whatever else is useful; the link between
 // the plan and the budget for the executives; and a summary report of the requests.

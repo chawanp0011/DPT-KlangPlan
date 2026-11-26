@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round B2 (14 Nov 2569): the revenue estimate of the units, and their non-budget funds.
+// KlangFinance, budget round B2 (14 Nov 2569): the revenue estimate of the units, and their non-budget funds.
 // The menu "Revenue estimate of the units" did not exist (checked: only the Finance app holds receipts, not an estimate made at request time).
 // Each division estimates, for the year being prepared, what it expects to collect: State revenue (to be remitted) and Non-budget funds
 // (money the unit holds and spends outside the budget act). Planning sees every unit's lines; a unit sees and edits its own. The non-budget lines

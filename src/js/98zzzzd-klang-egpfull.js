@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P62 (23 Nov 2569): e-GP and the contract hold every value the two department files ask for.
+// KlangFinance, round P62 (23 Nov 2569): e-GP and the contract hold every value the two department files ask for.
 // Checked column by column against the follow-up form (ฟอร์มติดตาม พ.ร.บ., 72 columns) and the disbursement plan (วางแผนการเบิกจ่าย,
 // 51 columns). What was missing is added where it is recorded in the work, all optional and marked "(ตามไฟล์ติดตาม)":
 //   e-GP step 2: survey/design, design done, cost estimate, TOR done (columns 23-26);

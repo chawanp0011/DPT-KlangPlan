@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P6 (13 Nov 2569): the delivery chain after the contract, as status of the project.
+// KlangFinance, procurement round P6 (13 Nov 2569): the delivery chain after the contract, as status of the project.
 // Checked first: the project already had the contractor's delivery date (ph.delivered, recorded by procurement) and the committee's acceptance, but
 // nothing for the two hand-overs the user named: (1) the contractor hands the work to the division, (2) the division hands it on to the local
 // authority (อปท.) or to the owner of the request. The accounting side of a built work (asset, transfer out of GFMIS) is in the Construction

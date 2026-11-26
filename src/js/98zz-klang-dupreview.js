@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P13 (15 Nov 2569): the list "Possible duplicates" of the consolidation page gets a review process, a side-by-side
+// KlangFinance, round P13 (15 Nov 2569): the list "Possible duplicates" of the consolidation page gets a review process, a side-by-side
 // comparison, the lines that are thought to overlap, and a place where Planning records the result.
 //  - Process: found (by AI or marked by Planning) -> under review (an owner starts it) -> [more information asked from the units, answered] ->
 //    result (merge, partly duplicate: the unit adjusts the scope, or not a duplicate). A result needs a note; it is kept with who and when, and a log of the

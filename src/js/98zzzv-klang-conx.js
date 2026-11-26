@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P46 (20 Nov 2569): the contract as the user listed it.
+// KlangFinance, round P46 (20 Nov 2569): the contract as the user listed it.
 // Step 4 (ทำสัญญา): the tab "งวดงานและตรวจรับ" becomes "สัญญาและสัญญาแก้ไข". It holds the contract's details, its files, the contract
 // guarantee (letter of guarantee / cash / bond), the number of phases, the advance payment, and the table of contract amendments.
 // Step 5: contract management and payment are one step. Each delivery is "ครั้งที่" (not "งวด"), with the advance repaid little by little,

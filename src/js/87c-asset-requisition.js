@@ -1,4 +1,4 @@
-// Fisko Assets, round R9, part 3: asking for an asset (A10) and the seed for the whole R9 asset work.
+// Assets, round R9, part 3: asking for an asset (A10) and the seed for the whole R9 asset work.
 // A unit asks for a kind of asset and says how many and why. The asset team looks at the spare stock of that type at approval,
 // names the exact items and hands them over; with no stock the answer is "procure". Sample flow, to confirm with the asset team.
 const AR_ST = { submitted: [["รอพิจารณา", "Waiting"], "p-info"], approved: [["อนุมัติ รอส่งมอบ", "Approved, to hand over"], "p-warn"], done: [["ส่งมอบแล้ว", "Handed over"], "p-ok"], rejected: [["ไม่อนุมัติ", "Not approved"], "p-bad"], nostock: [["ไม่มีของ ให้จัดหาใหม่", "Not in stock, to procure"], "p-mute"], cancelled: [["ถอนคำขอ", "Withdrawn"], "p-mute"] };

@@ -1,4 +1,4 @@
-// Fisko Procurement round 23 (Q6 of design v0.2): agentic AI, simulated (chapter 11; FR-PR-58, 59; D-P09).
+// Procurement round 23 (Q6 of design v0.2): agentic AI, simulated (chapter 11; FR-PR-58, 59; D-P09).
 // An agent takes a goal, plans steps from a template, calls tools from a register, and stops for a person at
 // every step that writes data. Nothing here calls a model: each step runs an existing rule function, so the
 // results are real for the sample data but the "planning" is a fixed template. Agents have no tool to score

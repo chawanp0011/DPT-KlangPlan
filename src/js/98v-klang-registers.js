@@ -1,4 +1,4 @@
-// Fisko-KlangFinance: registers of outputs/projects and of activities (asked for on 4 Nov 2569).
+// KlangFinance: registers of outputs/projects and of activities (asked for on 4 Nov 2569).
 // Both are views of the budget structure the request form already uses (S.structure[year]: programme > output > activity),
 // so a request's output and activity come from these registers and nothing is stored twice. They are the same nodes the
 // admin page "Budget structure" lists; these pages split them by level and let Planning keep them.

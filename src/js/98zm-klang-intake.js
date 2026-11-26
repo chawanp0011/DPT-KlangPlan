@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q6 (12 Nov 2569): who sent a request in, how it came, and the Planning division's intake.
+// KlangFinance, budget round Q6 (12 Nov 2569): who sent a request in, how it came, and the Planning division's intake.
 // 1. The request page showed the sending unit only as small grey text under the title and held no contact, channel or letter
 //    details. The main tab now has a panel "who sent it and how it came in": the unit that sent it (the unit that owns the
 //    request), the agency name as written on the cover letter, the person who sent it (name, position, phone, email), the channel

@@ -1,5 +1,5 @@
-// Fisko-KlangFinance, round R9: (A) salary history and the staff debt-deduction register that feed the payroll run in
-// Fisko HR; (B) a "OneDPT" style page: bring in an Excel (.xlsx) or CSV file and show it as an executive dashboard.
+// KlangFinance, round R9: (A) salary history and the staff debt-deduction register that feed the payroll run in
+// HR; (B) a "OneDPT" style page: bring in an Excel (.xlsx) or CSV file and show it as an executive dashboard.
 // Written new for the DPT finance division (MoM 2 Nov 2569: salary base history, debts to cooperative and savings bank,
 // the wish for an e-payroll; and the OneDPT project that GIS presented: import an Excel file, show an executive dashboard).
 // NOT done: a national e-payroll, income tax, pensions (บำเหน็จบำนาญ), government pension fund returns, social-security

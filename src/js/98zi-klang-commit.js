@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q4e (12 Nov 2569): the kind of request.
+// KlangFinance, budget round Q4e (12 Nov 2569): the kind of request.
 //  A request is either a single-year item or a multi-year commitment item. The new-request form asks for it and the main
 //  tab of the request has a select for it (it was only a button on the multi-year tab). Going back to single-year is refused
 //  while a later year still holds an amount.

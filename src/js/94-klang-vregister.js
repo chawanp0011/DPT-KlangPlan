@@ -1,8 +1,8 @@
-// Fisko-KlangFinance, round R2: the voucher control register (ทะเบียนคุมใบสำคัญเบิกจ่าย), written new for the DPT finance division.
+// KlangFinance, round R2: the voucher control register (ทะเบียนคุมใบสำคัญเบิกจ่าย), written new for the DPT finance division.
 // It replaces the Google Sheet the division uses to follow each disbursement (MoM 2 Nov 2569, พี่ปุ๊ก): work kind
 // (construction, buy/hire, general), budget kind, checking group, five steps (goods received, documents checked, approved,
 // keyed for payment, paid), who holds it, how long it has waited, and the receiving unit and date the register adds.
-// It reads the vouchers Fisko Finance already has; it does not create them. The role split of accounting, finance and
+// It reads the vouchers Finance already has; it does not create them. The role split of accounting, finance and
 // budget administration (plan row 4) is NOT done here: it needs the 40-odd `ROLE === "fin"` conditions reworked.
 const VR_EDIT = ["fin", "finhead", "vchk1", "vchk2"]; // who may fill the register's own fields; sample assumption, to confirm
 const VR_STUCK_DAYS = 7; // sample threshold for "waiting too long"
@@ -51,7 +51,7 @@ CRUD.def("vreg", {
       [L("ยอดรวม / สุทธิ", "Gross / net"), `${baht(v.gross)} / ${baht(c.net)}`], v.contract && [L("สัญญา", "Contract"), `${v.contract}${ph ? " · " + tx(ph.name) : ""}`], [L("สำนัก/กองที่ขอเบิก", "Requesting unit"), v.reg && v.reg.unit ? esc(unitName(v.reg.unit)) : "–"],
       [L("วันที่รับเอกสาร", "Received on"), v.reg && v.reg.recv ? fdate(v.reg.recv) : "–"], v.reg && v.reg.note && [L("หมายเหตุ", "Note"), esc(v.reg.note)], vOpen(v) && [L("ค้างที่", "Held by"), `${esc(tx(vHolder(v)))} · ${vAge(v)} ${L("วัน", "days")}`]])
       + `<ol style="list-style:none;margin:8px 0 0;padding:0">${st.steps.map((x, i) => `<li style="display:flex;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--line)">${dotI(x.done ? "ok" : x.cur ? "warn" : "muted")}<b style="font-weight:600">${i + 1}. ${tx(x.label)}</b>${x.cur ? tag(L("ขั้นปัจจุบัน", "Current step"), "p-warn") : ""}</li>`).join("")}</ol>
-      <p class="sub">${L("ขั้นอ่านจากสถานะใบขอเบิกใน Fisko Finance (F3) ไม่ได้ตามผลจริงใน GFMIS หรือ KTB", "Steps are read from the voucher status in Fisko Finance (F3), not from real GFMIS or KTB")}</p>`;
+      <p class="sub">${L("ขั้นอ่านจากสถานะใบขอเบิกใน Finance (F3) ไม่ได้ตามผลจริงใน GFMIS หรือ KTB", "Steps are read from the voucher status in Finance (F3), not from real GFMIS or KTB")}</p>`;
   },
 });
 

@@ -1,7 +1,7 @@
-// Fisko-ERP-Gov, part 8: Fisko HR (added on request after the 8 modules).
+// ERP-Gov, part 8: HR (added on request after the 8 modules).
 // ERP-Government (Odoo 15) has no payroll or leave modules: its HR scope is hr_department_code and hr_operating_unit
 // (employees tied to units), and hr_expense with tier validation, sequences and advance clearing (employee expense claims).
-// This app rewrites that scope in the Fisko list + drawer pattern: employee register, expense claims approved by tier,
+// This app rewrites that scope in the list + drawer pattern: employee register, expense claims approved by tier,
 // and a simple monthly payroll run that is handed to Finance. Rates in the payroll run are samples to confirm. Real
 // staff data comes from Smart HR, which is not connected.
 ROLES.hr = ["เจ้าหน้าที่ทรัพยากรบุคคล", "HR officer"];
@@ -26,7 +26,7 @@ const isHr = () => ROLE === "hr";
 const emp = id => (S.emps || []).find(e => e.id === id);
 const empName = id => (emp(id) ? tx(emp(id).name) : id);
 const myEmp = () => (S.emps || []).find(e => e.user === me().id);
-// Fisko-KlangFinance R9: payroll lines also carry deductions from the staff debt register (dedFor in 98y-klang-payroll-onedpt.js).
+// KlangFinance R9: payroll lines also carry deductions from the staff debt register (dedFor in 98y-klang-payroll-onedpt.js).
 // The month is passed only when a real run is prepared; the seed calls payLine(e) with no month and gets no deductions.
 function payLine(e, ym) {
   const sso = e.type === "temp" || e.type === "hire" ? Math.min(PAY_RATE.ssoCap, Math.round(e.salary * PAY_RATE.sso)) : 0, gpf = e.type === "gov" ? Math.round(e.salary * PAY_RATE.gpf) : 0;
@@ -101,7 +101,7 @@ CRUD.def("hexp", {
     if (x.status === "submitted" && ROLE === need && !own) out.push({ id: "ok", label: L("อนุมัติ", "Approve"), kind: "primary", confirm: baht(x.amount), run: y => { y.status = "approved"; y.decided = { by: me().id, t: nowIso() }; audit(["อนุมัติใบเบิกค่าใช้จ่าย", "Approved an expense claim"], y.id); notify(["hr"], [`ใบเบิก ${y.id} อนุมัติแล้ว รอส่งการเงิน`, `Claim ${y.id} approved; send to Finance`], "hr-exp"); return L("อนุมัติแล้ว", "Approved"); } },
       { id: "no", label: L("ไม่อนุมัติ", "Do not approve"), kind: "danger", why: true, run: (y, why) => { y.status = "rejected"; y.decided = { by: me().id, t: nowIso(), why }; audit(["ไม่อนุมัติใบเบิกค่าใช้จ่าย", "Expense claim not approved"], `${y.id} · ${why}`); return L("บันทึกแล้ว", "Recorded"); } });
     if (x.status === "submitted" && mine) out.push({ id: "wd", label: L("ถอนคำขอ", "Withdraw"), why: true, run: (y, why) => { y.status = "cancelled"; audit(["ถอนใบเบิกค่าใช้จ่าย", "Withdrew an expense claim"], `${y.id} · ${why}`); return L("ถอนแล้ว", "Withdrawn"); } });
-    if (x.status === "approved" && isHr()) out.push({ id: "fin", label: L("ส่งการเงินทำใบขอเบิก", "Send to Finance"), kind: "primary", confirm: L("แจ้งการเงินให้ทำใบขอเบิกใน Fisko Finance (F3) ระบบไม่สร้างใบขอเบิกให้เอง", "Tells Finance to prepare the voucher in F3; the voucher is not created automatically"), run: y => { y.status = "sent"; y.sentAt = nowIso(); audit(["ส่งใบเบิกให้การเงิน", "Sent a claim to Finance"], y.id); notify(["fin"], [`ใบเบิกค่าใช้จ่ายพนักงาน ${y.id} ${fmt(y.amount)} บาท ทำใบขอเบิก`, `Employee claim ${y.id}, ${fmt(y.amount)} baht: prepare a voucher`], "fnc-pay"); return L("ส่งการเงินแล้ว", "Sent to Finance"); } });
+    if (x.status === "approved" && isHr()) out.push({ id: "fin", label: L("ส่งการเงินทำใบขอเบิก", "Send to Finance"), kind: "primary", confirm: L("แจ้งการเงินให้ทำใบขอเบิกใน Finance (F3) ระบบไม่สร้างใบขอเบิกให้เอง", "Tells Finance to prepare the voucher in F3; the voucher is not created automatically"), run: y => { y.status = "sent"; y.sentAt = nowIso(); audit(["ส่งใบเบิกให้การเงิน", "Sent a claim to Finance"], y.id); notify(["fin"], [`ใบเบิกค่าใช้จ่ายพนักงาน ${y.id} ${fmt(y.amount)} บาท ทำใบขอเบิก`, `Employee claim ${y.id}, ${fmt(y.amount)} baht: prepare a voucher`], "fnc-pay"); return L("ส่งการเงินแล้ว", "Sent to Finance"); } });
     return out;
   },
   view: x => kv([[L("พนักงาน", "Employee"), esc(empName(x.emp))], [L("ชนิด", "Kind"), esc(tx(HX_KIND[x.kind]))], [L("วันที่", "Date"), fdate(x.date)], [L("จำนวน", "Amount"), baht(x.amount)], [L("รายละเอียด", "Details"), esc(x.why)],

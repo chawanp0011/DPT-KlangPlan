@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P4 (12 Nov 2569): extending a contract / changing its amount, in four steps.
+// KlangFinance, procurement round P4 (12 Nov 2569): extending a contract / changing its amount, in four steps.
 //   1. The division (or procurement for it) prepares the papers and hands them to procurement.
 //   2. The procurement officer checks the papers and has the AI write a summary to ask the authority for approval; the authority approves.
 //   3. The officer has the AI draft the legal paper (an amendment to the contract) and sends it to the legal unit to check.

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P2 (10 Nov 2569): four working phases, and the hand-over from the division to Finance.
+// KlangFinance, procurement round P2 (10 Nov 2569): four working phases, and the hand-over from the division to Finance.
 // The new flow gives a procurement case four owners in turn: (1) the Planning Division (the plan), (2) the division or bureau that
 // owns the case (approval in principle, reference price, TOR, the TOR committee, then hand over to the Finance Division),
 // (3) the procurement officers, e-GP part (take the case, create the project, documents, notice, bids, evaluation, award, appeal),

@@ -1,8 +1,8 @@
-// Fisko Finance round 46: non-budget money (เงินนอกงบประมาณ), the full cycle chosen in decision D-FN-04.
+// Finance round 46: non-budget money (เงินนอกงบประมาณ), the full cycle chosen in decision D-FN-04.
 // - Funds (S.nbFunds): the kinds of non-budget money an agency may keep by law, with the money held at the treasury
 //   (ฝากคลัง, clause 101 (5)) and in the agency's non-budget account (clause 20 (1)).
 // - Spending plans (S.nbPlans) per fund and year: lines, drafted by Finance and approved by the head of the agency.
-//   Spending is only from an approved plan line (R-FN-07); Fisko Budget sees the plans read-only (M06, FR-B-18).
+//   Spending is only from an approved plan line (R-FN-07); Budget sees the plans read-only (M06, FR-B-18).
 // - Money in: receipts of kind "nonbudget" name their fund (66e); cash is deposited at the treasury by the remittance.
 // - Withdrawals from the treasury deposit (S.nbWd) against the plan, approved by the head of the agency; withdrawn
 //   money must be paid out or deposited back within 15 working days (clause 101 (5)).
@@ -131,7 +131,7 @@ FS.nbPlans = () => {
         <button class="btn" type="submit">+ ${L("เพิ่มรายการ", "Add line")}</button></form>
         ${p && p.lines.length ? `<button class="btn primary" type="button" id="nbp-sub" style="margin-top:8px">${L("เสนอหัวหน้าส่วนราชการอนุมัติ", "Send to the head of the agency")}</button>` : ""}` : ""}
       ${head && p && p.status === "submitted" ? `<div class="row" style="flex-wrap:wrap"><button class="btn primary" type="button" id="nbp-ok">${L("อนุมัติแผน", "Approve the plan")}</button><input type="text" id="nbp-why" placeholder="${L("เหตุผลถ้าส่งกลับ", "Reason to return")}" style="min-width:220px;flex:1" aria-label="${L("เหตุผล", "Reason")}"><button class="btn danger" type="button" id="nbp-no">${L("ส่งกลับแก้ไข", "Return")}</button></div>` : ""}
-      <p class="sub" style="margin:8px 0 0">${L("จ่ายจากเงินนอกงบประมาณได้เฉพาะรายการในแผนที่อนุมัติแล้วและไม่เกินวงเงิน (R-FN-07) · กองแผนและผู้บริหารเห็นแผนนี้ใน Fisko Budget (M06)", "Non-budget money is spent only on lines of an approved plan, within the amount (R-FN-07) · Planning and executives see this plan in Fisko Budget (M06)")}</p>
+      <p class="sub" style="margin:8px 0 0">${L("จ่ายจากเงินนอกงบประมาณได้เฉพาะรายการในแผนที่อนุมัติแล้วและไม่เกินวงเงิน (R-FN-07) · กองแผนและผู้บริหารเห็นแผนนี้ใน Budget (M06)", "Non-budget money is spent only on lines of an approved plan, within the amount (R-FN-07) · Planning and executives see this plan in Budget (M06)")}</p>
     </div></section>`;
 };
 FS.nbWd = () => {
@@ -224,15 +224,15 @@ FIN_BINDS.push(() => {
   };
 }
 
-// ---------- Fisko Budget M06: the non-budget plans, read-only (FR-B-18) ----------
+// ---------- Budget M06: the non-budget plans, read-only (FR-B-18) ----------
 ALLOC_TABS.push({ id: "nb", label: ["เงินนอกงบประมาณ", "Non-budget money"] });
 ALLOC.nb = () => {
   if (ALLOC_FY !== FAM_FY) return `<section class="panel"><div class="body sub">${L("แผนเงินนอกงบประมาณใช้กับปีงบประมาณที่กำลังใช้จ่าย", "Non-budget plans apply to the year being spent")} (${FAM_FY})</div></section>`;
   const F = nbFunds();
-  return `<section class="panel"><header><h2>${L("เงินนอกงบประมาณ", "Non-budget money")} · ${fyLabel(FAM_FY)}</h2><span class="sp"></span><span class="sub">${L("ดูอย่างเดียว · การเงินจัดทำแผนใน Fisko Finance และหัวหน้าส่วนราชการอนุมัติ", "View only · Finance drafts the plans in Fisko Finance and the head of the agency approves")}</span></header>
+  return `<section class="panel"><header><h2>${L("เงินนอกงบประมาณ", "Non-budget money")} · ${fyLabel(FAM_FY)}</h2><span class="sp"></span><span class="sub">${L("ดูอย่างเดียว · การเงินจัดทำแผนใน Finance และหัวหน้าส่วนราชการอนุมัติ", "View only · Finance drafts the plans in Finance and the head of the agency approves")}</span></header>
     <div class="tbl-wrap"><table><thead><tr><th style="min-width:220px">${L("กองทุน", "Fund")}</th><th>${L("แผน", "Plan")}</th><th class="n">${L("วงเงินตามแผน", "Planned")}</th><th class="n">${L("ใช้ไป", "Used")}</th><th class="n">${L("รับเข้าปีนี้", "In this year")}</th><th class="n">${L("คงเหลือทั้งหมด", "Total held")}</th></tr></thead>
       <tbody>${F.map(f => { const p = nbPlan(f.id), b = nbBal(f); return `<tr><td><span class="mono">${f.id}</span> ${esc(tx(f.name))}</td><td>${p ? stTag(NBP_ST, p.status) : "—"}</td><td class="n">${p ? fmt(sumv(p.lines.map(l => l.amount))) : "—"}</td><td class="n">${fmt(nbUsed(f.id))}</td><td class="n">${fmt(b.income)}</td><td class="n">${fmt(b.total)}</td></tr>`; }).join("") || `<tr><td colspan="6" class="sub">—</td></tr>`}</tbody></table></div>
-    ${allowed("finance") ? `<div class="body"><button class="btn ghost" type="button" data-jump="fnc-nb:plans">${L("เปิดใน Fisko Finance", "Open in Fisko Finance")}</button></div>` : ""}</section>`;
+    ${allowed("finance") ? `<div class="body"><button class="btn ghost" type="button" data-jump="fnc-nb:plans">${L("เปิดใน Finance", "Open in Finance")}</button></div>` : ""}</section>`;
 };
 {
   const bb = BIND.allocation;

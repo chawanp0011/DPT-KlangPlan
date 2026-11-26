@@ -16,7 +16,7 @@ const store = {
 };
 
 // ---------- language ----------
-let LANG = store.get("fisko-lang") === "en" ? "en" : "th";
+let LANG = store.get("app-lang") === "en" ? "en" : "th";
 const L = (th, en) => (LANG === "en" ? en : th);
 const tx = v => (Array.isArray(v) ? v[LANG === "en" ? 1 : 0] : v == null ? "" : v);
 const fmt = (n, d = 0) => Number(n).toLocaleString(LANG === "en" ? "en-US" : "th-TH", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -38,7 +38,7 @@ const SEEDS = {}; // id -> { name: [th, en], seed: () => state }, registered by 
 const DATA_V = 104; // bump when the seed shape changes so saved demo state is reseeded
 let ORG = "sample";
 let S = null;
-const key = () => "fisko-v1-" + ORG;
+const key = () => "app-v1-" + ORG;
 function load() {
   if (!SEEDS[ORG]) ORG = "sample";
   const raw = store.get(key());
@@ -65,11 +65,11 @@ const ROLES = {
   proc: ["เจ้าหน้าที่พัสดุ", "Procurement officer"],
   prochead: ["หัวหน้าเจ้าหน้าที่พัสดุ", "Head of procurement"],
 };
-let ROLE = ROLES[store.get("fisko-role")] ? store.get("fisko-role") : "plan";
+let ROLE = ROLES[store.get("app-role")] ? store.get("app-role") : "plan";
 // Signed-in session (round 7). The role switcher still works as a demo shortcut: it moves the session
 // to that role's demo user. me() is the signed-in user when their role matches the current role.
 let SESSION = null;
-try { SESSION = JSON.parse(store.get("fisko-session") || "null"); } catch (e) { SESSION = null; }
+try { SESSION = JSON.parse(store.get("app-session") || "null"); } catch (e) { SESSION = null; }
 const me = () => {
   const su = SESSION && S && S.users.find(u => u.id === SESSION.user);
   if (su && su.role === ROLE) return su;
@@ -110,14 +110,14 @@ const NAV = []; // { id, code, group, label: [th,en], roles: [...], soon: round 
 const GROUPS = { overview: ["ภาพรวม", "Overview"], form: ["จัดทำงบประมาณ", "Budget formulation"], exec: ["บริหารและติดตาม", "Execution & results"], procurement: ["จัดซื้อจัดจ้าง", "Procurement"], finance: ["การเงิน", "Finance"], intel: ["วิเคราะห์", "Intelligence"], sys: ["ระบบ", "System"] };
 let CUR = "home";
 const APP_IDS = ["budget", "procurement", "finance"];
-let APP = APP_IDS.includes(store.get("fisko-app")) ? store.get("fisko-app") : "budget";
+let APP = APP_IDS.includes(store.get("app-app")) ? store.get("app-app") : "budget";
 function allowed(id) { const n = NAV.find(x => x.id === id); return !n || n.roles.includes(ROLE); }
 function go(v) { if (location.hash === "#" + v) route(); else location.hash = v; }
 const NAV_ALIAS = { request: "requests" }; // a page without a menu line of its own opens under this line
 let ROUTE_KEY = ""; // the page drawn last: view id and, on the request page, which request and tab
 function route() {
-  // window.FISKO_ROUTE lets tests/sweep.js route without touching browser history, which browsers throttle
-  let v = (window.FISKO_ROUTE || location.hash || "#home").slice(1);
+  // window.APP_ROUTE lets tests/sweep.js route without touching browser history, which browsers throttle
+  let v = (window.APP_ROUTE || location.hash || "#home").slice(1);
   if (v.startsWith("admin-")) { ADMIN_TAB = v.slice(6); v = "admin"; }
   if (!VIEWS[v] && !NAV.find(n => n.id === v)) v = "home";
   CUR = v;

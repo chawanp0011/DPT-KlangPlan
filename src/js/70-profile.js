@@ -1,4 +1,4 @@
-// Fisko Procurement round 36 (T1 of design v0.3, chapter 18): the agency profile and feature switches (FR-PR-63),
+// Procurement round 36 (T1 of design v0.3, chapter 18): the agency profile and feature switches (FR-PR-63),
 // automatic document numbers (FR-PR-80), public hearing of the TOR (FR-PR-64, R-25), RFQ and invitation letters
 // (FR-PR-65), extra item fields with VAT and ERP references (FR-PR-67) and price extras (FR-PR-68).
 // Government and state-enterprise agencies use the same product; what differs is a profile in M10.
@@ -198,7 +198,7 @@ ADMIN.procprof = () => {
   const ad = isAdmin(), pf = S.prof, F = S.docno.fmt, num = (k, lbl, hint) => `<div class="f" style="flex:0 1 200px"><label for="pf-${k}">${lbl}</label><input type="number" id="pf-${k}" min="0" step="any" value="${pf.p[k]}" ${ad ? "" : "disabled"}><span class="sub">${hint}</span></div>`;
   return `
   <div class="alert"><div class="ic" style="background:var(--info-soft);color:var(--info)">i</div><div><b>${L("โปรไฟล์หน่วยงาน: ผลิตภัณฑ์เดียว ตั้งค่าได้ตามชนิดหน่วยงาน", "Agency profile: one product, configured for the kind of agency")}</b>
-    <p>${L("ส่วนราชการและรัฐวิสาหกิจใช้ Fisko ตัวเดียวกัน ต่างกันที่สวิตช์ด้านล่าง ค่าตั้งต้นเป็นข้อเสนอจากการเทียบ TOR ต้องยืนยันกับฝ่ายกฎหมายและเจ้าหน้าที่พัสดุ", "Government agencies and state enterprises use the same Fisko; the switches below differ. The starting values come from the TOR comparison and must be confirmed with legal and procurement staff.")}</p></div></div>
+    <p>${L("ส่วนราชการและรัฐวิสาหกิจใช้ ตัวเดียวกัน ต่างกันที่สวิตช์ด้านล่าง ค่าตั้งต้นเป็นข้อเสนอจากการเทียบ TOR ต้องยืนยันกับฝ่ายกฎหมายและเจ้าหน้าที่พัสดุ", "Government agencies and state enterprises use the same; the switches below differ. The starting values come from the TOR comparison and must be confirmed with legal and procurement staff.")}</p></div></div>
   <section class="panel"><header><h2>${L("ชนิดหน่วยงาน", "Kind of agency")}</h2><span class="sp"></span>${tag(tx(PROF_TYPES[pf.type]), "p-info")}</header>
     <div class="body row">${Object.keys(PROF_TYPES).map(k => `<button class="btn ${pf.type === k ? "primary" : ""}" type="button" data-ptype="${k}" ${ad ? "" : "disabled"}>${tx(PROF_TYPES[k])}</button>`).join("")}<span class="sub">${L("เลือกแล้วระบบตั้งสวิตช์เป็นค่าตั้งต้นของชนิดนั้น แก้ทีละข้อได้ภายหลัง", "Choosing a kind sets the switches to its starting values; you can then change each one")}</span></div></section>
   <section class="panel"><header><h2>${L("สวิตช์ฟังก์ชัน", "Feature switches")}</h2><span class="sp"></span>${tag(ad ? L("แก้ไขได้", "Editable") : L("ดูอย่างเดียว", "View only"), ad ? "p-ok" : "p-mute")}</header>

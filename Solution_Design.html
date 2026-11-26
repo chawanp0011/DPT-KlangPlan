@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fisko Solution Design</title>
+<title>Solution Design</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
@@ -171,7 +171,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <body>
 <div class="layout">
 <nav class="toc" id="toc" aria-label="สารบัญ">
-  <div class="brand">Fisko<small>Solution Design Document · v0.3</small></div>
+  <div class="brand"><small>Solution Design Document · v0.3</small></div>
   <div class="tools"><button type="button" id="toc-toggle" aria-expanded="false">สารบัญ</button><button type="button" id="theme">ธีม</button></div>
   <ol>
     <li><a href="#s1"><span class="n">01</span>บทนำ</a></li>
@@ -197,7 +197,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 
 <header class="cover">
   <div class="eyebrow">Solution Design Document</div>
-  <h1>Fisko<br><span style="font-size:.55em;color:var(--accent)">Agency e-Budgeting Management System (AEBMS)</span></h1>
+  <h1><br><span style="font-size:.55em;color:var(--accent)">Agency e-Budgeting Management System (AEBMS)</span></h1>
   <p class="th">ระบบบริหารจัดการงบประมาณอิเล็กทรอนิกส์สำหรับหน่วยรับงบประมาณ</p>
   <div class="meta">
     <div><span>เวอร์ชัน</span><b>0.3 ร่างเพื่อการหารือ</b></div>
@@ -215,8 +215,8 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 
 <h3><span class="num">1.1</span>วัตถุประสงค์ของเอกสาร</h3>
 <div class="prose">
-<p><b>Fisko</b> คือชื่อแพลตฟอร์ม ส่วน AEBMS (Agency e-Budgeting Management System) คือชื่อระบบที่ใช้ในเอกสารข้อกำหนด เอกสารนี้ใช้ทั้งสองชื่อในความหมายเดียวกัน</p>
-<p>เอกสารนี้กำหนดการออกแบบโซลูชันของ Fisko ครอบคลุมฟังก์ชันการทำงาน สถาปัตยกรรมแอปพลิเคชัน สถาปัตยกรรมเทคนิค ข้อมูล การเชื่อมต่อ AI และความมั่นคงปลอดภัย เพื่อใช้เป็นฐานร่วมกันระหว่างหน่วยงานและทีมพัฒนาก่อนจัดทำ Functional Requirement Specification และ Detailed Design รายโมดูล</p>
+<p><b></b> คือชื่อแพลตฟอร์ม ส่วน AEBMS (Agency e-Budgeting Management System) คือชื่อระบบที่ใช้ในเอกสารข้อกำหนด เอกสารนี้ใช้ทั้งสองชื่อในความหมายเดียวกัน</p>
+<p>เอกสารนี้กำหนดการออกแบบโซลูชันของ ครอบคลุมฟังก์ชันการทำงาน สถาปัตยกรรมแอปพลิเคชัน สถาปัตยกรรมเทคนิค ข้อมูล การเชื่อมต่อ AI และความมั่นคงปลอดภัย เพื่อใช้เป็นฐานร่วมกันระหว่างหน่วยงานและทีมพัฒนาก่อนจัดทำ Functional Requirement Specification และ Detailed Design รายโมดูล</p>
 </div>
 
 <h3><span class="num">1.2</span>ขอบเขต</h3>
@@ -254,7 +254,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <ul>
   <li>Conceptual Design: Agency e-Budgeting Management System (AEBMS) v0.1</li>
   <li>เอกสารนำเสนอ Conceptual Architecture &amp; Functional Modules (ตุลาคม 2569)</li>
-  <li>ต้นแบบหน้าจอ Fisko Prototype รอบที่ 1–10 (ข้อมูลตัวอย่าง) และสคริปต์สาธิต 15 นาที</li>
+  <li>ต้นแบบหน้าจอ Prototype รอบที่ 1–10 (ข้อมูลตัวอย่าง) และสคริปต์สาธิต 15 นาที</li>
   <li>หลักเกณฑ์และแบบฟอร์มการจัดทำคำของบประมาณของสำนักงบประมาณ ฉบับที่ใช้ในปีงบประมาณที่ติดตั้งระบบ</li>
   <li>พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 และพระราชบัญญัติการรักษาความมั่นคงปลอดภัยไซเบอร์ พ.ศ. 2562</li>
   <li>มาตรฐานและแนวปฏิบัติด้านรัฐบาลดิจิทัลที่หน่วยงานถือปฏิบัติ</li>
@@ -540,7 +540,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
     <tr><td class="id">FR-PL-03</td><td><span class="tag t-new">ใหม่ v0.3</span> ประวัติการเปลี่ยนแปลงรายรายการ เปิดดูได้จากรายการหลักทุกประเภท รวม Audit Log การทำงานของ AI เวอร์ชัน และความเห็นของรายการนั้นในลำดับเวลาเดียว</td><td><span class="tag t-must">Must</span></td></tr>
     <tr><td class="id">FR-PL-04</td><td><span class="tag t-new">ใหม่ v0.3</span> การมอบอำนาจ: ผู้มีอำนาจมอบให้ผู้อื่นตามขอบเขตและช่วงวันที่ ผู้รับมอบทำรายการแทนได้ ระบบแสดงและบันทึกว่าทำแทนใคร แจ้งผู้มอบ และยกเลิกได้</td><td><span class="tag t-must">Must</span></td></tr>
     <tr><td class="id">FR-PL-05</td><td><span class="tag t-new">ใหม่ v0.3</span> พื้นที่ทำงานของฉัน: รวมงานรอดำเนินการของผู้ใช้จากทุกโมดูล (รวมงานที่ได้รับมอบอำนาจ) พร้อมกำหนดส่ง และลิงก์ไปยังหน้าจอที่ต้องทำ</td><td><span class="tag t-must">Must</span></td></tr>
-    <tr><td class="id">FR-PL-06</td><td><span class="tag t-new">ใหม่ v0.3</span> App Switcher: ผู้ใช้สลับระหว่างแอปของ Fisko (Budget และ Procurement / Finance เมื่อเปิดใช้) จากจุดเดียว แต่ละแอปแสดงเฉพาะเมนูของตน งานของฉันและการดูแลระบบใช้ร่วมกัน แอปที่บทบาทไม่มีสิทธิ์แสดงเป็นสีจาง และลิงก์งานหรือการแจ้งเตือนพาไปแอปที่ถูกต้องเอง</td><td><span class="tag t-should">Should</span></td></tr>
+    <tr><td class="id">FR-PL-06</td><td><span class="tag t-new">ใหม่ v0.3</span> App Switcher: ผู้ใช้สลับระหว่างแอปของ (Budget และ Procurement / Finance เมื่อเปิดใช้) จากจุดเดียว แต่ละแอปแสดงเฉพาะเมนูของตน งานของฉันและการดูแลระบบใช้ร่วมกัน แอปที่บทบาทไม่มีสิทธิ์แสดงเป็นสีจาง และลิงก์งานหรือการแจ้งเตือนพาไปแอปที่ถูกต้องเอง</td><td><span class="tag t-should">Should</span></td></tr>
   </tbody>
 </table></div>
 </section>
@@ -767,7 +767,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
     <div class="ext"><b>New GFMIS Thai</b>การเบิกจ่ายและสถานะงบประมาณ</div>
     <div class="ext"><b>ERP / Financial</b>บัญชีและการเงินของหน่วยงาน</div>
   </div>
-  <div class="core"><b>Fisko</b><span>API Gateway · Data Exchange · ETL · File Import-Export</span></div>
+  <div class="core"><b></b><span>API Gateway · Data Exchange · ETL · File Import-Export</span></div>
   <div class="side">
     <div class="ext"><b>e-GP</b>สถานะจัดซื้อจัดจ้าง</div>
     <div class="ext"><b>HR / Payroll</b>อัตรากำลังและเงินเดือน</div>

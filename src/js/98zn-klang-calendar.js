@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q1 (12 Nov 2569): the budget calendar, split into the Budget Bureau's dates and the agency's own.
+// KlangFinance, budget round Q1 (12 Nov 2569): the budget calendar, split into the Budget Bureau's dates and the agency's own.
 // What was asked: a calendar built from the Budget Bureau's dates and from the agency's internal dates. What existed was S.calendar
 // (six milestones with a date, an owner role and a name) shown on the B1 page and on the home page, and a list the administrator
 // could edit. This round gives it, on page BQ12:
@@ -39,7 +39,7 @@ const clCls = e => (e.done ? "p-ok" : clOverdue(e) ? "p-bad" : clKind(e) === "bu
 
 // ---------- export ----------
 const clIcs = list => { const esc2 = s => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n"), d8 = s => s.replace(/-/g, ""), next = s => { const d = new Date(s + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10).replace(/-/g, ""); };
-  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Fisko//Budget calendar//TH", "CALSCALE:GREGORIAN", ...list.flatMap(e => ["BEGIN:VEVENT", `UID:${e.id}-${FORM_FY}@fisko.example`, `DTSTAMP:${d8(TODAY)}T000000Z`, `DTSTART;VALUE=DATE:${d8(e.date)}`, `DTEND;VALUE=DATE:${next(clEnd(e))}`, `SUMMARY:${esc2(clName(e))}`, `DESCRIPTION:${esc2(`${tx(CL_KIND[clKind(e)])} · ${tx(ROLES[e.role] || [e.role, e.role])}${e.note ? " · " + e.note : ""}`)}`, `CATEGORIES:${esc2(tx(CL_KIND[clKind(e)]))}`, "END:VEVENT"]), "END:VCALENDAR"].join("\r\n"); };
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-////Budget calendar//TH", "CALSCALE:GREGORIAN", ...list.flatMap(e => ["BEGIN:VEVENT", `UID:${e.id}-${FORM_FY}@app.example`, `DTSTAMP:${d8(TODAY)}T000000Z`, `DTSTART;VALUE=DATE:${d8(e.date)}`, `DTEND;VALUE=DATE:${next(clEnd(e))}`, `SUMMARY:${esc2(clName(e))}`, `DESCRIPTION:${esc2(`${tx(CL_KIND[clKind(e)])} · ${tx(ROLES[e.role] || [e.role, e.role])}${e.note ? " · " + e.note : ""}`)}`, `CATEGORIES:${esc2(tx(CL_KIND[clKind(e)]))}`, "END:VEVENT"]), "END:VCALENDAR"].join("\r\n"); };
 const clCsv = list => { const q = s => (/[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')}"` : String(s)); return ["id,kind,date,end,name,owner,unit,remind_days,done,note", ...list.map(e => [e.id, tx(CL_KIND[clKind(e)]), e.date, e.end || "", clName(e), tx(ROLES[e.role] || [e.role, e.role]), e.unit ? unitName(e.unit) : "", e.remind == null ? 7 : e.remind, e.done ? "yes" : "", e.note || ""].map(q).join(","))].join("\n"); };
 const clDownload = (name, mime, text) => { const blob = new Blob(["\uFEFF" + text], { type: mime }), a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
 

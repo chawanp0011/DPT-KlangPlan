@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P38 (20 Nov 2569): the new menu "เตรียมคำของบประมาณ" (Make the budget request), before the request list.
+// KlangFinance, round P38 (20 Nov 2569): the new menu "เตรียมคำของบประมาณ" (Make the budget request), before the request list.
 // Asked for by the user: "ปรับกระบวนการเตรียมความพร้อมคำของบประมาณ":
 //   1 Planning receives the project documents from a division, an outside agency or others; sample files to test with are wanted;
 //   2 Planning uses AI to process all the attached documents, puts what it finds into the prepared fields, and checks whether the documents

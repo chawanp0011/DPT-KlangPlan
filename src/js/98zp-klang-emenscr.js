@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round A4 (12 Nov 2569): the national plans of e-MENSCR, as a register and as links on a request.
+// KlangFinance, budget round A4 (12 Nov 2569): the national plans of e-MENSCR, as a register and as links on a request.
 // What was asked: use the data from e-MENSCR (emenscr.nesdc.go.th), in the form the site gives it. The site's project list needs a
 // login, so the user exported the four plan trees as JSON files (ns.json, masterplan_mixed.json, plan13.json, nr.json). Each file is
 // a tree of {name, id, parentid, depth, children, _checkenabled, kpi_id}; _checkenabled marks the nodes a project may tick.
@@ -108,10 +108,10 @@ function rqPlanPanel(r) {
 }
 
 // ---------- keep an imported tree in IndexedDB (the saved state is too small for it) ----------
-function emDb() { return new Promise((res, rej) => { try { const q = indexedDB.open("fisko-emenscr", 1); q.onupgradeneeded = () => q.result.createObjectStore("o"); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); } catch (e) { rej(e); } }); }
+function emDb() { return new Promise((res, rej) => { try { const q = indexedDB.open("app-emenscr", 1); q.onupgradeneeded = () => q.result.createObjectStore("o"); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); } catch (e) { rej(e); } }); }
 const emStore = (db, mode) => db.transaction("o", mode).objectStore("o");
 async function emKeep(k, val) { try { const db = await emDb(), st = emStore(db, "readwrite"); if (val) st.put(val, k); else st.delete(k); } catch (e) { /* storage blocked: the import then lasts until the page closes */ } }
-async function emLoad() { try { const db = await emDb(), st = emStore(db, "readonly"); await Promise.all(EM_KINDS.map(([k]) => new Promise(res => { const q = st.get(k); q.onsuccess = () => { if (q.result && Array.isArray(q.result.rows)) EM_OVER[k] = q.result; res(); }; q.onerror = () => res(); }))); if (Object.keys(EM_OVER).length && (String(location.hash) === "#strategy" || window.FISKO_ROUTE === "#strategy")) route(); } catch (e) { /* none kept */ } }
+async function emLoad() { try { const db = await emDb(), st = emStore(db, "readonly"); await Promise.all(EM_KINDS.map(([k]) => new Promise(res => { const q = st.get(k); q.onsuccess = () => { if (q.result && Array.isArray(q.result.rows)) EM_OVER[k] = q.result; res(); }; q.onerror = () => res(); }))); if (Object.keys(EM_OVER).length && (String(location.hash) === "#strategy" || window.APP_ROUTE === "#strategy")) route(); } catch (e) { /* none kept */ } }
 emLoad();
 
 // ---------- the e-MENSCR tabs of menu B2 ----------
@@ -207,8 +207,8 @@ Object.keys(EM_TABKEY).forEach(k => { STRAT[k] = () => { EM.tab = EM_TABKEY[k]; 
 { // an old address or deep link to the page that was BQ13 opens the first tab of B2
   const br = route;
   route = function () {
-    const h = String(window.FISKO_ROUTE || location.hash || "").replace(/^#/, "");
-    if (h === "bq-em") { STRAT_TAB = "em-browse"; if (window.FISKO_ROUTE) window.FISKO_ROUTE = "#strategy"; else history.replaceState(null, "", "#strategy"); }
+    const h = String(window.APP_ROUTE || location.hash || "").replace(/^#/, "");
+    if (h === "bq-em") { STRAT_TAB = "em-browse"; if (window.APP_ROUTE) window.APP_ROUTE = "#strategy"; else history.replaceState(null, "", "#strategy"); }
     return br.apply(this, arguments);
   };
 }

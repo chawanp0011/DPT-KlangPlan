@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P67 (23 Nov 2569): the page of a รายการจัดซื้อ (the request a unit raised).
+// KlangFinance, round P67 (23 Nov 2569): the page of a รายการจัดซื้อ (the request a unit raised).
 // P89 (24 Nov 2569): the parts 4-7 are shown again (asked for: "เอากลับมาก่อน"); window.CASE_HIDE47 = true hides them as in P67.
 // The part ส่ง e-GP has two tabs: "สถานะ e-GP" (the steps, as before) and "รายละเอียดขอซื้อขอจ้าง": everything the unit entered in
 // ขอซื้อขอจ้าง, with its documents, read-only. The hidden parts stay in the page (hidden) so that nothing that reads them breaks.

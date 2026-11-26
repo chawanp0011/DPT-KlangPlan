@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P23 (16 Nov 2569): contract management can ADD committees to a contract ("บริหารสัญญา สามารถเพิ่มกรรมการตรวจรับ
+// KlangFinance, procurement round P23 (16 Nov 2569): contract management can ADD committees to a contract ("บริหารสัญญา สามารถเพิ่มกรรมการตรวจรับ
 // หรือกรรมการชุดอื่นๆ เพิ่มเติมได้").
 // Before, a contract held ONE committee, c.cm (its acceptance committee), and the only action was "change" (replace) it, blocked after a signature.
 // Now the contract page, under that committee, has a block of ADDITIONAL committees: c.cms = [committee id, ...], taken from the committees of the case

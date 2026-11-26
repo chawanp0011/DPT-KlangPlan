@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P39 (20 Nov 2569): the menu "เตรียมคำของบประมาณ" goes on (the readers and the finders of the first part are in 98zzzr).
+// KlangFinance, round P39 (20 Nov 2569): the menu "เตรียมคำของบประมาณ" goes on (the readers and the finders of the first part are in 98zzzr).
 // Asked for by the user after P38:
 //   1 a division can send a case itself, and Planning receives it and checks it: new states "being prepared by the division" and
 //     "sent, waiting for Planning"; Planning's button "receive" makes it a case of Planning;

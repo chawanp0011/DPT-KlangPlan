@@ -1,4 +1,4 @@
-// Fisko Procurement round 20 (Q3 of design v0.2): the plan and the reports. Procurement categories
+// Procurement round 20 (Q3 of design v0.2): the plan and the reports. Procurement categories
 // (FR-PR-38), plan versions with approval and publication (FR-PR-03, FR-PR-37), demand intake from M06 lines
 // and next year's M02 requests (FR-PR-36), the monthly procurement summary in the สขร.1 layout (FR-PR-53, R-18),
 // an audit dossier per case (FR-PR-54) and a timeline of every case against the fiscal year (FR-PR-55).

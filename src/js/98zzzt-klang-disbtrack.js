@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P43 (21 Nov 2569): "ติดตามเร่งรัดการเบิกจ่าย" (Speeding up and following the disbursement), a dashboard.
+// KlangFinance, round P43 (21 Nov 2569): "ติดตามเร่งรัดการเบิกจ่าย" (Speeding up and following the disbursement), a dashboard.
 // Asked for by the user: read the documents of the Finance Division (disbursement) and of the Planning Division (follow-up) in
 // "8. กรมฯ. ติดตามเร่งรัดการเบิกจ่าย ประจำปีงบประมาณ พ.ศ. 2570", process all their columns, make a dashboard and the details of the
 // states, and add a view of the state of each project.

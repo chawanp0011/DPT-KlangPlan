@@ -1,4 +1,4 @@
-// Fisko Finance round FN1 (Finance design v0.1, chapter 12): foundations.
+// Finance round FN1 (Finance design v0.1, chapter 12): foundations.
 // - Finance rules in M10 (P-F03): thresholds, regulation clocks and the payment-approval authority table (clause 36).
 //   The administrator edits; finance, the head of finance and the auditor read. Every value carries its clause and level.
 // - Head of finance role (finhead, D-FN-02): checks, escalations and later the period close.
@@ -63,7 +63,7 @@ ADMIN.fcfg = () => {
     ${sec(L("อัตราช่วยคำนวณค่าเดินทาง (FR-FN-24)", "Travel rates for the calculator (FR-FN-24)"), L("ค่าตัวอย่าง ต้องยืนยันกับอัตราที่ใช้จริงของหน่วยงาน", "Sample values; confirm with the agency's actual rates"), rows(FCFG_ROWS.travel))}
     ${sec(L("นาฬิกาตามระเบียบ", "Regulation clocks"), L("วันทำการไม่นับเสาร์ อาทิตย์ และวันหยุดใน กฎจัดซื้อจัดจ้าง", "Working days skip weekends and the holidays in Procurement rules"), rows(FCFG_ROWS.clocks))}
     <section class="panel"><header><h2>${L("ผู้มีอำนาจอนุมัติจ่าย (ข้อ 36)", "Payment approval authority (clause 36)")}</h2><span class="sp"></span><span class="sub">${L("ใช้ตรวจผู้อนุมัติใบขอเบิกและเงินยืม", "Used to check who approves vouchers and advances")}</span></header>
-      <div class="tbl-wrap"><table><thead><tr><th>${L("ตำแหน่ง", "Position")}</th><th>${L("บทบาทในระบบ", "Role in Fisko")}</th><th class="n">${L("อนุมัติได้ไม่เกิน (บาท · 0 = ไม่จำกัด)", "Up to (baht · 0 = no limit)")}</th><th>${L("ระดับ", "Level")}</th></tr></thead>
+      <div class="tbl-wrap"><table><thead><tr><th>${L("ตำแหน่ง", "Position")}</th><th>${L("บทบาทในระบบ", "Role in")}</th><th class="n">${L("อนุมัติได้ไม่เกิน (บาท · 0 = ไม่จำกัด)", "Up to (baht · 0 = no limit)")}</th><th>${L("ระดับ", "Level")}</th></tr></thead>
         <tbody>${c.auth.map(a => `<tr><td>${tx(a.pos)}</td><td class="sub">${tx(ROLES[a.role])}</td><td class="n"><input type="number" data-fca="${a.id}" value="${a.max}" min="0" step="1000" ${ds} style="width:130px" aria-label="${esc(tx(a.pos))}"></td><td>${lvl(a.id === "A1" ? "A" : "C")}</td></tr>`).join("")}</tbody></table></div>
       <div class="body sub">${L("หัวหน้าส่วนราชการระดับกรมเป็นผู้มีอำนาจตามข้อ 36 (1) ผู้ได้รับมอบหมายต้องดำรงตำแหน่งตามที่ข้อ 36 กำหนด วงเงินของผู้ได้รับมอบหมายเป็นตัวอย่าง ตั้งตามคำสั่งมอบหมายของหน่วยงาน", "The head of the department holds the authority under clause 36 (1). Assignees must hold the positions the clause sets. Assignee limits are examples; set them from the agency's assignment order.")}</div></section>
     ${ed ? `<div class="row"><button class="btn ghost" type="button" id="fc-reset">${L("คืนค่าตั้งต้น", "Restore defaults")}</button><span class="sub">${L("ระดับ A อ่านจากตัวบทระเบียบ · ระดับ B มาจากข้อหารือหรือข่าว ต้องยืนยัน · ระดับ C เป็นข้อเสนอการออกแบบ", "Level A is read from the regulation · level B comes from rulings or news and needs confirming · level C is a design proposal")}</span></div>` : ""}`;

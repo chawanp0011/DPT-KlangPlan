@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, rounds P35-P36 (18 Nov 2569): the menu "ทบทวนแผนบูรณาการ" (Integrated plan review), right after "ทบทวนหน่วยงาน".
+// KlangFinance, rounds P35-P36 (18 Nov 2569): the menu "ทบทวนแผนบูรณาการ" (Integrated plan review), right after "ทบทวนหน่วยงาน".
 // Asked for by the user: read the manual "คู่มือการทบทวนผลสัมฤทธิ์ เป้าหมาย แนวทางการดำเนินงานและตัวชี้วัดของแผนงานบูรณาการ ปีงบประมาณ พ.ศ. 2567"
 // (Budget Bureau, Evaluation Division 2, Nov 2565) and design a menu that supports the work it describes (P35); then (P36):
 //   - the KPI detail is a three-step pop-up as in the user's pictures: 1 basic data (item, name, kind, unit, criterion, formula),

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P92 (25 Nov 2569): รายงานความก้าวหน้า (asked for: "รายการที่ต้องติดตาม ให้เอาไปรวมกับ รายงานความก้าวหน้า
+// KlangFinance, round P92 (25 Nov 2569): รายงานความก้าวหน้า (asked for: "รายการที่ต้องติดตาม ให้เอาไปรวมกับ รายงานความก้าวหน้า
 // ตัดรายงานออก ให้ใส่ในจุดต่างๆที่กำหนดไว้แล้วดึงข้อมูลมาแสดง ส่วนสถานะให้เรียงลำดับเริ่มต้นจนปิดโครงการ"):
 // - the list "รายการที่ต้องติดตาม" leaves the overview and opens this tab;
 // - no report form here any more: each value is entered where it already belongs (the unit's request, e-GP, the contract, the payment

@@ -1,4 +1,4 @@
-// Fisko Budget round B1, review and consolidation screens.
+// Budget round B1, review and consolidation screens.
 // - M04 rounds: a waterfall from the amount requested to the executive decision (UX-04). The rows now come from
 //   the requests (syncBudget in 41d), so the waterfall and the table always match the request form.
 // - M03 overview: totals against last year's amounts for the same requests, the 20% cap (BR-11) and how much of

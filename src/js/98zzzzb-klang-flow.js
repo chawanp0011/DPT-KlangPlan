@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P58 (23 Nov 2569): the procurement process as the user set it out.
+// KlangFinance, round P58 (23 Nov 2569): the procurement process as the user set it out.
 // 1. แผนจัดซื้อ: Planning imports the budget items (first tab, round P56).
 // 2. ติดตามค่าใช้จ่าย: a dashboard for Planning (budget, committed, paid by unit and by item) with an Excel report.
 // 3. ขอซื้อขอจ้าง (was ใบขอซื้อขอจ้าง): the item goes from office to office:

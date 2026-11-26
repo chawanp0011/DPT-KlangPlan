@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P57 (23 Nov 2569): duplicate requests in "เตรียมคำของบประมาณ".
+// KlangFinance, round P57 (23 Nov 2569): duplicate requests in "เตรียมคำของบประมาณ".
 // When Planning processes a case, it is compared with the other cases of the year (not cancelled): the name of the project (the share of
 // two-letter pieces in common), the responsible unit, the amount and the area. Cases that look the same are kept on the case (c.dup) and their
 // number shows in the column "คำขอซ้ำ" of the overview. The count opens tab 3 (ส่งต่อและติดตาม), where the cases are compared side by side,

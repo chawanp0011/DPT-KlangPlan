@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P44 (21 Nov 2569): the panel "ส่ง e-GP" is redone as the seven steps the user gave. Its purpose: to record only
+// KlangFinance, round P44 (21 Nov 2569): the panel "ส่ง e-GP" is redone as the seven steps the user gave. Its purpose: to record only
 // WHICH STEP the project is at now, with the data and files of each step. It replaces the panel of 98zp (egpUpdatePanel); the old records
 // (c.egpUp, c.egpItems) are kept and not read here. Data: c.egp7 = { stage: 1..7, multi, s1..s7 }.
 // Checked against the department's files (the disbursement plan's 16 procurement states and the follow-up form's step columns): the steps

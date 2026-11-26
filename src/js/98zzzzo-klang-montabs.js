@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P87 (24 Nov 2569): every tab of ติดตามการใช้จ่าย (#dashboard) reads the same data.
+// KlangFinance, round P87 (24 Nov 2569): every tab of ติดตามการใช้จ่าย (#dashboard) reads the same data.
 // Found on review: each tab had its own year chip; the progress report listed a separate sample of projects; the alerts came only from
 // the budget lines; drill-down and forecast read the old snapshot (S.dash) while "ปีปัจจุบัน (สด)" read the allocation lines, so the
 // same unit showed different payments. Now:

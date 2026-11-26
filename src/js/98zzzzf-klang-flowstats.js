@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P66 (23 Nov 2569): the analytics menu follows the new flow.
+// KlangFinance, round P66 (23 Nov 2569): the analytics menu follows the new flow.
 // A first tab "ตาม flow" with the fiscal year: where every budget item is (Planning -> unit -> Treasury e-GP 1-7 -> contract ->
 // voucher check -> accounting -> finance -> close), the money at each step, how long the payments wait at each desk, and each unit.
 // The older tabs (KPIs, red flags, forecast, what-if) stay after it.

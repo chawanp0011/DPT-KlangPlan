@@ -1,4 +1,4 @@
-// Fisko Finance round FN5 (Finance design v0.1, chapters 6.6 and 6.7): GFMIS, reconciliation and closing.
+// Finance round FN5 (Finance design v0.1, chapters 6.6 and 6.7): GFMIS, reconciliation and closing.
 // - Register of people assigned to work in GFMIS (FR-FN-34, clauses 10–12); making request files and remitting check it.
 // - GFMIS files in (FR-FN-35): the revenue and remittance report and the monthly trial balance (posting and payment
 //   results stay on F3). Remittances are matched with the report.
@@ -35,7 +35,7 @@ const bkOpen = (acct, m) => { const o = ((S.bankAccts || {})[acct] || { open: {}
 const bkBook = (acct, m) => bkOpen(acct, m) + sumv(bookLines(acct, m).map(l => l.amt));
 const stmtOf = (acct, m) => (S.bankStmts || []).find(s => s.acct === acct && s.month === m);
 const recOf = (acct, m) => (S.bankRecs || []).find(r => r.acct === acct && r.month === m);
-// Three-way: a Fisko line matches a bank line with the same reference and amount.
+// Three-way: a line matches a bank line with the same reference and amount.
 function bkMatch(acct, m) {
   const book = bookLines(acct, m), st = stmtOf(acct, m), bank = st ? st.lines : [];
   const bookOnly = book.filter(b => !bank.some(x => x.ref === b.ref && x.amt === b.amt)), bankOnly = bank.filter(x => !book.some(b => b.ref === x.ref && b.amt === x.amt));
@@ -74,18 +74,18 @@ const BK_MONTHS = ["2026-09", "2026-10"];
     return `
     <section class="panel"><header><h2>${L("รายการเดินบัญชีและการจับคู่", "Bank statement and matching")} · ${tx(BK_A[acct])} · ${monthLabel(m)}</h2><span class="sp"></span>
       ${maker && !x.st ? `<button class="btn primary" type="button" id="bk-imp">${L("นำเข้ารายการเดินบัญชี (ตัวอย่าง)", "Import the bank statement (sample)")}</button>` : ""}</header>
-      ${x.st ? `<div class="tbl-wrap"><table><thead><tr><th>${L("วันที่", "Date")}</th><th>${L("อ้างอิง", "Reference")}</th><th>${L("รายการ", "Item")}</th><th class="n">${L("ใน Fisko", "In Fisko")}</th><th class="n">${L("ในธนาคาร", "At the bank")}</th><th>${L("ผล", "Result")}</th><th></th></tr></thead>
+      ${x.st ? `<div class="tbl-wrap"><table><thead><tr><th>${L("วันที่", "Date")}</th><th>${L("อ้างอิง", "Reference")}</th><th>${L("รายการ", "Item")}</th><th class="n">${L("ใน", "In")}</th><th class="n">${L("ในธนาคาร", "At the bank")}</th><th>${L("ผล", "Result")}</th><th></th></tr></thead>
         <tbody>${[...x.book.map(b => ({ b, k: x.bank.find(y => y.ref === b.ref && y.amt === b.amt) })), ...x.bankOnly.map(k => ({ b: null, k }))].map(({ b, k }) => { const r = b || k, adj = !b && (S.bookAdj || []).some(a => a.ref === k.ref); return `<tr><td class="sub">${fdate(r.d)}</td><td class="mono">${esc(r.ref)}</td><td>${esc(tx(r.desc))}</td><td class="n">${b ? fmt(b.amt, 2) : "—"}</td><td class="n">${k ? fmt(k.amt, 2) : "—"}</td>
           <td>${b && k ? `${dotI("ok")}${L("ตรงกัน", "Matched")}` : b ? `${dotI("warn")}${L("ระหว่างทาง (ยังไม่ผ่านธนาคาร)", "In transit (not at the bank yet)")}` : `${dotI("bad")}${L("มีเฉพาะในธนาคาร", "Only at the bank")}`}</td>
           <td>${!b && fin && !adj && !(rec && rec.status === "signed") ? `<button class="btn ghost" type="button" data-bkadj="${esc(k.ref)}">${L("บันทึกเข้าบัญชี", "Record in the books")}</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="7" class="sub">${L("ไม่มีรายการในเดือนนี้", "No movements this month")}</td></tr>`}</tbody></table></div>
         <div class="body"><div class="grid2" style="gap:16px">
           <table><tbody>
             <tr><td>${L("ยอดตามรายการเดินบัญชี", "Balance per bank")}</td><td class="n">${fmt(x.bankClose, 2)}</td></tr>
-            <tr><td>${L("บวก/หัก รายการระหว่างทางใน Fisko", "± items in transit in Fisko")}</td><td class="n">${fmt(sumv(x.bookOnly.map(b => b.amt)), 2)}</td></tr>
+            <tr><td>${L("บวก/หัก รายการระหว่างทางใน", "± items in transit in")}</td><td class="n">${fmt(sumv(x.bookOnly.map(b => b.amt)), 2)}</td></tr>
             <tr><td><b>${L("ยอดธนาคารที่ปรับแล้ว", "Adjusted bank balance")}</b></td><td class="n"><b>${fmt(x.bankClose + sumv(x.bookOnly.map(b => b.amt)), 2)}</b></td></tr>
           </tbody></table>
           <table><tbody>
-            <tr><td>${L("ยอดตามบัญชี (Fisko)", "Balance per books (Fisko)")}</td><td class="n">${fmt(x.bookBal, 2)}</td></tr>
+            <tr><td>${L("ยอดตามบัญชี ()", "Balance per books ()")}</td><td class="n">${fmt(x.bookBal, 2)}</td></tr>
             <tr><td>${L("บวก/หัก รายการที่มีเฉพาะในธนาคาร", "± items only at the bank")}</td><td class="n">${fmt(sumv(x.bankOnly.map(k => k.amt)), 2)}</td></tr>
             <tr><td><b>${L("ยอดบัญชีที่ปรับแล้ว", "Adjusted book balance")}</b></td><td class="n"><b>${fmt(x.bookBal + sumv(x.bankOnly.map(k => k.amt)), 2)}</b></td></tr>
           </tbody></table></div>
@@ -107,7 +107,7 @@ const BK_MONTHS = ["2026-09", "2026-10"];
         ${tb ? `<div class="tbl-wrap"><table><thead><tr><th>${L("บัญชี", "Account")}</th><th class="n">${L("เดบิต", "Debit")}</th><th class="n">${L("เครดิต", "Credit")}</th></tr></thead>
           <tbody>${tb.rows.map(r => `<tr><td><span class="mono">${r.code}</span> ${esc(tx(r.name))}</td><td class="n">${r.dr ? fmt(r.dr, 2) : ""}</td><td class="n">${r.cr ? fmt(r.cr, 2) : ""}</td></tr>`).join("")}</tbody>
           <tfoot><tr><td>${L("รวม", "Total")}</td><td class="n">${fmt(sumv(tb.rows.map(r => r.dr)), 2)}</td><td class="n">${fmt(sumv(tb.rows.map(r => r.cr)), 2)}</td></tr></tfoot></table></div>
-          <div class="body sub">${dotI(tb.ok ? "ok" : "bad")}${tb.ok ? L("เดบิตเท่ากับเครดิต และเงินฝากธนาคารตรงกับยอดตามบัญชีใน Fisko", "Debits equal credits and the bank balance matches the Fisko books") : L("ไม่ตรงกับยอดใน Fisko ตรวจสอบ", "Doesn't match the Fisko books; check")} · ${L("นำเข้า", "imported")} ${fdate(tb.t, true)}</div>` : `<div class="body sub">${L("ยังไม่ได้นำเข้า", "Not imported yet")}</div>`}</section>`;
+          <div class="body sub">${dotI(tb.ok ? "ok" : "bad")}${tb.ok ? L("เดบิตเท่ากับเครดิต และเงินฝากธนาคารตรงกับยอดตามบัญชีใน", "Debits equal credits and the bank balance matches the books") : L("ไม่ตรงกับยอดใน ตรวจสอบ", "Doesn't match the books; check")} · ${L("นำเข้า", "imported")} ${fdate(tb.t, true)}</div>` : `<div class="body sub">${L("ยังไม่ได้นำเข้า", "Not imported yet")}</div>`}</section>`;
   };
 }
 
@@ -179,7 +179,7 @@ FS.auditQ = () => {
 FS.budgetFeed = () => {
   const spend = famLines().map(l => ({ l, paid: linePaid(l.id) })).filter(x => x.paid > 0);
   return `
-  <section class="panel"><header><h2>${L("ยอดเบิกจ่ายที่ส่งให้ Fisko Budget (M06, M07)", "Spending sent to Fisko Budget (M06, M07)")}</h2><span class="sp"></span><span class="sub">${L("คำนวณจากการจ่ายจริงใน Fisko Finance ทันทีที่จ่าย", "Worked out from what Fisko Finance has actually paid, as soon as it is paid")}</span></header>
+  <section class="panel"><header><h2>${L("ยอดเบิกจ่ายที่ส่งให้ Budget (M06, M07)", "Spending sent to Budget (M06, M07)")}</h2><span class="sp"></span><span class="sub">${L("คำนวณจากการจ่ายจริงใน Finance ทันทีที่จ่าย", "Worked out from what Finance has actually paid, as soon as it is paid")}</span></header>
     <div class="tbl-wrap"><table><thead><tr><th>${L("รายการจัดสรร", "Allocation line")}</th><th class="n">${L("จัดสรร (ลบ.)", "Allocated (M)")}</th><th class="n">${L("เบิกจ่ายจริง (ลบ.)", "Spent (M)")}</th><th class="n">%</th></tr></thead>
       <tbody>${spend.map(x => `<tr><td>${esc(lineLabel(x.l))} <span class="mono sub">${x.l.id}</span></td><td class="n">${mb(x.l.amount)}</td><td class="n">${mb(x.paid)}</td><td class="n">${fmt(x.l.amount ? x.paid / x.l.amount * 100 : 0, 1)}</td></tr>`).join("") || `<tr><td colspan="4" class="sub">—</td></tr>`}</tbody>
       <tfoot><tr><td>${L("รวม", "Total")}</td><td class="n">${mb(sumv(spend.map(x => x.l.amount)))}</td><td class="n">${mb(sumv(spend.map(x => x.paid)))}</td><td></td></tr></tfoot></table></div></section>`;
@@ -231,7 +231,7 @@ FS.budgetFeed = () => {
           { code: "3101010101", name: ["ทุนและเงินฝากยกมา", "Equity and deposits brought forward"], dr: 0, cr: bank + nb },
         ];
         (S.tbs = S.tbs || []).push({ month: m, rows, t: nowIso(), by: me().id, ok: true });
-        audit(["นำเข้างบทดลองจาก GFMIS", "Imported the GFMIS trial balance"], m); done(L("นำเข้างบทดลองแล้ว · ตรงกับยอดใน Fisko", "Trial balance imported · agrees with Fisko"));
+        audit(["นำเข้างบทดลองจาก GFMIS", "Imported the GFMIS trial balance"], m); done(L("นำเข้างบทดลองแล้ว · ตรงกับยอดใน", "Trial balance imported · agrees with"));
       };
     }
     {

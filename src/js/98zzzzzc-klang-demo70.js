@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P97 (26 Nov 2569): a full sample run of FY 2570 in two sets (asked for: "รันตัวอย่างใหม่ทั้งหมด อีกรอบ ปี 2570
+// KlangFinance, round P97 (26 Nov 2569): a full sample run of FY 2570 in two sets (asked for: "รันตัวอย่างใหม่ทั้งหมด อีกรอบ ปี 2570
 // แบ่งเป็น 2 ชุด 1 เตรียมคำของบประมาณ 2 จัดซื้อจัดจ้าง ให้ใช้ข้อมูลเดี่ยวเป็นตัวอย่างทั้ง flow จนแสดง ติดตามดำเนินการ กับ แผนเบิกจ่าย").
 // One item each, made up and marked "(ตัวอย่างครบ flow)". Each step runs as the role that does it, through the same function the screen
 // calls; where the screen uses a dialog the runner can't press (the requisition form with its TOR and committees, the contract dialog,

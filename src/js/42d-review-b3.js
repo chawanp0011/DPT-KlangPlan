@@ -1,4 +1,4 @@
-// Fisko Budget round B3, committee (M04): a committee role, membership, quorum, conflicts of interest, votes,
+// Budget round B3, committee (M04): a committee role, membership, quorum, conflicts of interest, votes,
 // minutes drafted from the record, and the impact of a cut on KPI targets and the quarterly plan.
 // FR-B-21, FR-B-22, SD-10 (a member from the requesting unit abstains), D-B02, D-B07 (direct proportion).
 ROLES.committee = ["กรรมการพิจารณางบประมาณ", "Budget committee member"];

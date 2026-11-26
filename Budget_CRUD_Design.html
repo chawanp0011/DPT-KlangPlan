@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fisko Budget CRUD UI Design</title>
+<title>Budget CRUD UI Design</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
@@ -188,7 +188,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <body>
 <div class="layout">
 <nav class="toc" id="toc" aria-label="สารบัญ">
-  <div class="brand">Fisko Budget<small>CRUD UI Design · v0.2</small></div>
+  <div class="brand">Budget<small>CRUD UI Design · v0.2</small></div>
   <div class="tools"><button type="button" id="toc-toggle" aria-expanded="false">สารบัญ</button><button type="button" id="theme">ธีม</button></div>
   <ol>
     <li><a href="#s1"><span class="n">01</span>เป้าหมายและขอบเขต</a></li>
@@ -212,9 +212,9 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <div class="doc">
 
 <header class="cover">
-  <div class="eyebrow">Fisko Budget · CRUD UI Design</div>
-  <h1>Fisko Budget<br><span style="font-size:.55em;color:var(--accent)">ออกแบบหน้าจอสร้าง ดู แก้ไข และลบข้อมูล เพื่อสาธิตวงจรงบประมาณครบตั้งแต่ต้นจนจบ</span></h1>
-  <p class="th">ต่อยอดจาก Fisko Budget Detailed Design v0.3 และผังเมนู B1 ถึง B11 (รอบ 47)</p>
+  <div class="eyebrow">Budget · CRUD UI Design</div>
+  <h1>Budget<br><span style="font-size:.55em;color:var(--accent)">ออกแบบหน้าจอสร้าง ดู แก้ไข และลบข้อมูล เพื่อสาธิตวงจรงบประมาณครบตั้งแต่ต้นจนจบ</span></h1>
+  <p class="th">ต่อยอดจาก Budget Detailed Design v0.3 และผังเมนู B1 ถึง B11 (รอบ 47)</p>
   <div class="meta">
     <div><span>เวอร์ชัน</span><b>0.2 สร้างครบแล้ว</b></div>
     <div><span>วันที่</span><b>18 ตุลาคม 2569</b></div>
@@ -222,7 +222,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
     <div><span>ต่อยอดจาก</span><b>Budget Design v0.3 · ต้นแบบรอบ 1 ถึง 47</b></div>
   </div>
   <div class="callout" style="margin-top:14px"><b>สิ่งที่ตกลงกันแล้ว</b> (1) ทำ CRUD ครบทุกข้อมูล รวมข้อมูลหลัก (ยุทธศาสตร์ คณะกรรมการ ผลผลิต แผนแม่บท) พร้อมแก้การไหลของข้อมูลข้ามขั้น · (2) ติดตามการใช้จ่าย (B8) และผลสัมฤทธิ์ (B9) เปลี่ยนมาใช้บรรทัดจัดสรรปี 2570 ข้อมูลปี 2569 เหลือเป็นแท็บประวัติแบบอ่านอย่างเดียว · (3) ทุกหน้าใช้รูปแบบ “รายการ + ลิ้นชักด้านข้าง” · (4) ขั้นที่จำลองอยู่ (ผลพิจารณาสำนักงบประมาณ การตัดลดในรัฐสภา ผลการแปรญัตติ) มีฟอร์มบันทึกผลจริงและปุ่ม “จำลอง” ที่เติมค่าให้</div>
-  <div class="notice"><b>สถานะเอกสาร:</b> เป็นร่างเพื่อตัดสินใจก่อนสร้าง ตัวเลขทั้งหมดเป็นข้อมูลสมมติ รหัสข้อกำหนดใช้ FR-C ต่อจาก FR-B ในเอกสารออกแบบ Fisko Budget</div>
+  <div class="notice"><b>สถานะเอกสาร:</b> เป็นร่างเพื่อตัดสินใจก่อนสร้าง ตัวเลขทั้งหมดเป็นข้อมูลสมมติ รหัสข้อกำหนดใช้ FR-C ต่อจาก FR-B ในเอกสารออกแบบ Budget</div>
 </header>
 
 <!-- ============================== 01 ============================== -->
@@ -237,14 +237,14 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 </div>
 <h3><span class="num">1.1</span>อยู่ในขอบเขต</h3>
 <ul>
-  <li>หน้า B1 ถึง B11 ของ Fisko Budget และข้อมูลหลักด้านงบประมาณใน M10 (ปฏิทิน ปีงบประมาณ โครงสร้างแผนงาน ราคามาตรฐาน คณะกรรมการ แผนแม่บท ผลผลิต)</li>
+  <li>หน้า B1 ถึง B11 ของ Budget และข้อมูลหลักด้านงบประมาณใน M10 (ปฏิทิน ปีงบประมาณ โครงสร้างแผนงาน ราคามาตรฐาน คณะกรรมการ แผนแม่บท ผลผลิต)</li>
   <li>การไหลของข้อมูลข้ามขั้นตั้งแต่ยุทธศาสตร์ถึงผลสัมฤทธิ์ และปุ่มเปลี่ยนสถานะที่ยังขาด</li>
   <li>การเปลี่ยน B8 และ B9 ให้ใช้ข้อมูลปี 2570 และการเลิกใช้ปีและวันที่ที่ฝังในโค้ด</li>
   <li>สคริปต์สาธิตใหม่ที่เดินครบวงจร (บทที่ 11)</li>
 </ul>
 <h3><span class="num">1.2</span>นอกขอบเขต</h3>
 <ul>
-  <li>Fisko Procurement และ Fisko Finance (ใช้ข้อมูลจากงบประมาณเท่าที่มีอยู่ เช่น บรรทัดจัดสรร)</li>
+  <li>Procurement และ Finance (ใช้ข้อมูลจากงบประมาณเท่าที่มีอยู่ เช่น บรรทัดจัดสรร)</li>
   <li>การเชื่อมต่อจริงกับระบบ e-Budgeting และ GFMIS ยังเป็นไฟล์จำลองเหมือนเดิม</li>
   <li>การนำเข้าข้อมูลจำนวนมาก (มีเฉพาะวางจาก Excel ที่มีอยู่แล้วในบรรทัดคำขอ)</li>
 </ul>
@@ -513,7 +513,7 @@ footer.end { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--li
 <section class="ch" id="s9">
 <h2><span class="num">09</span>B8 และ B9 บนข้อมูลปี 2570</h2>
 <ul>
-  <li><b>แหล่งข้อมูลเดียว:</b> โครงการที่ติดตามคือบรรทัดจัดสรรปี 2570 ที่เป็นงบลงทุนหรือโครงการ (จัดกลุ่มตามกิจกรรมและหน่วยงาน) แผนรายเดือนมาจาก B7 ผลเบิกจ่ายมาจากการนำเข้า (SIM-04) และใบสำคัญที่จ่ายใน Fisko Finance</li>
+  <li><b>แหล่งข้อมูลเดียว:</b> โครงการที่ติดตามคือบรรทัดจัดสรรปี 2570 ที่เป็นงบลงทุนหรือโครงการ (จัดกลุ่มตามกิจกรรมและหน่วยงาน) แผนรายเดือนมาจาก B7 ผลเบิกจ่ายมาจากการนำเข้า (SIM-04) และใบสำคัญที่จ่ายใน Finance</li>
   <li><b>แท็บของ B8:</b> ปีปัจจุบัน เจาะลึก พยากรณ์ การแจ้งเตือน รายงานความก้าวหน้า จัดซื้อ และนำเข้า ใช้ปี 2570 ทั้งหมด แท็บ “ปี 2569” อ่านอย่างเดียวและมีป้าย “ประวัติ”</li>
   <li><b>B9:</b> ตัวชี้วัดที่มีเป้าปี 2570 (รวมที่สร้างใน B2) รายงานรายไตรมาสตามรอบของปี 2570 ต้นทุนต่อผลผลิตจากยอดเบิกจริง การประเมินและข้อเสนอแนะใช้เลขปีของข้อมูล</li>
   <li><b>ข้อมูลตั้งต้นใหม่:</b> ปี 2570 อยู่ในเดือนที่ 1 (ตุลาคม 2569) มีผลเบิกจ่ายเดือนแรก รายงานความก้าวหน้าบางส่วน และผลตัวชี้วัดไตรมาส 4 ปี 2569 ที่ปิดแล้วเป็นประวัติ เพิ่ม <span class="mono">DATA_V</span></li>

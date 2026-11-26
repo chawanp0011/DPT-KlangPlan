@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round B1 (14 Nov 2569): requests of the divisions and the consolidation done by Planning.
+// KlangFinance, budget round B1 (14 Nov 2569): requests of the divisions and the consolidation done by Planning.
 // Asked for (pasted spec):
 //  - "Requests" becomes "Division requests": a division sees only its own requests (it already did; the page is renamed).
 //  - "Consolidation at agency level" becomes "Agency requests consolidation" (รวมคำขอหน่วยงาน): every item the divisions sent in, checked by Planning:

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, menu round M4 (13 Nov 2569): the new menu "Agency review" (ทบทวนหน่วยงาน), the ministry registers, and the menu
+// KlangFinance, menu round M4 (13 Nov 2569): the new menu "Agency review" (ทบทวนหน่วยงาน), the ministry registers, and the menu
 // "Strategy and programmes" cut down. Asked for by the user:
 //   New menu "ทบทวนหน่วยงาน", its tabs taken out of "ยุทธศาสตร์และแผนงาน": vision and mission, agency outcomes, agency strategies,
 //   agency service goals, agency programmes, outputs/projects, activities.

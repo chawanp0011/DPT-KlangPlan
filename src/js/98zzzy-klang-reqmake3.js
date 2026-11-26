@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P50 (23 Nov 2569): "เตรียมคำของบประมาณ" made easier to use.
+// KlangFinance, round P50 (23 Nov 2569): "เตรียมคำของบประมาณ" made easier to use.
 // 1. When Planning processes the documents, the request is also matched to the budget structure of the year (แผนงาน / ผลผลิต-โครงการ /
 //    กิจกรรม): each activity is scored by how much of its names, and those of its output and programme, appear in the documents. Planning
 //    can pick another candidate. The match is a text similarity, not a language model.

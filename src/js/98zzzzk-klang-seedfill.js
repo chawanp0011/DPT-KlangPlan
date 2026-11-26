@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P81 (24 Nov 2569): the sample data made consistent with the new payment flow.
+// KlangFinance, round P81 (24 Nov 2569): the sample data made consistent with the new payment flow.
 // The sample contracts kept their deliveries and payments in the older structure (k.phases, S.payreqs), while the contract page, the
 // payment desks and the two dashboards read the new one (k.cx.dl). A contract opened at "เบิกจ่าย" or "ปิดการจัดซื้อแล้ว" showed no
 // delivery and nothing paid. Here each sample contract gets its deliveries from its accepted phases: a phase with an approved payment

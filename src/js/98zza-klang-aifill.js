@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P14 (16 Nov 2569): "AI helps draft the request" now summarises ALL the attached documents and puts what it finds into
+// KlangFinance, round P14 (16 Nov 2569): "AI helps draft the request" now summarises ALL the attached documents and puts what it finds into
 // the sections of the request, as far as it can.
 //  - On attach the prototype now reads the text of the files it can read in the browser: .txt .csv .md .json, .docx (word/document.xml) and .xlsx
 //    (the cells). A PDF or any other file cannot be read here: it is listed by its name only and the summary says so. The text is kept in the

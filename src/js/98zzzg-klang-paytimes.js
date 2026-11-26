@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round P24 (16 Nov 2569): payment "by occasion" (ครั้ง), seen and made on the contract and the case, with more than one phase
+// KlangFinance, procurement round P24 (16 Nov 2569): payment "by occasion" (ครั้ง), seen and made on the contract and the case, with more than one phase
 // in one payment ("การเบิกจ่ายจะจ่ายเป็นครั้งแทน โดยในแต่ละครั้งสามารถใส่งวดได้มากกว่า 1 งวด พร้อมรายละเอียดการเบิกจ่าย").
 // What was there: the finance voucher (S.vouchers, file 66c) IS a payment request for one occasion and can already carry several accepted phases of one
 // contract (v.phases, v.parts); but it could only be made on the Finance page, and the contract page and the case page showed the payment phase by phase

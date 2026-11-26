@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round R8: finance duties the duty list names and Fisko Finance did not have. Written new for the DPT
+// KlangFinance, round R8: finance duties the duty list names and Finance did not have. Written new for the DPT
 // finance division. Seven small registers, each a workflow of record-keeping with approval where the duty list implies
 // one: annual revenue estimate (FX1), K-value price adjustment (FX2), central-budget emergency reserve requests (FX3),
 // withholding-tax returns derived from paid vouchers (FX4), assignment of claims (FX5), refunds of state revenue and

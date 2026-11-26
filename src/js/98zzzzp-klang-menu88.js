@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P88 (25 Nov 2569): the menus keep only what is used now (asked for: "ปรับเมนูให้เหลือแค่ที่ต้องใช้ก่อน
+// KlangFinance, round P88 (25 Nov 2569): the menus keep only what is used now (asked for: "ปรับเมนูให้เหลือแค่ที่ต้องใช้ก่อน
 // โดยซ่อนเมนูที่ไม่จำเป็นออกไปก่อน"). Nothing is deleted: window.MENU_ALL = true (or m88All(true)) shows every menu again.
 //   1. ระบบสิทธิ์และผู้ดูแลระบบ: ผู้ดูแลระบบ and the organisation app (positions and approval limits);
 //   2. วางแผนและบริหารงบประมาณ: จัดเตรียมคำของบประมาณ, ทะเบียนโครงสร้างงบประมาณ, ติดตามความก้าวหน้า, แดชบอร์ดผู้บริหาร;

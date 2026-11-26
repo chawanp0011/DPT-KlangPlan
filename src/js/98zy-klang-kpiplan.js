@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P12 (15 Nov 2569): the KPI lists of the menu "Agency review", as asked after the review of the pages.
+// KlangFinance, round P12 (15 Nov 2569): the KPI lists of the menu "Agency review", as asked after the review of the pages.
 //  1. Every KPI list is grouped: a heading row names what the KPIs are under (the outcome, the agency service goal, the output/project or the
 //     activity), so nobody has to use the filter to find out.
 //  2. The KPIs of the service goals hang under the AGENCY SERVICE GOAL (not "under a goal/เป้าประสงค์"): label, choices, column and detail say so.

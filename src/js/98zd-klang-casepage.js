@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, procurement round A (10 Nov 2569): the case page in seven main panels, each with sub-panels.
+// KlangFinance, procurement round A (10 Nov 2569): the case page in seven main panels, each with sub-panels.
 // The user's table: Plan (prepare the plan, approve the plan) / Prepare the data (project details, method, reference price, TOR,
 // committees) / Send to e-GP (the e-GP steps) / Contract / Contract management / Payment / Close the case. This replaces the
 // twelve-step ring, the numbered stepper and the four-phase bar. The twelve states stay in the data (many files and the tests

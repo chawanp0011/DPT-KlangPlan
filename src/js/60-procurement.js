@@ -1,6 +1,6 @@
-// Fisko Procurement (round 11, light version): a procurement plan tied to FY2570 allocation lines,
+// Procurement (round 11, light version): a procurement plan tied to FY2570 allocation lines,
 // requisitions, contracts with acceptance phases, and e-GP status by file import (files only, per D-F05).
-// The official procurement steps stay in e-GP; Fisko prepares, checks and tracks.
+// The official procurement steps stay in e-GP; prepares, checks and tracks.
 let PRQ_OPEN = null;
 let PLAN_Q = "", PLAN_FS = "", PLAN_PG = 1, PLAN_ADD = false, PLAN_LQ = "";
 const PLAN_PS = 10;
@@ -14,7 +14,7 @@ const famReq = id => S.reqn.find(r => r.id === id);
 const famCon = id => S.contracts.find(c => c.id === id);
 const famCommitted = lineId => sumv(S.contracts.filter(c => c.line === lineId).map(c => c.amount));
 const famReserved = lineId => sumv(S.reqn.filter(r => r.status === "approved" && famPlan(r.plan).line === lineId).map(r => r.amount));
-// Non-procurement commitments kept by Fisko Finance (round FN1): utilities, rent, service agreements, travel orders.
+// Non-procurement commitments kept by Finance (round FN1): utilities, rent, service agreements, travel orders.
 // Advances drawn from the budget count as spending of the line (clause 62): the amount lent until cleared, then what was spent (round FN3).
 const famAdv = lineId => sumv((S.advances || []).filter(a => a.line === lineId && a.source === "budget" && ["approved", "paid", "clearing", "objected", "cleared"].includes(a.state)).map(a => (a.state === "cleared" ? Math.min(a.clearing.spent, a.approvedAmt || a.amount) : a.approvedAmt || a.amount)));
 // Approved vouchers with no contract or commitment behind them (round FN2) spend the line directly.

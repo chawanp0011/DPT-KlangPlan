@@ -1,4 +1,4 @@
-// Fisko Budget round B1 (Budget design v0.1, chapter 12): one data spine and a step-by-step request form.
+// Budget round B1 (Budget design v0.1, chapter 12): one data spine and a step-by-step request form.
 // - Division director role and approval before Planning (FR-B-12); Planning passes to the committee only when
 //   the w3 condition applies, otherwise to the executive (FR-B-20).
 // - Request steps with a status dot each (FR-B-07): lines and justification, quarterly plan (FR-B-08),

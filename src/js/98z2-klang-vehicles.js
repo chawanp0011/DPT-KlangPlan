@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round V1 (19 Nov 2569): vehicles, reworked from the user's list. Builds on the R6 file (98z) and replaces its
+// KlangFinance, round V1 (19 Nov 2569): vehicles, reworked from the user's list. Builds on the R6 file (98z) and replaces its
 // vehicle, vehicle-queue and fuel registers by declaring them again here; the R6 file is left as written except three small edits
 // (vbClash also counts a trip in use, vhName shows the name and the plate apart, the fuel page text).
 //   VH1 vehicle register: a name apart from the plate, a link to the asset register (type shown from the asset), site, maintenance cycle,

@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P19 (16 Nov 2569): sample contract changes (extend the time / change the amount) at EVERY step of the four-step flow of file 98zg.
+// KlangFinance, round P19 (16 Nov 2569): sample contract changes (extend the time / change the amount) at EVERY step of the four-step flow of file 98zg.
 // Asked: "add samples where a contract can be changed; I can't find any". Before this the seed had no contract change that used the flow (only one old
 // pending change, shown as "made before this flow"), and the contracts of the other samples have every phase accepted, so there was nothing to open.
 // The contracts CT-2570-001 (case PC-2570-001) and CT-2570-002 (case PC-2570-002) still have open phases, so they take the samples:
@@ -35,7 +35,7 @@ Object.keys(SEEDS).forEach(k => {
   };
 });
 
-// Fisko-KlangFinance, round P19b (16 Nov 2569): a sample for EVERY step of the contract panels (4 to 7) of the procurement case, and samples of contract changes at every step of
+// KlangFinance, round P19b (16 Nov 2569): a sample for EVERY step of the contract panels (4 to 7) of the procurement case, and samples of contract changes at every step of
 // their own four-step flow. The steps of the panels were completed in file 98zd (guarantee, delivery, change, invoice, warranty, return of the guarantee); here each of them is the
 // CURRENT step of at least one sample case:
 //   panel 4  step 1 sign (the case at the award, PC-2570-003) · step 2 guarantee not recorded (a clone with the contract signed and no guarantee)

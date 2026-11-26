@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, budget round Q5 (12 Nov 2569): bring a budget request in from a document, with a SIMULATED reader.
+// KlangFinance, budget round Q5 (12 Nov 2569): bring a budget request in from a document, with a SIMULATED reader.
 // What the user asked for: a division can enter a request from a PDF or an image by OCR, and the system processes it so the
 // data goes in correctly. A real OCR cannot run in this single-page prototype (no server, nothing reads the file). So, like the
 // procurement documents (file 63c): the file is attached and shown, but the "reading" is one of three fixed sample results that

@@ -1,4 +1,4 @@
-// Fisko Budget round B2, strategic planning (M01): the Budget Bureau's linkage from national plans to requests.
+// Budget round B2, strategic planning (M01): the Budget Bureau's linkage from national plans to requests.
 // - National layers (FR-B-01): national strategy → master plan under it → agency strategy → goal → KPI →
 //   activity → request, with what was requested and decided at every node (FR-B-03).
 // - Budget shares by strategy (FR-B-04): the executive sets a minimum share per agency strategy; the tree compares

@@ -1,4 +1,4 @@
-// Fisko-ERP-Gov, part 7: Finance Division roles from the duty list (หน้าที่กองคลัง.xlsx).
+// ERP-Gov, part 7: Finance Division roles from the duty list (หน้าที่กองคลัง.xlsx).
 // Voucher checkers 1 and 2: a voucher goes to the checking group by kind and amount (see vcGroup in 66c-fin-fn2.js).
 // The head of finance can check either group. The finance officer (fin) prepares and no longer checks.
 // Not split: accounting and budget administration stay inside the fin role (see ตรวจสอบสิทธิ์กองคลัง.md).

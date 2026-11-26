@@ -1,4 +1,4 @@
-// Fisko-KlangFinance, round P48 (23 Nov 2569): in the payment block the documents column shows how many documents there are; a click opens
+// KlangFinance, round P48 (23 Nov 2569): in the payment block the documents column shows how many documents there are; a click opens
 // them in a window: the list on the left, a preview on the right, and a download for each. The system holds the documents' data (kind,
 // number, date, phase), not the scanned files, so the preview and the download are a document drawn from that data, marked as such.
 function pdDocHtml(c, v, d) {

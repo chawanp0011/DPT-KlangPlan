@@ -1,4 +1,4 @@
-// Fisko Budget round B3, submission (M05): minister approval before sending (section 25, FR-B-24), the
+// Budget round B3, submission (M05): minister approval before sending (section 25, FR-B-24), the
 // submission pack in the Budget Bureau's report layout with a CSV for e-Budgeting (FR-B-23, D-B03), and a
 // briefing pack with expected questions and draft answers (FR-B-25, agent AG-16, simulated).
 SUB_TABS.splice(1, 0, { id: "pack", label: ["ชุดยื่นตามแบบสำนักงบประมาณ", "Budget Bureau pack"] });
