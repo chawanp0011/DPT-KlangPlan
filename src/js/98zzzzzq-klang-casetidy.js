@@ -26,7 +26,7 @@ function p99BiPanel(c) { const r = p99BiOf(c); if (!r) return `<div class="sub">
     ${kv("วงเงิน (บาท)", fmt(r.amount))}${kv("จำนวน / หน่วยนับ", r.qty ? `${fmt(r.qty)} ${esc(r.uname || "")}` : "")}${kv("ที่มาของงบประมาณ", esc(pl.act || ""))}${kv("ลักษณะงบประมาณ", esc(pl.years || r.years || ""))}
     ${kv("พื้นที่ดำเนินการ", esc(pl.prov || ""))}${kv("ปีที่เริ่ม / จำนวนปี", pl.startY ? `${pl.startY} / ${pl.nYears || 1} ปี` : "")}
     ${kv("หน่วยงานที่มอบหมาย", us.map(u => `${esc(unitName(u.unit))} ${fmt(u.amt)} บาท`).join("<br>"))}${kv("งบประมาณรายปี (ล้านบาท)", Object.keys(yrs).length ? Object.entries(yrs).map(([y, v]) => `ปี ${y}: ${fmt(v, 4)}`).join(" · ") : "")}</dl>
-    <div class="tbl-wrap" style="margin-top:8px"><table><thead><tr><th>แผนเงิน (บาท)</th>${M}<th class="n">รวม</th></tr></thead><tbody><tr><td>${r.planRev ? `ปรับแผนครั้งที่ ${r.planRev}` : "แผนตั้งต้น"}</td>${r.plan.map(v => `<td class="n">${v ? fmt(Math.round(v)) : "–"}</td>`).join("")}<td class="n"><b>${fmt(Math.round(r.plan.reduce((a, b) => a + b, 0)))}</b></td></tr></tbody></table></div>
+    ${p99MoneyQ(c, r)}
     <div class="sub">${r.sent && r.sent.t ? `นำส่งสำนัก/กองเมื่อ ${fdate(String(r.sent.t).slice(0, 10))}` : ""}</div>`; }
 { const base = caseExtraPanels; caseExtraPanels = function (c) { const out = base(c); if (!m88On() || window.CASE_OLD) return out; out.push(cmPanel(1, 0, "รายละเอียดรายการงบประมาณ (กองแผนงาน)", p99BiPanel(c))); return out; }; }
 // P99: registers that are the same every year (พื้นที่, ตารางอ้างอิงรายจ่าย, ราคากลาง, the law/condition/document registers): no year selector; พื้นที่ is titled as its menu.
@@ -44,3 +44,10 @@ function p99BbGroup() { if (!m88On()) return; document.querySelectorAll('form[da
 (function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(p99BbGroup, 50); }).observe(document.body, { childList: true, subtree: true }); })();
 // ความยาว (เมตร) is asked at e-GP step 4 now: hidden in the request form of the unit (data kept)
 (function () { let tm = null; new MutationObserver(() => { clearTimeout(tm); tm = setTimeout(() => { if (!m88On()) return; const i = document.getElementById("pr-qlen"); const fd = i && i.closest(".f"); if (fd && fd.style.display !== "none") fd.style.display = "none"; }, 50); }).observe(document.body, { childList: true, subtree: true }); })();
+// step 1: the money plan of the item by quarter (plan, result, % ) with the months on a click; the result is what was paid on the item
+function p99MoneyQ(c, r) { const fy = biFy(r), mi = Math.min(11, prMonIdx(TODAY)), qNow = Math.floor(mi / 3), D = prDtRows(fy, false), row = D.find(x => x.id === r.id), act = row ? row.act : Array(12).fill(0);
+  const S3 = (a, i) => a.slice(i * 3, i * 3 + 3).reduce((s, v) => s + (Number(v) || 0), 0), tp = r.plan.reduce((s, v) => s + (Number(v) || 0), 0), ta = act.reduce((s, v) => s + v, 0);
+  return `<div style="margin-top:10px"><div class="row" style="justify-content:space-between;align-items:center"><b style="font-weight:600">แผนเงินและผลการเบิกจ่าย (บาท)</b><span class="sub">${r.planRev ? `ปรับแผนครั้งที่ ${r.planRev}` : "แผนตั้งต้น"} · ผลตามวันที่จ่ายจริง</span></div>
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:6px">${[0, 1, 2, 3].map(q => `<div style="border:1px solid var(--line);border-radius:8px;padding:8px;${q === qNow ? "background:#fefce8" : ""}"><div class="sub">ไตรมาส ${q + 1} · ${["ต.ค.–ธ.ค.", "ม.ค.–มี.ค.", "เม.ย.–มิ.ย.", "ก.ค.–ก.ย."][q]}</div>${mp98Cell(S3(r.plan, q), S3(act, q), q <= qNow)}</div>`).join("")}
+      <div style="border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface-2,#f8fafc)"><div class="sub">รวมทั้งปี</div>${mp98Cell(tp, ta, true)}</div></div>
+    <details style="margin-top:8px"><summary class="btn ghost" style="display:inline-block">ดูรายเดือน (แผน / ผล)</summary><div style="margin-top:6px">${mp98Months(r, act, mi)}</div></details></div>`; }

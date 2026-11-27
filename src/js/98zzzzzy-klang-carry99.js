@@ -68,3 +68,12 @@ document.addEventListener("click", e => { const t = e.target && e.target.closest
   const k = t.closest("[data-c99k]"); if (k) { C99.kind = C99.kind === k.dataset.c99k ? "" : k.dataset.c99k; route(); } });
 if (typeof M88_GRP !== "undefined") M88_GRP.carry99 = M88_G.pay; // under เบิกจ่าย, after ติดตามการเบิกจ่าย
 if (typeof NAV_ICON !== "undefined") NAV_ICON.carry99 = "coins";
+// P99: แผนจัดซื้อ, the name of an item sent to the units opens its purchase case (step 1 รายการงบประมาณ)
+{ const base = biTable; biTable = function (list, can) { let h = base(list, can); if (!m88On()) return h;
+  list.forEach(r => { if (!r.sent) return; const cs = r.sent.cs || (r.sent.pp && (caseByPlan(r.sent.pp) || {}).id) || "bi:" + r.id; const nm = `<td>${esc(r.name)}<div class="sub">`;
+    const i = h.indexOf(`<td class="mono sub">${esc(r.id)}</td>`); if (i < 0) return; const j = h.indexOf(nm, i); if (j < 0) return;
+    h = h.slice(0, j) + `<td><button type="button" class="bi99-go" data-bi99case="${esc(cs)}" title="เปิดรายการจัดซื้อ ขั้น 1 รายการงบประมาณ">${esc(r.name)}</button><div class="sub">` + h.slice(j + nm.length); });
+  return `<style>.bi99-go{all:unset;cursor:pointer;color:var(--accent,#2563eb);font-weight:600}.bi99-go:hover{text-decoration:underline}</style>` + h; }; }
+document.addEventListener("click", e => { const t = e.target && e.target.closest ? e.target.closest("[data-bi99case]") : null; if (!t) return; e.preventDefault();
+  let id = t.dataset.bi99case; if (id.startsWith("bi:")) { const r = biData().rows.find(x => x.id === id.slice(3)), p = r && typeof r99Make === "function" ? r99Make(r) : null, c = p && caseByPlan(p.id); if (!c) { toast("ยังไม่มีรายการจัดซื้อของรายการนี้"); return; } id = c.id; commit(); }
+  APP_ROUTE = ""; jump("case:" + id); setTimeout(() => { const b = document.querySelector('button.cphase[data-cphase="1"]'); if (b) b.click(); }, 200); });
