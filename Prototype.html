@@ -32505,7 +32505,8 @@ document.addEventListener("click", e => { const t = e.target && e.target.closest
 //   เงินพับ when งานปี < the fiscal year shown (money of an older year: it lapses if not paid).
 // The rule is used by ติดตามการเบิกจ่าย (dashboard tab), the executive dashboard, and the new menu เงินกัน-เงินพับ, a dashboard by group and
 // by risk that says which work to push.
-// Data: bi row .workY (from the file, or edited in รายละเอียด / มอบหมาย); when empty: the starting year of the item (pl.startY), else its year.
+// Data: bi row .workY (from the file, or edited in รายละเอียด / มอบหมาย); when empty: the year of the budget (a multi-year item's starting
+// year is not used: each year of a ผูกพัน item is that year's own budget, not money carried over).
 
 // 1. the import reads งานปี
 { const base = biFromTypeSheet; biFromTypeSheet = function (sheet, rows) { const out = base(sheet, rows); if (!out) return out;
@@ -32513,9 +32514,10 @@ document.addEventListener("click", e => { const t = e.target && e.target.closest
   const H = Array.from(rows[hi], c => String(c == null ? "" : c).trim()), wy = H.findIndex(h => /งานปี/.test(h)), nm = H.findIndex(h => /^รายการ$/.test(h)); if (wy < 0) return out;
   const data = rows.slice(hi + 1).filter(r => r && String(r[nm] == null ? "" : r[nm]).trim()); out.forEach((o, i) => { const v = Number(String((data[i] || [])[wy] || "").replace(/[^\d]/g, "")); if (v > 2400) o.workY = v; }); return out; }; }
 // 2. the year of an item and the kind of what is left
-const c99WorkY = (b, fy) => Number(b && b.workY) || Number(b && b.pl && b.pl.startY) || fy;
+const c99WorkY = (b, fy) => Number(b && b.workY) || (b && /^S70-/.test(b.id || "") && (Number(b.no) || 0) % 5 === 0 ? fy - 1 : 0) || fy;
 function c99Of(x, fy) { const y = c99WorkY(x.b, fy), left = Math.max(0, x.B - x.A); return { y, left, kind: left <= 0 ? "paid" : y >= fy ? "carry" : "lapse" }; }
-// the sample of FY 2570 has no งานปี: some multi-year items start a year before (pl.startY) and so fall in เงินพับ, as in the department's file
+// the sample of FY 2570 has no งานปี column: every fifth sample item (S70-…) is taken as money of the year before (เงินกันเหลื่อมปีจากปีก่อน),
+// so the pages show both cases; real files carry งานปี
 
 // 3. รายละเอียด / มอบหมาย: งานปี can be checked and edited with the other imported values
 { const base = p99Imported; p99Imported = function (r) { const h = base(r), ro = r.sent ? "disabled" : "";
